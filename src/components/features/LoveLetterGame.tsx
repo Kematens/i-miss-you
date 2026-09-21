@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, Swords, Eye, RotateCcw, HelpCircle, Sparkles, Trophy } from 'lucide-react';
+import { Heart, Swords, Eye, RotateCcw, HelpCircle, Sparkles, Trophy, Shield } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 export interface CardDef {
@@ -12,17 +12,19 @@ export interface CardDef {
   desc: string;
   badgeColor: string;
   artBg: string;
+  icon: string;
+  roman: string;
 }
 
 export const LOVE_LETTER_CARDS: CardDef[] = [
-  { id: 1, value: 1, name: '卫兵 · 探念', count: 5, effect: '猜牌淘汰', desc: '猜对方手牌（非卫兵），猜中直接击杀对方淘汰！', badgeColor: 'bg-[#1E3A8A] text-[#93C5FD]', artBg: 'from-[#1E3A8A]/20 to-[#0F172A]' },
-  { id: 2, value: 2, name: '牧师 · 窥心', count: 2, effect: '偷看手牌', desc: '私密偷看对方当前手里握着的那张牌，知己知彼。', badgeColor: 'bg-[#14532D] text-[#86EFAC]', artBg: 'from-[#14532D]/20 to-[#064E3B]' },
-  { id: 3, value: 3, name: '男爵 · 决斗', count: 2, effect: '比大小点', desc: '与对方秘密拼点，手牌较小的一方当场出局！', badgeColor: 'bg-[#7C2D12] text-[#FDBA74]', artBg: 'from-[#7C2D12]/20 to-[#431407]' },
-  { id: 4, value: 4, name: '侍女 · 护身', count: 2, effect: '绝对无敌', desc: '到下一回合前，完全免疫对方所有的卡牌效果。', badgeColor: 'bg-[#047857] text-[#A7F3D0]', artBg: 'from-[#047857]/20 to-[#065F46]' },
-  { id: 5, value: 5, name: '王子 · 弃牌', count: 2, effect: '强制换牌', desc: '强制对方扔掉手牌重摸一张；若弃掉公主则直接淘汰！', badgeColor: 'bg-[#581C87] text-[#D8B4FE]', artBg: 'from-[#581C87]/20 to-[#3B0764]' },
-  { id: 6, value: 6, name: '国王 · 互易', count: 1, effect: '强行交换', desc: '与对方强行交换手中的卡牌，占领主动权。', badgeColor: 'bg-[#854D0E] text-[#FDE047]', artBg: 'from-[#854D0E]/20 to-[#713F12]' },
-  { id: 7, value: 7, name: '夫人 · 傲慢', count: 1, effect: '被动打出', desc: '若手中有王子或国王，必须打出此牌。', badgeColor: 'bg-[#9D174D] text-[#FBCFE8]', artBg: 'from-[#9D174D]/20 to-[#831843]' },
-  { id: 8, value: 8, name: '公主 · 誓约', count: 1, effect: '最高8点', desc: '点数最高！但若打出或被迫弃掉，直接自爆出局！', badgeColor: 'bg-[#8C1D35] text-[#FFE599]', artBg: 'from-[#8C1D35]/30 to-[#4A0E17]' }
+  { id: 1, value: 1, name: '卫兵 · 探念', count: 5, effect: '猜牌淘汰', desc: '猜对方手牌（非卫兵），猜中直接击杀淘汰！', badgeColor: 'bg-[#1E3A8A] text-[#93C5FD]', artBg: 'from-[#1E3A8A] to-[#0F172A]', icon: '⚔️', roman: 'I' },
+  { id: 2, value: 2, name: '牧师 · 窥心', count: 2, effect: '偷看手牌', desc: '私密偷看对方当前手里握着的那张牌，知己知彼。', badgeColor: 'bg-[#14532D] text-[#86EFAC]', artBg: 'from-[#14532D] to-[#064E3B]', icon: '👁️', roman: 'II' },
+  { id: 3, value: 3, name: '男爵 · 决斗', count: 2, effect: '比大小点', desc: '与对方秘密拼点，手牌较小的一方当场出局！', badgeColor: 'bg-[#7C2D12] text-[#FDBA74]', artBg: 'from-[#7C2D12] to-[#431407]', icon: '🗡️', roman: 'III' },
+  { id: 4, value: 4, name: '侍女 · 护身', count: 2, effect: '绝对无敌', desc: '到下一回合前，完全免疫对方所有的卡牌效果。', badgeColor: 'bg-[#047857] text-[#A7F3D0]', artBg: 'from-[#047857] to-[#065F46]', icon: '🛡️', roman: 'IV' },
+  { id: 5, value: 5, name: '王子 · 弃牌', count: 2, effect: '强制换牌', desc: '强制对方扔掉手牌重摸一张；若弃掉公主则直接淘汰！', badgeColor: 'bg-[#581C87] text-[#D8B4FE]', artBg: 'from-[#581C87] to-[#3B0764]', icon: '🪄', roman: 'V' },
+  { id: 6, value: 6, name: '国王 · 互易', count: 1, effect: '强行交换', desc: '与对方强行交换手中的卡牌，占领主动权。', badgeColor: 'bg-[#854D0E] text-[#FDE047]', artBg: 'from-[#854D0E] to-[#713F12]', icon: '👑', roman: 'VI' },
+  { id: 7, value: 7, name: '夫人 · 傲慢', count: 1, effect: '被动打出', desc: '若手中有王子或国王，必须打出此牌。', badgeColor: 'bg-[#9D174D] text-[#FBCFE8]', artBg: 'from-[#9D174D] to-[#831843]', icon: '🌹', roman: 'VII' },
+  { id: 8, value: 8, name: '公主 · 誓约', count: 1, effect: '最高8点', desc: '点数最高！但若打出或被迫弃掉，直接自爆出局！', badgeColor: 'bg-[#8C1D35] text-[#FFE599]', artBg: 'from-[#8C1D35] to-[#4A0E17]', icon: '💖', roman: 'VIII' }
 ];
 
 export const LoveLetterGame: React.FC = () => {
@@ -57,7 +59,8 @@ export const LoveLetterGame: React.FC = () => {
       drawnCardA: null as CardDef | null,
       drawnCardB: null as CardDef | null,
       protectedA: false,
-      protectedB: false
+      protectedB: false,
+      discardPile: [] as CardDef[]
     };
   };
 
@@ -65,9 +68,10 @@ export const LoveLetterGame: React.FC = () => {
   const [activePlayer, setActivePlayer] = useState<'A' | 'B'>('A'); // Player A (HE), Player B (HER)
   const [tokensA, setTokensA] = useState(0);
   const [tokensB, setTokensB] = useState(0);
+  const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
   const [peekingCard, setPeekingCard] = useState<CardDef | null>(null);
   const [showGuessModal, setShowGuessModal] = useState(false);
-  const [log, setLog] = useState<string>('游戏开始，请出牌！');
+  const [log, setLog] = useState<string>('宫廷密信已发，请从手牌中摸一出一！');
   const [roundWinner, setRoundWinner] = useState<'A' | 'B' | 'tie' | null>(null);
   const [showRules, setShowRules] = useState(false);
   const [hideHand, setHideHand] = useState(false);
@@ -75,7 +79,6 @@ export const LoveLetterGame: React.FC = () => {
   // Turn draw
   const drawCardForCurrent = () => {
     if (state.deck.length === 0) {
-      // Deck empty -> Compare highest card
       endRoundCompare();
       return;
     }
@@ -113,19 +116,19 @@ export const LoveLetterGame: React.FC = () => {
   // Round Winner handler
   const winRound = (winner: 'A' | 'B', reason: string) => {
     setRoundWinner(winner);
-    setLog(`${winner === 'A' ? 'HE (黑曜石)' : 'HER (秘银石)'} 获胜！${reason}`);
+    setLog(`${winner === 'A' ? '👦 HE' : '👧 HER'} 获胜！${reason}`);
 
     if (winner === 'A') {
       const nextA = tokensA + 1;
       setTokensA(nextA);
       if (nextA >= 3) {
-        confetti({ particleCount: 60, spread: 80, origin: { y: 0.5 } });
+        confetti({ particleCount: 70, spread: 85, origin: { y: 0.5 } });
       }
     } else {
       const nextB = tokensB + 1;
       setTokensB(nextB);
       if (nextB >= 3) {
-        confetti({ particleCount: 60, spread: 80, origin: { y: 0.5 } });
+        confetti({ particleCount: 70, spread: 85, origin: { y: 0.5 } });
       }
     }
 
@@ -147,7 +150,7 @@ export const LoveLetterGame: React.FC = () => {
       winRound('B', `手牌点数更大（${cardB.name} > ${cardA.name}）`);
     } else {
       setRoundWinner('tie');
-      setLog(`点数相同（${cardA.value}点），平分秋色！`);
+      setLog(`双方手牌点数相同（${cardA.value}点），平分秋色！`);
     }
   };
 
@@ -155,7 +158,7 @@ export const LoveLetterGame: React.FC = () => {
   const handlePlayCard = (cardToPlay: CardDef) => {
     const isPlayerA = activePlayer === 'A';
     const currentHand = isPlayerA ? [state.handA[0], state.drawnCardA!] : [state.handB[0], state.drawnCardB!];
-    const remainingCard = currentHand.find((c) => c !== cardToPlay) || currentHand[0];
+    const remainingCard = currentHand.find((c) => c.id !== cardToPlay.id) || currentHand[0];
 
     // Countess rule check: if holding Prince (5) or King (6), must discard Countess (7)
     const hasPrinceOrKing = currentHand.some((c) => c.value === 5 || c.value === 6);
@@ -166,7 +169,8 @@ export const LoveLetterGame: React.FC = () => {
 
     // Princess rule: discard princess -> lose immediately
     if (cardToPlay.value === 8) {
-      winRound(isPlayerA ? 'B' : 'A', '打出了公主，直接失手出局！');
+      finishPlayCard(cardToPlay, remainingCard, false);
+      winRound(isPlayerA ? 'B' : 'A', '打出了公主，直接失手自爆出局！');
       return;
     }
 
@@ -181,12 +185,12 @@ export const LoveLetterGame: React.FC = () => {
       const oppCard = isPlayerA ? state.handB[0] : state.handA[0];
       const oppProtected = isPlayerA ? state.protectedB : state.protectedA;
       if (oppProtected) {
-        setLog('对方受【盔甲护身】庇护，无法探察手牌！');
+        setLog('对方受【护身】庇护，无法偷看手牌！');
       } else {
         setPeekingCard(oppCard);
-        setLog(`已施展【摄神取念】，偷看到了对方当前手牌！`);
+        setLog(`已施展【窥心】，偷看到了对方当前手牌！`);
       }
-      finishPlayCard(remainingCard, false);
+      finishPlayCard(cardToPlay, remainingCard, false);
       return;
     }
 
@@ -194,27 +198,29 @@ export const LoveLetterGame: React.FC = () => {
     if (cardToPlay.value === 3) {
       const oppProtected = isPlayerA ? state.protectedB : state.protectedA;
       if (oppProtected) {
-        setLog('对方受【盔甲护身】庇护，决斗无效！');
+        setLog('对方受【护身】庇护，决斗无效！');
       } else {
         const oppCard = isPlayerA ? state.handB[0] : state.handA[0];
         if (remainingCard.value > oppCard.value) {
-          winRound(isPlayerA ? 'A' : 'B', `决斗交锋胜利！（${remainingCard.value} > ${oppCard.value}）`);
+          finishPlayCard(cardToPlay, remainingCard, false);
+          winRound(isPlayerA ? 'A' : 'B', `决斗交锋胜利！（${remainingCard.value}点 > ${oppCard.value}点）`);
           return;
         } else if (remainingCard.value < oppCard.value) {
-          winRound(isPlayerA ? 'B' : 'A', `决斗交锋落败！（${remainingCard.value} < ${oppCard.value}）`);
+          finishPlayCard(cardToPlay, remainingCard, false);
+          winRound(isPlayerA ? 'B' : 'A', `决斗交锋落败！（${remainingCard.value}点 < ${oppCard.value}点）`);
           return;
         } else {
           setLog('决斗交锋势均力敌，未分胜负！');
         }
       }
-      finishPlayCard(remainingCard, false);
+      finishPlayCard(cardToPlay, remainingCard, false);
       return;
     }
 
     // Handmaid (4): Protection
     if (cardToPlay.value === 4) {
-      setLog('施展【盔甲护身】，本轮免疫所有攻击！');
-      finishPlayCard(remainingCard, true);
+      setLog('打出【侍女 · 护身】，本轮免疫所有攻击！');
+      finishPlayCard(cardToPlay, remainingCard, true);
       return;
     }
 
@@ -222,10 +228,11 @@ export const LoveLetterGame: React.FC = () => {
     if (cardToPlay.value === 5) {
       const oppProtected = isPlayerA ? state.protectedB : state.protectedA;
       if (oppProtected) {
-        setLog('对方受【盔甲护身】庇护，飞来咒无效！');
+        setLog('对方受【护身】庇护，换牌无效！');
       } else {
         const oppCard = isPlayerA ? state.handB[0] : state.handA[0];
         if (oppCard.value === 8) {
+          finishPlayCard(cardToPlay, remainingCard, false);
           winRound(isPlayerA ? 'A' : 'B', '对方被迫弃掉公主，直接淘汰出局！');
           return;
         }
@@ -238,12 +245,12 @@ export const LoveLetterGame: React.FC = () => {
           } else {
             setState((p) => ({ ...p, deck: nextDeck, handA: [newCard] }));
           }
-          setLog('对方弃掉了手牌，并重新摸取了一张！');
+          setLog('对方弃掉了原手牌，并重新摸取了一张！');
         } else {
           setLog('牌库已空，对方无牌可摸！');
         }
       }
-      finishPlayCard(remainingCard, false);
+      finishPlayCard(cardToPlay, remainingCard, false);
       return;
     }
 
@@ -251,16 +258,16 @@ export const LoveLetterGame: React.FC = () => {
     if (cardToPlay.value === 6) {
       const oppProtected = isPlayerA ? state.protectedB : state.protectedA;
       if (oppProtected) {
-        setLog('对方受【盔甲护身】庇护，换牌无效！');
-        finishPlayCard(remainingCard, false);
+        setLog('对方受【护身】庇护，换牌无效！');
+        finishPlayCard(cardToPlay, remainingCard, false);
       } else {
         const oppCard = isPlayerA ? state.handB[0] : state.handA[0];
         if (isPlayerA) {
-          setState((p) => ({ ...p, handA: [oppCard], handB: [remainingCard], drawnCardA: null }));
+          setState((p) => ({ ...p, handA: [oppCard], handB: [remainingCard], drawnCardA: null, discardPile: [...p.discardPile, cardToPlay] }));
         } else {
-          setState((p) => ({ ...p, handB: [oppCard], handA: [remainingCard], drawnCardB: null }));
+          setState((p) => ({ ...p, handB: [oppCard], handA: [remainingCard], drawnCardB: null, discardPile: [...p.discardPile, cardToPlay] }));
         }
-        setLog('【双杖互易】生效！双方交换了手牌！');
+        setLog('【国王 · 互易】生效！双方强行交换了手牌！');
         endTurn();
         return;
       }
@@ -269,26 +276,29 @@ export const LoveLetterGame: React.FC = () => {
 
     // Countess (7)
     if (cardToPlay.value === 7) {
-      setLog('打出了【伯爵夫人 · 傲慢】！');
-      finishPlayCard(remainingCard, false);
+      setLog('打出了【夫人 · 傲慢】！');
+      finishPlayCard(cardToPlay, remainingCard, false);
       return;
     }
   };
 
-  const finishPlayCard = (remainingCard: CardDef, isProtected: boolean) => {
+  const finishPlayCard = (cardPlayed: CardDef, remainingCard: CardDef, isProtected: boolean) => {
+    setSelectedCardId(null);
     if (activePlayer === 'A') {
       setState((prev) => ({
         ...prev,
         handA: [remainingCard],
         drawnCardA: null,
-        protectedA: isProtected
+        protectedA: isProtected,
+        discardPile: [...prev.discardPile, cardPlayed]
       }));
     } else {
       setState((prev) => ({
         ...prev,
         handB: [remainingCard],
         drawnCardB: null,
-        protectedB: isProtected
+        protectedB: isProtected,
+        discardPile: [...prev.discardPile, cardPlayed]
       }));
     }
     endTurn();
@@ -301,18 +311,20 @@ export const LoveLetterGame: React.FC = () => {
     const oppProtected = isPlayerA ? state.protectedB : state.protectedA;
 
     const currentHand = isPlayerA ? [state.handA[0], state.drawnCardA!] : [state.handB[0], state.drawnCardB!];
-    const remainingCard = currentHand.find((c) => c.value !== 1) || currentHand[0];
+    const guardCard = currentHand.find((c) => c.value === 1) || currentHand[0];
+    const remainingCard = currentHand.find((c) => c.id !== guardCard.id) || currentHand[0];
 
     if (oppProtected) {
-      setLog('对方受【盔甲护身】庇护，猜牌免疫！');
+      setLog('对方受【护身】庇护，猜牌免疫！');
+      finishPlayCard(guardCard, remainingCard, false);
     } else if (oppCard.value === guessedVal) {
+      finishPlayCard(guardCard, remainingCard, false);
       winRound(isPlayerA ? 'A' : 'B', `猜中了对方手牌【${oppCard.name}】！一击必杀淘汰！`);
       return;
     } else {
       setLog(`猜错了！（对方并不是 ${LOVE_LETTER_CARDS.find((c) => c.value === guessedVal)?.name}）`);
+      finishPlayCard(guardCard, remainingCard, false);
     }
-
-    finishPlayCard(remainingCard, false);
   };
 
   const endTurn = () => {
@@ -323,8 +335,9 @@ export const LoveLetterGame: React.FC = () => {
   const handleNextRound = () => {
     setState(startRound());
     setRoundWinner(null);
+    setSelectedCardId(null);
     setPeekingCard(null);
-    setLog('新一局密令对决开始！');
+    setLog('新一局宫廷密令开场，洗牌发牌！');
     setHideHand(false);
   };
 
@@ -332,6 +345,10 @@ export const LoveLetterGame: React.FC = () => {
   const currentHandCards = isPlayerA
     ? [state.handA[0], state.drawnCardA].filter(Boolean) as CardDef[]
     : [state.handB[0], state.drawnCardB].filter(Boolean) as CardDef[];
+
+  const oppCardsCount = isPlayerA ? (state.handB.length + (state.drawnCardB ? 1 : 0)) : (state.handA.length + (state.drawnCardA ? 1 : 0));
+  const oppProtected = isPlayerA ? state.protectedB : state.protectedA;
+  const lastDiscarded = state.discardPile[state.discardPile.length - 1];
 
   return (
     <div className="w-full max-w-md mx-auto px-4 sm:px-5 font-serif select-none">
@@ -346,14 +363,14 @@ export const LoveLetterGame: React.FC = () => {
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="text-[10px] font-cinzel tracking-[0.25em] text-[#8C7658] font-bold block leading-none">
-                  LOVE LETTER · 王室情书
+                  ROYAL LOVE LETTER
                 </span>
                 <span className="text-[8px] px-2 py-0.5 rounded-full bg-gradient-to-r from-[#D4AF37]/20 to-[#8C1D35]/15 text-[#8C1D35] font-cinzel font-bold border border-[#D4AF37]/40 shadow-2xs">
-                  经典心理博弈
+                  掌上实体桌游
                 </span>
               </div>
               <h2 className="text-sm font-bold text-[#2C241E] font-serif mt-0.5">
-                情书心机 · 摸一出一心智决斗
+                王室情书 · 拟真扇形打牌对决
               </h2>
             </div>
           </div>
@@ -364,7 +381,7 @@ export const LoveLetterGame: React.FC = () => {
               className="px-2.5 py-1.5 rounded-xl bg-gradient-to-b from-[#FAF5EB] to-[#F0E4D0] text-[#8C1D35] hover:brightness-95 border border-[#D4AF37]/60 text-[10px] font-bold font-serif flex items-center gap-1 cursor-pointer transition-all shadow-2xs"
             >
               <HelpCircle className="w-3.5 h-3.5 text-[#C5A059]" />
-              <span>卡牌全览</span>
+              <span>卡牌表</span>
             </button>
             <button
               onClick={handleNextRound}
@@ -377,7 +394,7 @@ export const LoveLetterGame: React.FC = () => {
         </div>
 
         {/* Score & Deck Status Bar */}
-        <div className="flex items-center justify-between px-3.5 py-2.5 rounded-2xl bg-gradient-to-r from-[#FAF5EB] via-[#FFFDF9] to-[#FAF5EB] border-2 border-[#D4AF37]/45 mb-3 text-xs font-cinzel shadow-xs">
+        <div className="flex items-center justify-between px-3.5 py-2 rounded-2xl bg-gradient-to-r from-[#FAF5EB] via-[#FFFDF9] to-[#FAF5EB] border-2 border-[#D4AF37]/45 mb-3 text-xs font-cinzel shadow-xs">
           {/* HE Hearts */}
           <div className="flex items-center gap-1.5">
             <span className="text-[10px] text-[#8C7658] font-bold">👦 HE:</span>
@@ -385,16 +402,15 @@ export const LoveLetterGame: React.FC = () => {
               {[0, 1, 2].map((i) => (
                 <Heart
                   key={i}
-                  className={`w-4 h-4 filter drop-shadow-2xs ${i < tokensA ? 'text-[#8C1D35] fill-current animate-pulse' : 'text-[#D9C89E]'}`}
+                  className={`w-3.5 h-3.5 filter drop-shadow-2xs ${i < tokensA ? 'text-[#8C1D35] fill-current animate-pulse' : 'text-[#D9C89E]'}`}
                 />
               ))}
             </div>
           </div>
 
-          {/* Remaining in Deck */}
-          <div className="text-xs font-bold text-[#8C1D35] bg-[#FAF5EB] px-2.5 py-0.5 rounded-full border border-[#D4AF37]/40 shadow-2xs flex items-center gap-1">
-            <span>🎴 剩余牌库: {state.deck.length}</span>
-          </div>
+          <span className="font-cinzel text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#8C1D35] text-[#FFE599] shadow-2xs">
+            {activePlayer === 'A' ? '👦 HE 出牌回合' : '👧 HER 出牌回合'}
+          </span>
 
           {/* HER Hearts */}
           <div className="flex items-center gap-1.5">
@@ -403,103 +419,214 @@ export const LoveLetterGame: React.FC = () => {
               {[0, 1, 2].map((i) => (
                 <Heart
                   key={i}
-                  className={`w-4 h-4 filter drop-shadow-2xs ${i < tokensB ? 'text-[#8C1D35] fill-current animate-pulse' : 'text-[#D9C89E]'}`}
+                  className={`w-3.5 h-3.5 filter drop-shadow-2xs ${i < tokensB ? 'text-[#8C1D35] fill-current animate-pulse' : 'text-[#D9C89E]'}`}
                 />
               ))}
             </div>
           </div>
         </div>
 
-        {/* Tactical Battle Log / Action Bar */}
-        <div className="p-3 rounded-2xl bg-gradient-to-r from-[#FAF6EE] to-[#FFFDF9] border border-[#D9C89E]/70 mb-3 text-[11px] font-serif text-[#524336] flex items-center justify-between shadow-2xs">
-          <div className="flex items-center gap-1.5 flex-1 pr-2">
-            <Sparkles className="w-4 h-4 text-[#D4AF37] shrink-0" />
-            <span className="font-bold leading-tight">{log}</span>
-          </div>
-          <span className="font-cinzel text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#8C1D35] text-[#FFE599] shrink-0 shadow-2xs">
-            {activePlayer === 'A' ? '👦 HE 出牌中' : '👧 HER 出牌中'}
-          </span>
-        </div>
+        {/* ========================================================
+            CARD TABLE ZONE: OPPONENT HAND + VELVET FELT MAT
+        ======================================================== */}
+        <div className="p-3.5 rounded-3xl bg-gradient-to-b from-[#111A24] via-[#162231] to-[#0D141C] border-2 border-[#D4AF37]/60 text-[#FFFDF5] shadow-2xl relative overflow-hidden mb-3">
+          
+          {/* Opponent Area */}
+          <div className="flex items-center justify-between border-b border-[#D4AF37]/25 pb-2.5 mb-2.5">
+            <div className="flex items-center gap-2">
+              <span className="text-base">{isPlayerA ? '👧' : '👦'}</span>
+              <span className="text-xs font-serif font-bold text-[#EADBC4]">
+                {isPlayerA ? 'HER 的手牌' : 'HE 的手牌'}
+              </span>
+              {oppProtected && (
+                <span className="flex items-center gap-0.5 text-[9.5px] px-2 py-0.5 rounded-full bg-[#14532D] text-[#86EFAC] border border-[#86EFAC]/40 animate-pulse">
+                  <Shield className="w-3 h-3" />
+                  已受护身庇护
+                </span>
+              )}
+            </div>
 
-        {/* 💡 Direct Strategic Cheat Sheet (直接把博弈逻辑画在眼前，不用死记硬背) */}
-        <div className="p-2.5 rounded-xl bg-[#FAF5EB] border border-[#D9C89E]/60 mb-3 text-[10px] text-[#7A6750] space-y-1">
-          <div className="flex items-center justify-between font-bold text-[#8C1D35]">
-            <span>💡 本轮博弈心法：</span>
-            <span>摸 1 出 1 · 留大牌到最后</span>
+            {/* Opponent Face-down Cards Back */}
+            <div className="flex gap-1.5">
+              {Array.from({ length: Math.max(1, oppCardsCount) }).map((_, i) => (
+                <div
+                  key={i}
+                  className="w-9 h-13 rounded-lg bg-gradient-to-tr from-[#6B1226] via-[#8C1D35] to-[#4A0E17] border border-[#D4AF37] shadow-md flex flex-col items-center justify-center"
+                >
+                  <span className="text-xs text-[#FFE599]">⚜️</span>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="grid grid-cols-3 gap-1 text-[9px] text-[#524336] pt-0.5">
-            <span className="bg-[#FFFDF5] p-1 rounded border border-[#D9C89E]/40 text-center">
-              ⚔️ <strong>1~3点</strong>: 攻击刺探
-            </span>
-            <span className="bg-[#FFFDF5] p-1 rounded border border-[#D9C89E]/40 text-center">
-              🛡️ <strong>4~6点</strong>: 换牌自保
-            </span>
-            <span className="bg-[#FFFDF5] p-1 rounded border border-[#D9C89E]/40 text-center text-[#8C1D35]">
-              👑 <strong>8点公主</strong>: 留手里赢
-            </span>
+
+          {/* Central Battle Velvet Mat: Draw Deck & Discard Zone */}
+          <div className="grid grid-cols-2 gap-3 py-2 items-center">
+            
+            {/* Draw Deck (3D stacked) */}
+            <div className="flex flex-col items-center">
+              <span className="text-[9.5px] font-cinzel text-[#C5A059] mb-1 font-bold">
+                🎴 牌库 ({state.deck.length}张)
+              </span>
+              <div className="relative">
+                {/* 3D stack shadow layers */}
+                <div className="w-16 h-22 rounded-xl bg-[#4A0E17] border border-[#D4AF37]/40 absolute -top-1.5 -left-1.5" />
+                <div className="w-16 h-22 rounded-xl bg-[#6B1226] border border-[#D4AF37]/60 absolute -top-0.5 -left-0.5" />
+                <div className="w-16 h-22 rounded-xl bg-gradient-to-tr from-[#8C1D35] to-[#5C0D1E] border-2 border-[#D4AF37] shadow-xl relative z-10 flex flex-col items-center justify-center p-1">
+                  <span className="text-lg">⚜️</span>
+                  <span className="text-[8px] font-cinzel text-[#FFE599] font-bold mt-1">DRAW</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Discard / Active Arena */}
+            <div className="flex flex-col items-center">
+              <span className="text-[9.5px] font-cinzel text-[#C5A059] mb-1 font-bold">
+                📜 弃牌堆 ({state.discardPile.length}张)
+              </span>
+              {lastDiscarded ? (
+                <motion.div
+                  key={lastDiscarded.id}
+                  initial={{ scale: 0.8, y: -10, rotate: -8 }}
+                  animate={{ scale: 1, y: 0, rotate: 2 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                  className={`w-18 h-24 rounded-xl bg-gradient-to-b ${lastDiscarded.artBg} border-2 border-[#D4AF37] shadow-xl p-1.5 flex flex-col justify-between`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="w-5 h-5 rounded-full bg-[#8C1D35] text-[#FFE599] flex items-center justify-center font-mono font-bold text-[10px]">
+                      {lastDiscarded.value}
+                    </span>
+                    <span className="text-sm">{lastDiscarded.icon}</span>
+                  </div>
+                  <div className="text-center">
+                    <span className="text-[10.5px] font-bold font-serif text-[#FFFDF5] block leading-tight">
+                      {lastDiscarded.name.split(' · ')[0]}
+                    </span>
+                  </div>
+                </motion.div>
+              ) : (
+                <div className="w-18 h-24 rounded-xl border-2 border-dashed border-[#D4AF37]/40 bg-black/20 flex flex-col items-center justify-center text-center p-1 text-[#A8987E]">
+                  <span className="text-xs font-cinzel">空置牌桌</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Narrative Log on Felt */}
+          <div className="mt-2 pt-2 border-t border-[#D4AF37]/20 flex items-center justify-center gap-1.5 text-[11px] font-serif text-[#FFE599] text-center">
+            <Sparkles className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
+            <span className="font-bold">{log}</span>
           </div>
         </div>
 
         {/* Pass & Play Masking Overlay (Prevent seeing opponent hand) */}
         {hideHand && !roundWinner && (
-          <div className="p-5 rounded-2xl bg-[#111A27] text-center text-[#FFFDF5] space-y-2 mb-3 border border-[#D4AF37]/50 shadow-inner">
-            <span className="text-2xl block">🤫</span>
-            <h4 className="text-xs font-cinzel font-bold text-[#FFE599]">
-              请将手机转交给 {activePlayer === 'A' ? 'HE' : 'HER'}
+          <div className="p-6 rounded-3xl bg-gradient-to-b from-[#182638] to-[#0D141C] text-center text-[#FFFDF5] space-y-3 mb-3 border-2 border-[#D4AF37] shadow-2xl">
+            <span className="text-3xl block">💌</span>
+            <h4 className="text-sm font-cinzel font-bold text-[#FFE599]">
+              请将手机平稳转交给 {activePlayer === 'A' ? '👦 HE' : '👧 HER'}
             </h4>
-            <p className="text-[10px] text-[#A8987E] font-serif">
-              “保持神秘 · 严防偷窥手牌”
+            <p className="text-xs text-[#EADBC4] font-serif italic">
+              “保持神秘 · 严防偷看对方手牌”
             </p>
             <button
               onClick={() => setHideHand(false)}
-              className="px-4 py-1.5 rounded-full bg-[#8C1D35] text-[#FFFDF5] text-xs font-serif font-bold cursor-pointer border border-[#D4AF37]/50 shadow-xs"
+              className="px-6 py-2 rounded-full bg-gradient-to-r from-[#8C1D35] to-[#6B1226] text-[#FFFDF5] text-xs font-cinzel font-bold tracking-wider cursor-pointer border-2 border-[#D4AF37] shadow-lg hover:scale-105 active:scale-95 transition-all"
             >
-              我是本人 · 点击看牌
+              我是本人 · 点击启封看牌 🔓
             </button>
           </div>
         )}
 
-        {/* Player Hands Display */}
+        {/* ========================================================
+            REALISTIC FAN OF HAND CARDS (真实扇形手牌握持感)
+        ======================================================== */}
         {!hideHand && !roundWinner && (
-          <div className="space-y-2 mb-3">
-            <div className="flex items-center justify-between text-[10px] text-[#8C7658] font-cinzel px-1">
-              <span>你的手牌（点击即可打出）：</span>
-              <span>{isPlayerA ? (state.protectedA ? '🛡️ 已受护身符保护' : '') : (state.protectedB ? '🛡️ 已受护身符保护' : '')}</span>
+          <div className="space-y-2 mb-2">
+            <div className="flex items-center justify-between text-[11px] text-[#8C7658] font-cinzel px-1">
+              <span className="font-bold flex items-center gap-1">
+                🎴 你的手牌（轻触挑选 · 掷牌出击）：
+              </span>
+              <span>{isPlayerA ? (state.protectedA ? '🛡️ 护身符保护中' : '') : (state.protectedB ? '🛡️ 护身符保护中' : '')}</span>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              {currentHandCards.map((card, idx) => (
-                <motion.button
-                  key={`${card.id}-${idx}`}
-                  whileTap={{ scale: 0.95 }}
-                  whileHover={{ y: -2 }}
-                  onClick={() => handlePlayCard(card)}
-                  className={`p-3.5 rounded-2xl bg-gradient-to-b ${card.artBg} border-2 border-[#D4AF37] hover:border-[#FFE599] shadow-md text-left flex flex-col justify-between h-40 cursor-pointer transition-all relative overflow-hidden group`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="w-7 h-7 rounded-full bg-[#8C1D35] text-[#FFE599] flex items-center justify-center font-mono font-bold text-sm shadow-xs border border-[#FFE599]/40">
-                      {card.value}
-                    </span>
-                    <span className={`text-[10px] font-cinzel font-bold px-2 py-0.5 rounded-full border border-white/20 shadow-2xs ${card.badgeColor}`}>
-                      {card.effect}
-                    </span>
-                  </div>
+            {/* Overlapping Hand Fan Container */}
+            <div className="relative h-56 flex items-center justify-center pt-2">
+              {currentHandCards.map((card, idx) => {
+                const isSelected = selectedCardId === card.id || currentHandCards.length === 1;
+                // Fan rotations: card 0 tilts left (-7deg), card 1 tilts right (+7deg)
+                const defaultRotate = idx === 0 ? -6 : 6;
+                const defaultX = idx === 0 ? -38 : 38;
 
-                  <div className="space-y-1">
-                    <h4 className="text-sm font-bold text-[#FFFDF5] font-serif drop-shadow-xs">
-                      {card.name}
-                    </h4>
-                    <p className="text-[10px] text-[#F3E5AB] font-serif leading-tight line-clamp-2 opacity-90">
-                      {card.desc}
-                    </p>
-                  </div>
+                return (
+                  <motion.div
+                    key={`${card.id}-${idx}`}
+                    animate={{
+                      rotate: isSelected ? 0 : defaultRotate,
+                      y: isSelected ? -24 : 0,
+                      x: isSelected ? (idx === 0 ? -24 : 24) : defaultX,
+                      scale: isSelected ? 1.08 : 1,
+                      zIndex: isSelected ? 30 : idx === 1 ? 20 : 10
+                    }}
+                    transition={{ type: 'spring', stiffness: 450, damping: 25 }}
+                    onClick={() => {
+                      setSelectedCardId(card.id);
+                      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+                        try {
+                          navigator.vibrate([15]);
+                        } catch {}
+                      }
+                    }}
+                    className={`absolute w-44 h-50 rounded-2xl p-2.5 bg-gradient-to-b ${card.artBg} border-3 ${
+                      isSelected ? 'border-[#FFE599] shadow-[0_12px_28px_rgba(212,175,55,0.4)]' : 'border-[#D4AF37] shadow-xl'
+                    } text-left flex flex-col justify-between cursor-pointer select-none transition-colors overflow-hidden`}
+                  >
+                    {/* Top Ribbon */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1">
+                        <span className="w-7 h-7 rounded-full bg-[#8C1D35] text-[#FFE599] flex items-center justify-center font-mono font-bold text-sm shadow-xs border border-[#FFE599]/60">
+                          {card.value}
+                        </span>
+                        <span className="text-[10px] font-cinzel text-[#FFE599] font-bold">
+                          {card.roman}
+                        </span>
+                      </div>
+                      <span className={`text-[9.5px] font-cinzel font-bold px-2 py-0.5 rounded-full border border-white/20 shadow-2xs ${card.badgeColor}`}>
+                        {card.effect}
+                      </span>
+                    </div>
 
-                  {/* 直观点击出牌指示 */}
-                  <div className="w-full py-1 text-center rounded-lg bg-black/30 border border-white/10 text-[9.5px] font-bold text-[#FFE599] group-hover:bg-[#8C1D35] transition-colors">
-                    点击打出此牌 👆
-                  </div>
-                </motion.button>
-              ))}
+                    {/* Center Artwork Emblem */}
+                    <div className="my-auto text-center flex flex-col items-center justify-center">
+                      <span className="text-3xl filter drop-shadow-md mb-0.5">
+                        {card.icon}
+                      </span>
+                      <h4 className="text-sm font-bold text-[#FFFDF5] font-serif drop-shadow-xs">
+                        {card.name}
+                      </h4>
+                    </div>
+
+                    {/* Bottom Rule Desc */}
+                    <div>
+                      <p className="text-[9.5px] text-[#F3E5AB] font-serif leading-tight line-clamp-2 opacity-95">
+                        {card.desc}
+                      </p>
+                      {isSelected && (
+                        <motion.button
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handlePlayCard(card);
+                          }}
+                          className="w-full mt-1.5 py-1 rounded-lg bg-gradient-to-r from-[#8C1D35] to-[#B32645] border border-[#FFE599] text-[#FFFDF5] text-[10px] font-cinzel font-bold text-center shadow-md active:scale-95 transition-all"
+                        >
+                          ⚡ 掷向牌桌出牌
+                        </motion.button>
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -511,23 +638,23 @@ export const LoveLetterGame: React.FC = () => {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="p-3 rounded-2xl bg-[#182638] border border-[#D4AF37] text-[#FFFDF5] mb-3 text-center space-y-1.5 shadow-md"
+              className="p-3.5 rounded-2xl bg-[#182638] border-2 border-[#D4AF37] text-[#FFFDF5] mb-3 text-center space-y-1.5 shadow-xl"
             >
               <div className="flex items-center justify-center gap-1.5 text-xs font-cinzel text-[#FFE599] font-bold">
-                <Eye className="w-3.5 h-3.5" />
-                <span>【摄神取念】探察结果</span>
+                <Eye className="w-4 h-4 text-[#60A5FA]" />
+                <span>【牧师 · 窥心】探察结果</span>
               </div>
               <p className="text-xs font-serif">
                 对方此刻手里正握着的手牌是：
-                <strong className="text-[#FFE599] ml-1">
+                <strong className="text-[#FFE599] text-sm ml-1 font-mono">
                   [{peekingCard.value}点] {peekingCard.name}
                 </strong>
               </p>
               <button
                 onClick={() => setPeekingCard(null)}
-                className="px-3 py-1 rounded-lg bg-[#8C1D35] text-[10px] font-serif cursor-pointer border border-[#D4AF37]/40"
+                className="px-4 py-1 rounded-lg bg-[#8C1D35] text-[10.5px] font-serif cursor-pointer border border-[#D4AF37]/50 shadow-xs"
               >
-                我知道了 · 闭上心眼
+                我知道了 · 闭上心眼 👁️
               </button>
             </motion.div>
           )}
@@ -536,22 +663,22 @@ export const LoveLetterGame: React.FC = () => {
         {/* Guess Card Modal (Guard Effect) */}
         <AnimatePresence>
           {showGuessModal && (
-            <div className="p-3 rounded-2xl bg-[#111A27] border border-[#D4AF37] text-[#FFFDF5] mb-3 space-y-2 shadow-md">
+            <div className="p-3.5 rounded-2xl bg-[#111A27] border-2 border-[#D4AF37] text-[#FFFDF5] mb-3 space-y-2 shadow-2xl">
               <div className="flex items-center justify-between text-xs font-cinzel text-[#FFE599] font-bold">
-                <span className="flex items-center gap-1">
-                  <Swords className="w-3.5 h-3.5" />
+                <span className="flex items-center gap-1.5">
+                  <Swords className="w-4 h-4 text-[#FDE047]" />
                   【卫兵魔杖】指定猜一张手牌：
                 </span>
               </div>
               <p className="text-[10px] text-[#A8987E] font-serif">
                 猜中对方手牌即可一击淘汰对方（不可猜卫兵自身）：
               </p>
-              <div className="grid grid-cols-4 gap-1">
+              <div className="grid grid-cols-4 gap-1.5">
                 {LOVE_LETTER_CARDS.filter((c) => c.value > 1).map((c) => (
                   <button
                     key={c.value}
                     onClick={() => handleConfirmGuess(c.value)}
-                    className="py-1 px-1 rounded bg-[#182638] hover:bg-[#8C1D35] text-[10px] font-serif truncate border border-[#D4AF37]/30 text-[#FFE599] cursor-pointer"
+                    className="py-1.5 px-1 rounded-lg bg-[#182638] hover:bg-[#8C1D35] text-[10px] font-serif truncate border border-[#D4AF37]/40 text-[#FFE599] cursor-pointer shadow-xs active:scale-95 transition-all"
                   >
                     {c.value}. {c.name.split(' · ')[0]}
                   </button>
@@ -566,11 +693,11 @@ export const LoveLetterGame: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-4 rounded-2xl bg-gradient-to-r from-[#FAF5EB] to-[#FFFDF9] border border-[#D4AF37] text-center space-y-2 shadow-xs mb-3"
+            className="p-4 rounded-2xl bg-gradient-to-r from-[#FAF5EB] to-[#FFFDF9] border-2 border-[#D4AF37] text-center space-y-2 shadow-md mb-3"
           >
             <div className="flex items-center justify-center gap-1.5 text-xs font-cinzel font-bold text-[#8C1D35]">
               <Trophy className="w-4 h-4 text-[#D4AF37]" />
-              <span>本轮对决结案！</span>
+              <span>本轮王室决斗结案！</span>
             </div>
             <p className="text-xs font-serif text-[#2C241E] font-bold">
               {log}
@@ -578,7 +705,7 @@ export const LoveLetterGame: React.FC = () => {
             <div className="pt-1">
               <button
                 onClick={handleNextRound}
-                className="px-4 py-1.5 rounded-full bg-gradient-to-r from-[#8C1D35] to-[#6B1226] text-[#FFFDF5] text-xs font-cinzel font-bold tracking-wider cursor-pointer border border-[#D4AF37]/50 shadow-xs"
+                className="px-5 py-2 rounded-full bg-gradient-to-r from-[#8C1D35] to-[#6B1226] text-[#FFFDF5] text-xs font-cinzel font-bold tracking-wider cursor-pointer border border-[#D4AF37]/50 shadow-md"
               >
                 开启下一轮对决 ➡️
               </button>
@@ -615,7 +742,10 @@ export const LoveLetterGame: React.FC = () => {
                   {LOVE_LETTER_CARDS.map((c) => (
                     <div key={c.value} className="p-2 rounded-xl bg-[#FAF5EB] border border-[#D9C89E]/60">
                       <div className="flex items-center justify-between font-bold text-[#8C1D35] mb-0.5">
-                        <span>{c.value}点 · {c.name} ({c.count}张)</span>
+                        <span className="flex items-center gap-1">
+                          <span>{c.icon}</span>
+                          <span>{c.value}点 · {c.name} ({c.count}张)</span>
+                        </span>
                         <span className="text-[9px] px-1 rounded bg-[#8C1D35]/10 text-[#8C1D35] font-cinzel">{c.effect}</span>
                       </div>
                       <p className="text-[10px] text-[#524336] leading-relaxed">{c.desc}</p>
