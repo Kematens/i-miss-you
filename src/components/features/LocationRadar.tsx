@@ -498,6 +498,27 @@ export const LocationRadar: React.FC = () => {
                     </g>
                   );
                 })}
+
+                {/* Dynamic Lumos Pulse Shockwaves flowing from ME to HER */}
+                {isPulsing && (
+                  <g>
+                    {[0.2, 0.45, 0.7, 0.95].map((pFrac, pIdx) => {
+                      const px = 140 + (herNodeX - 140) * pFrac;
+                      const py = 140 + (herNodeY - 140) * pFrac;
+                      return (
+                        <circle
+                          key={`pulse-node-${pIdx}`}
+                          cx={px}
+                          cy={py}
+                          r={3 + pIdx * 1.5}
+                          fill="#FFFDF5"
+                          opacity={0.9}
+                          filter="drop-shadow(0 0 6px #FFE599)"
+                        />
+                      );
+                    })}
+                  </g>
+                )}
               </svg>
 
               {/* 2. Slow Rotating Latin Astrolabe Ring */}
@@ -539,7 +560,12 @@ export const LocationRadar: React.FC = () => {
               </motion.div>
 
               {/* 4. HER AVATAR NODE (Positioned Precisely on the Celestial Orbit) */}
-              <div
+              <motion.div
+                animate={{
+                  scale: isPulsing ? [1, 1.25, 1.05, 1] : 1,
+                  rotate: isPulsing ? [0, -8, 8, 0] : 0
+                }}
+                transition={{ duration: 0.8, ease: 'easeOut' }}
                 className="absolute z-30 flex flex-col items-center"
                 style={{
                   left: `${herNodeX}px`,
@@ -549,9 +575,9 @@ export const LocationRadar: React.FC = () => {
               >
                 <div className="relative group cursor-pointer">
                   {/* Breathing Aura */}
-                  <div className="absolute inset-[-4px] rounded-full bg-[#8C1D35] opacity-40 animate-ping pointer-events-none" />
+                  <div className={`absolute inset-[-4px] rounded-full bg-[#8C1D35] pointer-events-none ${isPulsing ? 'animate-ping opacity-80' : 'opacity-40 animate-ping'}`} />
                   {/* Portrait Medallion */}
-                  <div className="w-10 h-10 rounded-full border-2 border-[#FFE599] p-0.5 bg-[#101A29] shadow-[0_0_16px_rgba(140,29,53,0.9)] overflow-hidden">
+                  <div className={`w-10 h-10 rounded-full border-2 p-0.5 bg-[#101A29] overflow-hidden transition-all ${isPulsing ? 'border-[#FFFDF5] shadow-[0_0_25px_#FFE599]' : 'border-[#FFE599] shadow-[0_0_16px_rgba(140,29,53,0.9)]'}`}>
                     <img
                       src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop"
                       alt="Her"
@@ -563,12 +589,18 @@ export const LocationRadar: React.FC = () => {
                     HER · {WEASLEY_STATUSES[herStatusIndex].label}
                   </span>
                 </div>
-              </div>
+              </motion.div>
 
               {/* 5. ME AVATAR NODE (Anchor Center Pivot) */}
-              <div className="absolute z-30 flex flex-col items-center">
+              <motion.div
+                animate={{
+                  scale: isPulsing ? [1, 1.15, 1] : 1
+                }}
+                transition={{ duration: 0.6 }}
+                className="absolute z-30 flex flex-col items-center"
+              >
                 <div className="relative group cursor-pointer">
-                  <div className="w-10 h-10 rounded-full border-2 border-[#D4AF37] p-0.5 bg-[#101A29] shadow-[0_0_16px_rgba(212,175,55,0.7)] overflow-hidden">
+                  <div className={`w-10 h-10 rounded-full border-2 p-0.5 bg-[#101A29] overflow-hidden transition-all ${isPulsing ? 'border-[#FFFDF5] shadow-[0_0_24px_#D4AF37]' : 'border-[#D4AF37] shadow-[0_0_16px_rgba(212,175,55,0.7)]'}`}>
                     <img
                       src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop"
                       alt="Me"
@@ -579,7 +611,7 @@ export const LocationRadar: React.FC = () => {
                     ME · {WEASLEY_STATUSES[myStatusIndex].label}
                   </span>
                 </div>
-              </div>
+              </motion.div>
             </div>
 
             {/* Bottom Calibrate & Bearing Pill */}
@@ -725,15 +757,21 @@ export const LocationRadar: React.FC = () => {
               setIsPulsing(true);
               if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
                 try {
-                  navigator.vibrate([30, 60]);
+                  navigator.vibrate([30, 40, 70, 90]);
                 } catch {}
               }
-              setTimeout(() => setIsPulsing(false), 1500);
+              confetti({
+                particleCount: 30,
+                spread: 70,
+                origin: { y: 0.7 },
+                colors: ['#FFE599', '#D4AF37', '#FFF2CE', '#8C1D35']
+              });
+              setTimeout(() => setIsPulsing(false), 2000);
             }}
-            className="w-full py-2 rounded-xl bg-gradient-to-r from-[#8C1D35] to-[#6B1226] text-[#FFFDF5] text-xs font-serif font-bold flex items-center justify-center gap-1.5 shadow-sm hover:brightness-105 transition-all cursor-pointer"
+            className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#8C1D35] to-[#6B1226] text-[#FFFDF5] text-xs font-serif font-bold flex items-center justify-center gap-1.5 shadow-sm hover:brightness-105 transition-all cursor-pointer border border-[#D4AF37]/50"
           >
             <Zap className={`w-3.5 h-3.5 text-[#FFE599] ${isPulsing ? 'animate-bounce' : ''}`} />
-            <span>{isPulsing ? '✨ 已向对方手机发送实时心跳脉冲' : '向她发送心灵荧光脉冲 · LUMOS PULSE'}</span>
+            <span>{isPulsing ? '✨ 荧光脉冲引力波穿透天穹抵达对方！' : '向她发射心灵荧光脉冲 · LUMOS PULSE'}</span>
           </button>
         </div>
       </div>
