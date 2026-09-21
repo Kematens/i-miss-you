@@ -10,13 +10,17 @@ import { TodayLook } from './components/features/TodayLook';
 import { DailyRating } from './components/features/DailyRating';
 import { TrialHub } from './components/features/TrialHub';
 import { ScratchCard } from './components/features/ScratchCard';
+import { PairingModal } from './components/features/PairingModal';
+import { CoupleProvider, useCouple } from './context/CoupleContext';
 import { Settings, Heart } from 'lucide-react';
 
-export const App: React.FC = () => {
+const MainApp: React.FC = () => {
   const [activeTab, setActiveTab] = useState<NavTab>('seal');
   const [showPushModal, setShowPushModal] = useState(false);
   const [pushToken, setPushToken] = useState('');
   const [tokenSaved, setTokenSaved] = useState(false);
+
+  const { partnerOnline, myRole, setShowPairingModal } = useCouple();
 
   const anniversaryDays = 520;
 
@@ -68,13 +72,29 @@ export const App: React.FC = () => {
           </div>
         </div>
 
-        <button
-          onClick={() => setShowPushModal(true)}
-          className="p-2.5 rounded-2xl bg-[#FCF9F2]/90 hover:bg-[#FAF5EB] text-[#8C7658] hover:text-[#2C241E] shadow-2xs border border-[#D9C89E]/60 transition-all cursor-pointer"
-          title="设置"
-        >
-          <Settings className="w-4 h-4 text-[#C5A059]" />
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Synchronized Status & Identity Pill */}
+          <button
+            onClick={() => setShowPairingModal(true)}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-[#FCF9F2]/90 border border-[#D9C89E]/70 shadow-2xs text-[10px] font-medium text-[#524336] hover:bg-[#FAF5EB] transition-all cursor-pointer"
+            title="点击配置双人暗号与角色身份"
+          >
+            <span className="relative flex h-2 w-2">
+              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${partnerOnline ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+              <span className={`relative inline-flex rounded-full h-2 w-2 ${partnerOnline ? 'bg-emerald-600' : 'bg-amber-600'}`} />
+            </span>
+            <span className="font-cinzel font-bold text-[#8C1D35]">{myRole}</span>
+            <span className="text-[#8C7658] font-serif">{partnerOnline ? '已同频' : '暗号'}</span>
+          </button>
+
+          <button
+            onClick={() => setShowPushModal(true)}
+            className="p-2.5 rounded-2xl bg-[#FCF9F2]/90 hover:bg-[#FAF5EB] text-[#8C7658] hover:text-[#2C241E] shadow-2xs border border-[#D9C89E]/60 transition-all cursor-pointer"
+            title="设置"
+          >
+            <Settings className="w-4 h-4 text-[#C5A059]" />
+          </button>
+        </div>
       </header>
 
       {/* Covenant Milestone Banner */}
@@ -144,6 +164,9 @@ export const App: React.FC = () => {
       {/* Oxford Midnight & Brass Dock Navigation */}
       <DockNav activeTab={activeTab} onChangeTab={setActiveTab} />
 
+      {/* Secret Pairing Modal */}
+      <PairingModal />
+
       {/* Settings Modal */}
       {showPushModal && (
         <div className="fixed inset-0 z-50 bg-[#111A27]/60 backdrop-blur-xs flex items-center justify-center p-4 font-serif">
@@ -188,6 +211,14 @@ export const App: React.FC = () => {
         </div>
       )}
     </div>
+  );
+};
+
+export const App: React.FC = () => {
+  return (
+    <CoupleProvider>
+      <MainApp />
+    </CoupleProvider>
   );
 };
 
