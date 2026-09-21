@@ -197,31 +197,40 @@ export const MemoryFlipGame: React.FC = () => {
         </div>
 
         {/* 4x4 Cards Matrix */}
-        <div className="grid grid-cols-4 gap-2 bg-[#EFE7D5] p-2 rounded-2xl border-2 border-[#D4AF37]/45 shadow-inner">
+        <div className="grid grid-cols-4 gap-2.5 bg-[#EFE7D5] p-3 rounded-2xl border-2 border-[#D4AF37]/45 shadow-inner">
           {cards.map((c) => (
             <motion.button
               key={c.id}
-              whileTap={{ scale: 0.94 }}
+              whileTap={{ scale: 0.92 }}
               onClick={() => handleCardClick(c.id)}
               disabled={c.isFlipped || c.isMatched || isBusy}
-              className={`aspect-square rounded-xl flex items-center justify-center p-1 text-center font-serif text-xs transition-all border ${
+              className={`aspect-square rounded-2xl flex flex-col items-center justify-center p-1.5 text-center font-serif text-xs transition-all border-2 relative cursor-pointer shadow-sm ${
                 c.isMatched
-                  ? 'bg-[#166534] text-[#86EFAC] border-[#86EFAC]/50 opacity-90 shadow-2xs'
+                  ? 'bg-gradient-to-br from-[#14532D] to-[#052E16] text-[#86EFAC] border-[#4ADE80] shadow-md'
                   : c.isFlipped
-                  ? 'bg-[#FFFDF9] text-[#8C1D35] font-bold border-[#D4AF37] shadow-sm'
-                  : 'bg-[#FCF9F2] text-[#8C7658] border-[#D9C89E] hover:border-[#D4AF37] shadow-2xs cursor-pointer'
+                  ? 'bg-gradient-to-b from-[#FFFDF9] to-[#F5EBD9] text-[#8C1D35] font-bold border-[#D4AF37] shadow-lg ring-2 ring-[#FFE599]/60'
+                  : 'bg-gradient-to-b from-[#8C1D35] via-[#6B1226] to-[#4A0E17] text-[#FFE599] border-[#D4AF37] hover:brightness-110 shadow-md'
               }`}
             >
               {c.isFlipped || c.isMatched ? (
-                <motion.span
-                  initial={{ rotateY: 90 }}
-                  animate={{ rotateY: 0 }}
-                  className="font-bold leading-tight"
+                <motion.div
+                  initial={{ rotateY: 90, scale: 0.8 }}
+                  animate={{ rotateY: 0, scale: 1 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                  className="flex flex-col items-center justify-center"
                 >
-                  {c.word}
-                </motion.span>
+                  <span className="text-xl sm:text-2xl mb-0.5 filter drop-shadow-xs">
+                    {c.word.split(' ')[1] || '✨'}
+                  </span>
+                  <span className="text-[10px] sm:text-[11px] font-bold leading-none tracking-tight">
+                    {c.word.split(' ')[0]}
+                  </span>
+                </motion.div>
               ) : (
-                <span className="font-cinzel text-base opacity-40">⚜️</span>
+                <div className="flex flex-col items-center justify-center opacity-85 group-hover:opacity-100 transition-opacity">
+                  <span className="font-cinzel text-lg sm:text-xl text-[#FFE599] drop-shadow-xs">⚜️</span>
+                  <span className="text-[7.5px] font-cinzel tracking-widest text-[#FFE599]/70 mt-0.5">FLIP</span>
+                </div>
               )}
             </motion.button>
           ))}

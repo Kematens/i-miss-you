@@ -336,46 +336,46 @@ export const CodenamesDuet: React.FC = () => {
         </AnimatePresence>
 
         {/* 4x4 Parchment Word Matrix Grid */}
-        <div className="grid grid-cols-4 gap-1.5 bg-[#EFE7D5] p-2 rounded-2xl border-2 border-[#D4AF37]/45 shadow-inner">
+        <div className="grid grid-cols-4 gap-2 bg-[#EFE7D5] p-2.5 rounded-2xl border-2 border-[#D4AF37]/45 shadow-inner">
           {cards.map((card) => {
             const roleForOther = currentView === 'A' ? card.roleB : card.roleA;
 
             return (
               <motion.button
                 key={card.id}
-                whileTap={{ scale: 0.95 }}
+                whileTap={{ scale: 0.94 }}
                 onClick={() => handleCardClick(card.id)}
                 disabled={card.isRevealed || Boolean(gameOver)}
-                className={`aspect-[4/3] rounded-xl p-1 flex flex-col items-center justify-center text-center transition-all relative border ${
+                className={`aspect-[4/3] rounded-xl p-1.5 flex flex-col items-center justify-center text-center transition-all relative border-2 ${
                   card.isRevealed
                     ? roleForOther === 'agent'
-                      ? 'bg-gradient-to-tr from-[#1B4D3E] to-[#2D6A4F] text-[#D8F3DC] border-[#74C69D] shadow-sm'
+                      ? 'bg-gradient-to-tr from-[#14532D] to-[#15803D] text-[#D8F3DC] border-[#86EFAC] shadow-md ring-2 ring-[#86EFAC]/40'
                       : roleForOther === 'assassin'
-                      ? 'bg-gradient-to-tr from-[#8C1D35] to-[#4A0E17] text-[#FFFDF5] border-[#FF99A8] shadow-md'
-                      : 'bg-[#D9C89E]/60 text-[#7A6750] border-[#C5B7A0] opacity-80'
-                    : 'bg-[#FCF9F2] text-[#2C241E] border-[#D9C89E] hover:border-[#D4AF37] hover:shadow-xs cursor-pointer'
+                      ? 'bg-gradient-to-tr from-[#8C1D35] to-[#450A0A] text-[#FFFDF5] border-[#FCA5A5] shadow-lg ring-2 ring-[#EF4444]/50'
+                      : 'bg-[#D9C89E]/70 text-[#7A6750] border-[#C5B7A0] opacity-75'
+                    : 'bg-gradient-to-b from-[#FFFDF9] to-[#F5EBD9] text-[#2C241E] border-[#D4AF37]/60 hover:border-[#D4AF37] hover:shadow-md cursor-pointer'
                 }`}
               >
                 {/* Revealed status stamp icon */}
                 {card.isRevealed ? (
                   roleForOther === 'agent' ? (
                     <>
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#86EFAC] mb-0.5" />
-                      <span className="text-[10px] font-bold font-serif leading-tight">{card.word}</span>
+                      <CheckCircle2 className="w-4 h-4 text-[#86EFAC] mb-0.5 filter drop-shadow-2xs" />
+                      <span className="text-[10px] sm:text-[11px] font-bold font-serif leading-tight text-[#86EFAC]">{card.word}</span>
                     </>
                   ) : roleForOther === 'assassin' ? (
                     <>
-                      <Skull className="w-3.5 h-3.5 text-[#FCA5A5] mb-0.5" />
-                      <span className="text-[10px] font-bold font-serif leading-tight">{card.word}</span>
+                      <Skull className="w-4 h-4 text-[#FCA5A5] mb-0.5 animate-bounce" />
+                      <span className="text-[10px] sm:text-[11px] font-bold font-serif leading-tight text-[#FCA5A5]">{card.word}</span>
                     </>
                   ) : (
                     <>
-                      <span className="text-[9px] text-[#8C7658] font-cinzel">BYSTANDER</span>
-                      <span className="text-[10px] font-serif leading-tight line-through opacity-60">{card.word}</span>
+                      <span className="text-[8px] text-[#8C7658] font-cinzel tracking-wider">BYSTANDER</span>
+                      <span className="text-[9.5px] font-serif leading-tight line-through opacity-60">{card.word}</span>
                     </>
                   )
                 ) : (
-                  <span className="text-[10.5px] font-serif font-bold text-[#3D3025] leading-tight">
+                  <span className="text-[11px] sm:text-xs font-serif font-bold text-[#2C241E] leading-tight">
                     {card.word}
                   </span>
                 )}

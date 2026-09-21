@@ -17,8 +17,9 @@ export const RuneChess: React.FC = () => {
   const [currentPlayer, setCurrentPlayer] = useState<'obsidian' | 'silver'>('obsidian');
   const [winner, setWinner] = useState<CellValue>(null);
   const [winningLine, setWinningLine] = useState<[number, number][]>([]);
+  const [lastMove, setLastMove] = useState<[number, number] | null>(null);
 
-  // Check 5 in a row
+  // Check 4 in a row
   const checkWin = (grid: CellValue[][], r: number, c: number, player: 'obsidian' | 'silver') => {
     const directions = [
       [0, 1], // horizontal
@@ -67,6 +68,7 @@ export const RuneChess: React.FC = () => {
     const newBoard = board.map((row) => [...row]);
     newBoard[r][c] = currentPlayer;
     setBoard(newBoard);
+    setLastMove([r, c]);
 
     // Haptic feedback
     if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
@@ -105,6 +107,7 @@ export const RuneChess: React.FC = () => {
     );
     setWinner(null);
     setWinningLine([]);
+    setLastMove(null);
     setCurrentPlayer('obsidian');
 
     if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
@@ -165,31 +168,35 @@ export const RuneChess: React.FC = () => {
         </div>
 
         {/* 8x8 Wooden Rune Chessboard */}
-        <div className="p-2 rounded-2xl bg-[#EFE7D5] border-2 border-[#D4AF37]/50 shadow-inner">
-          <div className="grid grid-cols-8 gap-1 bg-[#D9C89E]/40 p-1 rounded-xl">
+        <div className="p-2.5 rounded-3xl bg-[#EFE7D5] border-2 border-[#D4AF37]/50 shadow-inner">
+          <div className="grid grid-cols-8 gap-1.5 bg-[#D9C89E]/40 p-1.5 rounded-2xl">
             {board.map((row, r) =>
               row.map((cell, c) => {
                 const isWinningCell = winningLine.some(([wr, wc]) => wr === r && wc === c);
+                const isLatest = lastMove && lastMove[0] === r && lastMove[1] === c;
 
                 return (
                   <button
                     key={`${r}-${c}`}
                     onClick={() => handleCellClick(r, c)}
                     disabled={Boolean(cell || winner)}
-                    className={`aspect-square rounded-lg flex items-center justify-center transition-all relative ${
+                    className={`aspect-square rounded-xl flex items-center justify-center transition-all relative ${
                       (r + c) % 2 === 0 ? 'bg-[#FCF9F2]' : 'bg-[#F4EBD9]'
-                    } hover:bg-[#FFE599]/30 active:scale-95 cursor-pointer`}
+                    } hover:bg-[#FFE599]/40 active:scale-95 cursor-pointer shadow-2xs`}
                   >
                     {cell === 'obsidian' && (
                       <motion.div
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-                        className={`w-4/5 h-4/5 rounded-full bg-gradient-to-tr from-[#080E18] to-[#1E293B] border border-[#D4AF37] shadow-md flex items-center justify-center ${
+                        className={`w-[85%] h-[85%] rounded-full bg-gradient-to-tr from-[#080E18] via-[#1E293B] to-[#334155] border-2 border-[#D4AF37] shadow-md flex items-center justify-center relative ${
                           isWinningCell ? 'ring-2 ring-[#FFE599] ring-offset-1 animate-pulse' : ''
                         }`}
                       >
-                        <span className="text-[8px] text-[#FFE599] opacity-80">ᚱ</span>
+                        <span className="text-[10px] text-[#FFE599] font-bold drop-shadow-xs">ᚱ</span>
+                        {isLatest && (
+                          <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-[#FFE599] ring-1 ring-black" />
+                        )}
                       </motion.div>
                     )}
 
@@ -198,11 +205,14 @@ export const RuneChess: React.FC = () => {
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-                        className={`w-4/5 h-4/5 rounded-full bg-gradient-to-tr from-[#CBD5E1] via-[#F8FAFC] to-[#94A3B8] border border-[#64748B] shadow-md flex items-center justify-center ${
+                        className={`w-[85%] h-[85%] rounded-full bg-gradient-to-tr from-[#94A3B8] via-[#F8FAFC] to-[#FFFFFF] border-2 border-[#64748B] shadow-md flex items-center justify-center relative ${
                           isWinningCell ? 'ring-2 ring-[#8C1D35] ring-offset-1 animate-pulse' : ''
                         }`}
                       >
-                        <span className="text-[8px] text-[#1E293B] opacity-80">ᚠ</span>
+                        <span className="text-[10px] text-[#1E293B] font-bold drop-shadow-xs">ᚠ</span>
+                        {isLatest && (
+                          <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-[#8C1D35] ring-1 ring-white" />
+                        )}
                       </motion.div>
                     )}
                   </button>

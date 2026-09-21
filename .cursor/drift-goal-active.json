@@ -1,13 +1,23 @@
 {
-  "goal": "我都想要 请你用goalmode模式逐一做好 中间打好git方便回退",
-  "status": "running",
-  "yolo": true,
+  "goal": "扩充《代号双子》为 200+ 海量主题词库，并移植世界级双人传世心理桌游《情书：心之密令》（Love Letter）",
+  "status": "completed",
+  "currentStep": 1,
   "steps": [
     {
       "id": 1,
-      "desc": "正在分析目标并制定计划...",
-      "status": "running"
+      "desc": "1. 将 CodenamesDuet 词库扩充至 200+ 词汇，支持【全部随机/生活甜蜜/约会旅行/心动回忆/魔法用典】分类切换",
+      "status": "done"
+    },
+    {
+      "id": 2,
+      "desc": "2. 编写 LoveLetterGame 双人心机对决桌游核心引擎与 8 种手牌判定机制",
+      "status": "done"
+    },
+    {
+      "id": 3,
+      "desc": "3. 整合进 TrialHub 并完成全站构建与测试",
+      "status": "done"
     }
   ],
-  "createdAt": "2026-09-21T16:21:12.536Z"
+  "updatedAt": "2026-09-21T17:37:10.551Z"
 }

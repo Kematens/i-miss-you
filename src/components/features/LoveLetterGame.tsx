@@ -10,17 +10,19 @@ export interface CardDef {
   count: number;
   effect: string;
   desc: string;
+  badgeColor: string;
+  artBg: string;
 }
 
 export const LOVE_LETTER_CARDS: CardDef[] = [
-  { id: 1, value: 1, name: '卫兵 · 摄念魔杖', count: 5, effect: '猜牌', desc: '猜对方手牌（不可猜卫兵），猜中直接将对方击倒淘汰！' },
-  { id: 2, value: 2, name: '牧师 · 摄神取念', count: 2, effect: '看牌', desc: '私密偷看对方手里的底牌。' },
-  { id: 3, value: 3, name: '男爵 · 决斗交锋', count: 2, effect: '拼点', desc: '秘密与对方比拼手牌点数，较小的一方立刻出局！' },
-  { id: 4, value: 4, name: '侍女 · 盔甲护身', count: 2, effect: '免伤', desc: '直到你的下个回合，免疫对方所有的卡牌效果。' },
-  { id: 5, value: 5, name: '王子 · 飞来咒语', count: 2, effect: '弃牌', desc: '强制对方弃掉手牌并重新摸一张（若弃掉公主则直接淘汰）。' },
-  { id: 6, value: 6, name: '国王 · 双杖互易', count: 1, effect: '换牌', desc: '与对方秘密交换手牌。' },
-  { id: 7, value: 7, name: '伯爵夫人 · 傲慢', count: 1, effect: '被动', desc: '若手中有王子或国王，必须打出此牌。' },
-  { id: 8, value: 8, name: '公主 · 心之誓约', count: 1, effect: '决胜', desc: '点数最大（8点），但若打出或弃掉此牌，直接判定败北出局！' }
+  { id: 1, value: 1, name: '卫兵 · 探念', count: 5, effect: '猜牌淘汰', desc: '猜对方手牌（非卫兵），猜中直接击杀对方淘汰！', badgeColor: 'bg-[#1E3A8A] text-[#93C5FD]', artBg: 'from-[#1E3A8A]/20 to-[#0F172A]' },
+  { id: 2, value: 2, name: '牧师 · 窥心', count: 2, effect: '偷看底牌', desc: '私密偷看对方手里的底牌一眼，知己知彼。', badgeColor: 'bg-[#14532D] text-[#86EFAC]', artBg: 'from-[#14532D]/20 to-[#064E3B]' },
+  { id: 3, value: 3, name: '男爵 · 决斗', count: 2, effect: '比大小点', desc: '与对方秘密拼点，手牌较小的一方当场出局！', badgeColor: 'bg-[#7C2D12] text-[#FDBA74]', artBg: 'from-[#7C2D12]/20 to-[#431407]' },
+  { id: 4, value: 4, name: '侍女 · 护身', count: 2, effect: '绝对无敌', desc: '到下一回合前，完全免疫对方所有的卡牌效果。', badgeColor: 'bg-[#047857] text-[#A7F3D0]', artBg: 'from-[#047857]/20 to-[#065F46]' },
+  { id: 5, value: 5, name: '王子 · 弃牌', count: 2, effect: '强制换牌', desc: '强制对方扔掉手牌重摸一张；若弃掉公主则直接淘汰！', badgeColor: 'bg-[#581C87] text-[#D8B4FE]', artBg: 'from-[#581C87]/20 to-[#3B0764]' },
+  { id: 6, value: 6, name: '国王 · 互易', count: 1, effect: '强行交换', desc: '与对方强行交换手中的卡牌，占领主动权。', badgeColor: 'bg-[#854D0E] text-[#FDE047]', artBg: 'from-[#854D0E]/20 to-[#713F12]' },
+  { id: 7, value: 7, name: '夫人 · 傲慢', count: 1, effect: '被动打出', desc: '若手中有王子或国王，必须打出此牌。', badgeColor: 'bg-[#9D174D] text-[#FBCFE8]', artBg: 'from-[#9D174D]/20 to-[#831843]' },
+  { id: 8, value: 8, name: '公主 · 誓约', count: 1, effect: '最高8点', desc: '点数最高！但若打出或被迫弃掉，直接自爆出局！', badgeColor: 'bg-[#8C1D35] text-[#FFE599]', artBg: 'from-[#8C1D35]/30 to-[#4A0E17]' }
 ];
 
 export const LoveLetterGame: React.FC = () => {
@@ -446,28 +448,29 @@ export const LoveLetterGame: React.FC = () => {
               <span>{isPlayerA ? (state.protectedA ? '🛡️ 已受护身符保护' : '') : (state.protectedB ? '🛡️ 已受护身符保护' : '')}</span>
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-3">
               {currentHandCards.map((card, idx) => (
                 <motion.button
                   key={`${card.id}-${idx}`}
-                  whileTap={{ scale: 0.96 }}
+                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ y: -2 }}
                   onClick={() => handlePlayCard(card)}
-                  className="p-3 rounded-2xl bg-[#FCF9F2] border-2 border-[#D4AF37] hover:bg-[#FAF5EB] shadow-sm text-left flex flex-col justify-between h-32 cursor-pointer transition-all relative overflow-hidden group"
+                  className={`p-3.5 rounded-2xl bg-gradient-to-b ${card.artBg} border-2 border-[#D4AF37] hover:border-[#FFE599] shadow-md text-left flex flex-col justify-between h-36 cursor-pointer transition-all relative overflow-hidden group`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="w-6 h-6 rounded-full bg-[#8C1D35] text-[#FFE599] flex items-center justify-center font-mono font-bold text-xs shadow-2xs">
+                    <span className="w-7 h-7 rounded-full bg-[#8C1D35] text-[#FFE599] flex items-center justify-center font-mono font-bold text-sm shadow-xs border border-[#FFE599]/40">
                       {card.value}
                     </span>
-                    <span className="text-[9.5px] font-cinzel font-bold text-[#8C1D35] px-1.5 py-0.2 rounded bg-[#8C1D35]/10 border border-[#8C1D35]/20">
+                    <span className={`text-[10px] font-cinzel font-bold px-2 py-0.5 rounded-full border border-white/20 shadow-2xs ${card.badgeColor}`}>
                       {card.effect}
                     </span>
                   </div>
 
-                  <div>
-                    <h4 className="text-xs font-bold text-[#2C241E] font-serif">
+                  <div className="space-y-1">
+                    <h4 className="text-sm font-bold text-[#FFFDF5] font-serif drop-shadow-xs">
                       {card.name}
                     </h4>
-                    <p className="text-[9.5px] text-[#7A6750] font-serif mt-0.5 leading-tight line-clamp-2">
+                    <p className="text-[10px] text-[#F3E5AB] font-serif leading-tight line-clamp-2 opacity-90">
                       {card.desc}
                     </p>
                   </div>
