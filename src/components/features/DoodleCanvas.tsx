@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Feather, Trash2, Send, Check } from 'lucide-react';
-import { SpotlightCard } from '../animations/SpotlightCard';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Feather, Trash2, Send, Sparkles } from 'lucide-react';
+import confetti from 'canvas-confetti';
 
 export const DoodleCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -11,13 +11,14 @@ export const DoodleCanvas: React.FC = () => {
   const [sentToast, setSentToast] = useState(false);
   const [hasDrawn, setHasDrawn] = useState(false);
 
-  const colors = [
-    { name: 'Burgundy', hex: '#8C1D35' },
-    { name: 'Gold', hex: '#C5A059' },
-    { name: 'Oxford', hex: '#1E293B' },
-    { name: 'Forest', hex: '#166534' },
-    { name: 'Amber', hex: '#B45309' },
-    { name: 'Charcoal', hex: '#33281E' }
+  // Hogwarts Apothecary Ink Pots
+  const INK_POTS = [
+    { name: 'Gryffindor Burgundy', label: '绯红火漆墨', hex: '#8C1D35' },
+    { name: 'Imperial Gold', label: '纯金荧光墨', hex: '#D4AF37' },
+    { name: 'Ravenclaw Oxford', label: '午夜靛蓝墨', hex: '#182638' },
+    { name: 'Slytherin Emerald', label: '深林翡翠墨', hex: '#1B4D3E' },
+    { name: 'Apothecary Amber', label: '琥珀魔药墨', hex: '#B45309' },
+    { name: 'Ancient Charcoal', label: '陈年焦炭墨', hex: '#2C2219' }
   ];
 
   useEffect(() => {
@@ -91,40 +92,73 @@ export const DoodleCanvas: React.FC = () => {
     if (!ctx) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     setHasDrawn(false);
+
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      try {
+        navigator.vibrate([15]);
+      } catch {}
+    }
   };
 
   const handleSend = () => {
     setSentToast(true);
+
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      try {
+        navigator.vibrate([25, 35, 60]);
+      } catch {}
+    }
+
+    confetti({
+      particleCount: 35,
+      spread: 70,
+      origin: { y: 0.4 },
+      colors: ['#D4AF37', '#FFF2CE', '#AA822A', '#8C1D35']
+    });
+
     setTimeout(() => {
       setSentToast(false);
-    }, 2500);
+    }, 3200);
   };
 
   return (
-    <div className="w-full max-w-md mx-auto p-4 sm:p-5 font-serif">
-      <SpotlightCard className="p-5 sm:p-6" spotlightColor="rgba(212, 175, 55, 0.2)">
+    <div className="w-full max-w-md mx-auto p-4 sm:p-5 font-serif select-none">
+      {/* Victorian Parchment Drawing Desk */}
+      <div className="relative rounded-3xl border border-[#D4AF37]/50 bg-[#FCF9F2]/95 shadow-[0_16px_36px_-6px_rgba(45,30,15,0.09)] p-5 text-[#2C241E] overflow-hidden">
+        
         {/* Header */}
-        <div className="flex items-center justify-between mb-3.5">
+        <div className="flex items-center justify-between pb-3 border-b border-[#D9C89E]/60 mb-3.5">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-2xl bg-[#EADBC4]/70 border border-[#D4AF37]/40 text-[#8C1D35] flex items-center justify-center shadow-xs">
-              <Feather className="w-4 h-4 text-[#C5A059]" />
+            <div className="w-8 h-8 rounded-2xl bg-[#8C1D35] border border-[#D4AF37]/40 text-[#F5E8BE] flex items-center justify-center shadow-xs">
+              <Feather className="w-4 h-4 text-[#FFE599]" />
             </div>
             <div>
-              <h2 className="text-xs font-bold text-[#2C241E] font-cinzel tracking-wider">
-                QUILL & INK · 羽毛笔手札
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] font-cinzel tracking-[0.2em] text-[#8C7658] block leading-none">
+                  QUILL & INK · 羽毛笔金墨
+                </span>
+                <span className="text-[8px] px-1.5 py-0.2 rounded bg-[#D4AF37]/15 text-[#8C1D35] font-cinzel border border-[#D4AF37]/30">
+                  REAL-TIME TRANSMIT
+                </span>
+              </div>
+              <h2 className="text-xs font-bold text-[#2C241E] font-serif mt-0.5">
+                羊皮笺手绘 · 墨迹即刻传书
               </h2>
-              <p className="text-[11px] text-[#8C7658]">
-                羊皮手绘 · 墨迹实时同步
-              </p>
             </div>
           </div>
-          <span className="text-[10px] text-[#C5A059] font-cinzel tracking-wider">
+          <span className="text-[10px] text-[#C5A059] font-cinzel tracking-wider font-bold">
             PARCHMENT
           </span>
         </div>
 
-        {/* Board */}
-        <div className="relative rounded-2xl overflow-hidden bg-[#FAF6EE] border border-[#D9C89E] shadow-inner">
+        {/* Parchment Canvas Stage with Brass Frame Borders */}
+        <div className="relative rounded-2xl overflow-hidden bg-[#FAF5EB] border-2 border-[#D4AF37]/45 shadow-[inset_0_2px_8px_rgba(0,0,0,0.06)]">
+          
+          {/* Faint watermark in background */}
+          <div className="absolute right-3 bottom-2 opacity-5 pointer-events-none font-cinzel text-5xl select-none text-[#8C1D35]">
+            ⚜️
+          </div>
+
           <canvas
             ref={canvasRef}
             onMouseDown={startDrawing}
@@ -138,32 +172,48 @@ export const DoodleCanvas: React.FC = () => {
           />
 
           {!hasDrawn && (
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-[#A8987E] text-xs font-serif italic">
-              蘸取墨水，在此随心书写或绘图...
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-[#A8987E] text-xs font-serif italic space-y-1">
+              <span className="text-sm opacity-60">🪶</span>
+              <span>蘸取下方魔法油墨，在此亲手勾勒心意...</span>
             </div>
           )}
         </div>
 
-        {/* Controls */}
-        <div className="mt-3 flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            {colors.map((c) => (
-              <button
-                key={c.hex}
-                onClick={() => setColor(c.hex)}
-                className={`w-5 h-5 rounded-full transition-transform ${
-                  color === c.hex ? 'scale-120 ring-2 ring-offset-1 ring-[#D4AF37]' : 'hover:scale-105'
-                }`}
-                style={{ backgroundColor: c.hex }}
-              />
-            ))}
+        {/* Ink Pots & Action Controls */}
+        <div className="mt-3.5 flex items-center justify-between">
+          {/* Apothecary Ink Bottles */}
+          <div className="flex items-center gap-1.5 bg-[#FAF6EE] p-1.5 rounded-2xl border border-[#D9C89E]/60">
+            {INK_POTS.map((c) => {
+              const isSelected = color === c.hex;
+              return (
+                <button
+                  key={c.hex}
+                  onClick={() => {
+                    setColor(c.hex);
+                    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+                      try {
+                        navigator.vibrate([10]);
+                      } catch {}
+                    }
+                  }}
+                  title={c.label}
+                  className={`w-6 h-6 rounded-full transition-all cursor-pointer relative flex items-center justify-center ${
+                    isSelected ? 'scale-115 ring-2 ring-[#D4AF37] ring-offset-1 shadow-xs' : 'hover:scale-105 opacity-80'
+                  }`}
+                  style={{ backgroundColor: c.hex }}
+                >
+                  {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-white/90" />}
+                </button>
+              );
+            })}
           </div>
 
+          {/* Action Buttons */}
           <div className="flex items-center gap-1.5">
             <button
               onClick={handleClear}
-              className="p-1.5 rounded-xl bg-[#EADBC4]/50 text-[#8C7658] hover:bg-[#EADBC4] border border-[#D9C89E]/60 transition-colors"
-              title="抹去墨迹"
+              className="p-2 rounded-xl bg-[#FAF5EB] text-[#8C7658] hover:text-[#8C1D35] hover:bg-[#EADBC4] border border-[#D9C89E]/70 transition-colors cursor-pointer"
+              title="清理羊皮笺墨迹"
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>
@@ -171,29 +221,33 @@ export const DoodleCanvas: React.FC = () => {
               whileTap={{ scale: 0.95 }}
               onClick={handleSend}
               disabled={!hasDrawn}
-              className={`px-3 py-1.5 rounded-xl text-xs font-cinzel tracking-wider flex items-center gap-1.5 transition-all ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-cinzel font-bold tracking-wider flex items-center gap-1.5 transition-all shadow-sm ${
                 hasDrawn
-                  ? 'bg-[#8C1D35] text-[#F5EBD9] cursor-pointer shadow-xs border border-[#D4AF37]/50'
-                  : 'bg-[#EADBC4]/40 text-[#A8987E] cursor-not-allowed border border-transparent'
+                  ? 'bg-gradient-to-r from-[#8C1D35] to-[#6B1226] text-[#FFFDF5] cursor-pointer border border-[#D4AF37]/50 hover:brightness-105'
+                  : 'bg-[#EADBC4]/40 text-[#A8987E] cursor-not-allowed border-transparent'
               }`}
             >
-              <Send className="w-3 h-3 text-[#F5E8BE]" />
-              TRANSMIT
+              <Send className="w-3.5 h-3.5 text-[#FFE599]" />
+              <span>TRANSMIT 飞递</span>
             </motion.button>
           </div>
         </div>
 
-        {sentToast && (
-          <motion.div
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-2.5 p-2 rounded-xl bg-[#FAF5EB] border border-[#D4AF37]/60 text-[#8C1D35] text-[11px] font-serif flex items-center justify-center gap-1.5 shadow-2xs"
-          >
-            <Check className="w-3.5 h-3.5 text-[#C5A059]" />
-            墨迹已穿透空间，呈现在对方羊皮笺上 📜
-          </motion.div>
-        )}
-      </SpotlightCard>
+        {/* Transmission Notification */}
+        <AnimatePresence>
+          {sentToast && (
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              className="mt-2.5 p-2.5 rounded-xl bg-[#FAF5EB] border border-[#D4AF37] text-[#8C1D35] text-xs font-serif flex items-center justify-center gap-2 shadow-sm"
+            >
+              <Sparkles className="w-4 h-4 text-[#D4AF37]" />
+              <span>墨迹已穿透空间屏障，由猫头鹰火速投递至对方手札 ✨</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 };
