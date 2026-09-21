@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, Swords, Eye, RotateCcw, HelpCircle, Sparkles, Trophy, Shield } from 'lucide-react';
+import { Heart, Swords, Eye, RotateCcw, HelpCircle, Sparkles, Trophy, Shield, Wifi, Hourglass, Send, Users } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { ClickSpark } from '../animations/ClickSpark';
+import { ShinyText } from '../animations/ShinyText';
 
 export interface CardDef {
   id: number;
@@ -27,6 +29,13 @@ export const LOVE_LETTER_CARDS: CardDef[] = [
   { id: 8, value: 8, name: '公主 · 誓约', count: 1, effect: '最高8点', desc: '点数最高！但若打出或被迫弃掉，直接自爆出局！', badgeColor: 'bg-[#8C1D35] text-[#FFE599]', artBg: 'from-[#8C1D35] to-[#4A0E17]', icon: '💖', roman: 'VIII' }
 ];
 
+interface FloatingEmoji {
+  id: number;
+  text: string;
+  sender: 'A' | 'B';
+  x: number;
+}
+
 export const LoveLetterGame: React.FC = () => {
   // Game setup
   const initDeck = () => {
@@ -36,18 +45,13 @@ export const LoveLetterGame: React.FC = () => {
         d.push({ ...c, id: Number(`${c.value}${i}`) });
       }
     });
-    // Shuffle
     return d.sort(() => Math.random() - 0.5);
   };
 
   const startRound = () => {
     const d = initDeck();
-    // Burn 1 card face down (classic rule)
-    d.pop();
-    // 3 extra burn cards for 2-player variant
-    d.pop();
-    d.pop();
-    d.pop();
+    d.pop(); // burn 1
+    d.pop(); d.pop(); d.pop(); // 3 burn cards for 2-player variant
 
     const p1Card = d.pop()!;
     const p2Card = d.pop()!;
@@ -76,6 +80,14 @@ export const LoveLetterGame: React.FC = () => {
   const [showRules, setShowRules] = useState(false);
   const [hideHand, setHideHand] = useState(false);
 
+  // Online Multiplayer Simulation State
+  const [isOnlineMode, setIsOnlineMode] = useState(true);
+  const [myOnlineRole, setMyOnlineRole] = useState<'A' | 'B'>('A'); // View from HE (A) or HER (B)
+  const [roomCode] = useState('LUMOS-520');
+  const [floatingEmojis, setFloatingEmojis] = useState<FloatingEmoji[]>([]);
+  const [drawingCardAnim, setDrawingCardAnim] = useState<CardDef | null>(null);
+  const [slammingCardAnim, setSlammingCardAnim] = useState<CardDef | null>(null);
+
   // Turn draw
   const drawCardForCurrent = () => {
     if (state.deck.length === 0) {
@@ -85,6 +97,12 @@ export const LoveLetterGame: React.FC = () => {
 
     const nextDeck = [...state.deck];
     const card = nextDeck.pop()!;
+
+    // Trigger visual draw flight animation
+    setDrawingCardAnim(card);
+    setTimeout(() => {
+      setDrawingCardAnim(null);
+    }, 650);
 
     if (activePlayer === 'A') {
       setState((prev) => ({
@@ -154,6 +172,27 @@ export const LoveLetterGame: React.FC = () => {
     }
   };
 
+  // Trigger floating reaction emoji across network
+  const handleSendReaction = (emojiText: string) => {
+    const newEmoji: FloatingEmoji = {
+      id: Date.now() + Math.random(),
+      text: emojiText,
+      sender: myOnlineRole,
+      x: 30 + Math.random() * 40
+    };
+    setFloatingEmojis((prev) => [...prev, newEmoji]);
+
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      try {
+        navigator.vibrate([15]);
+      } catch {}
+    }
+
+    setTimeout(() => {
+      setFloatingEmojis((prev) => prev.filter((e) => e.id !== newEmoji.id));
+    }, 2000);
+  };
+
   // Play a card
   const handlePlayCard = (cardToPlay: CardDef) => {
     const isPlayerA = activePlayer === 'A';
@@ -163,9 +202,13 @@ export const LoveLetterGame: React.FC = () => {
     // Countess rule check: if holding Prince (5) or King (6), must discard Countess (7)
     const hasPrinceOrKing = currentHand.some((c) => c.value === 5 || c.value === 6);
     if (hasPrinceOrKing && cardToPlay.value !== 7 && currentHand.some((c) => c.value === 7)) {
-      setLog('⚠️ 规则限制：手中有王子或国王时，必须打出伯爵夫人！');
+      setLog('⚠️ 规则限制：手中有王子或国王时，必须打出夫人！');
       return;
     }
+
+    // Trigger physical slam animation onto table
+    setSlammingCardAnim(cardToPlay);
+    setTimeout(() => setSlammingCardAnim(null), 500);
 
     // Princess rule: discard princess -> lose immediately
     if (cardToPlay.value === 8) {
@@ -328,8 +371,11 @@ export const LoveLetterGame: React.FC = () => {
   };
 
   const endTurn = () => {
-    setActivePlayer((p) => (p === 'A' ? 'B' : 'A'));
-    setHideHand(true); // Mask screen for pass & play secrecy
+    const nextPlayer = activePlayer === 'A' ? 'B' : 'A';
+    setActivePlayer(nextPlayer);
+    if (!isOnlineMode) {
+      setHideHand(true); // Pass & play secrecy only in single phone offline mode
+    }
   };
 
   const handleNextRound = () => {
@@ -341,429 +387,575 @@ export const LoveLetterGame: React.FC = () => {
     setHideHand(false);
   };
 
-  const isPlayerA = activePlayer === 'A';
-  const currentHandCards = isPlayerA
+  // Determine whose perspective to show
+  const activeRole = isOnlineMode ? myOnlineRole : activePlayer;
+  const isMyTurn = activePlayer === activeRole;
+
+  const currentHandCards = activeRole === 'A'
     ? [state.handA[0], state.drawnCardA].filter(Boolean) as CardDef[]
     : [state.handB[0], state.drawnCardB].filter(Boolean) as CardDef[];
 
-  const oppCardsCount = isPlayerA ? (state.handB.length + (state.drawnCardB ? 1 : 0)) : (state.handA.length + (state.drawnCardA ? 1 : 0));
-  const oppProtected = isPlayerA ? state.protectedB : state.protectedA;
+  const oppCardsCount = activeRole === 'A'
+    ? (state.handB.length + (state.drawnCardB ? 1 : 0))
+    : (state.handA.length + (state.drawnCardA ? 1 : 0));
+  const oppProtected = activeRole === 'A' ? state.protectedB : state.protectedA;
   const lastDiscarded = state.discardPile[state.discardPile.length - 1];
 
   return (
-    <div className="w-full max-w-md mx-auto px-4 sm:px-5 font-serif select-none">
-      <div className="relative rounded-3xl border border-[#D4AF37]/50 bg-[#FCF9F2]/95 shadow-[0_16px_36px_-6px_rgba(45,30,15,0.09)] p-4 sm:p-5 text-[#2C241E] overflow-hidden">
+    <ClickSpark sparkColors={['#FFE599', '#D4AF37', '#8C1D35', '#F59E0B']} sparkCount={7}>
+      <div className="w-full max-w-md mx-auto px-4 sm:px-5 font-serif select-none relative">
         
-        {/* Header */}
-        <div className="flex items-center justify-between pb-3.5 border-b border-[#D9C89E]/60 mb-3.5">
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#6B1226] via-[#8C1D35] to-[#B32645] border-2 border-[#D4AF37] text-[#FFE599] flex items-center justify-center shadow-md">
-              <Heart className="w-5 h-5 text-[#FFE599] fill-current filter drop-shadow-xs" />
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-[10px] font-cinzel tracking-[0.25em] text-[#8C7658] font-bold block leading-none">
-                  ROYAL LOVE LETTER
+        {/* Floating Reactions across Network */}
+        <div className="absolute inset-x-0 top-20 pointer-events-none z-50 overflow-hidden h-64">
+          <AnimatePresence>
+            {floatingEmojis.map((e) => (
+              <motion.div
+                key={e.id}
+                initial={{ opacity: 0, y: 180, scale: 0.6 }}
+                animate={{ opacity: 1, y: 10, scale: 1.2 }}
+                exit={{ opacity: 0, y: -40, scale: 0.8 }}
+                transition={{ duration: 1.8, ease: 'easeOut' }}
+                style={{ left: `${e.x}%` }}
+                className="absolute text-2xl filter drop-shadow-md bg-white/90 px-2 py-0.5 rounded-full border border-[#D4AF37]/50 shadow-lg text-black font-sans flex items-center gap-1"
+              >
+                <span>{e.text}</span>
+                <span className="text-[9px] font-cinzel text-[#8C1D35] font-bold">
+                  {e.sender === 'A' ? 'HE' : 'HER'}
                 </span>
-                <span className="text-[8px] px-2 py-0.5 rounded-full bg-gradient-to-r from-[#D4AF37]/20 to-[#8C1D35]/15 text-[#8C1D35] font-cinzel font-bold border border-[#D4AF37]/40 shadow-2xs">
-                  掌上实体桌游
-                </span>
-              </div>
-              <h2 className="text-sm font-bold text-[#2C241E] font-serif mt-0.5">
-                王室情书 · 拟真扇形打牌对决
-              </h2>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={() => setShowRules(true)}
-              className="px-2.5 py-1.5 rounded-xl bg-gradient-to-b from-[#FAF5EB] to-[#F0E4D0] text-[#8C1D35] hover:brightness-95 border border-[#D4AF37]/60 text-[10px] font-bold font-serif flex items-center gap-1 cursor-pointer transition-all shadow-2xs"
-            >
-              <HelpCircle className="w-3.5 h-3.5 text-[#C5A059]" />
-              <span>卡牌表</span>
-            </button>
-            <button
-              onClick={handleNextRound}
-              className="p-1.5 rounded-xl bg-gradient-to-b from-[#FAF5EB] to-[#F0E4D0] text-[#8C7658] hover:text-[#8C1D35] border border-[#D9C89E]/70 transition-all cursor-pointer shadow-2xs"
-              title="重开一局"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-            </button>
-          </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
 
-        {/* Score & Deck Status Bar */}
-        <div className="flex items-center justify-between px-3.5 py-2 rounded-2xl bg-gradient-to-r from-[#FAF5EB] via-[#FFFDF9] to-[#FAF5EB] border-2 border-[#D4AF37]/45 mb-3 text-xs font-cinzel shadow-xs">
-          {/* HE Hearts */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10px] text-[#8C7658] font-bold">👦 HE:</span>
-            <div className="flex gap-1">
-              {[0, 1, 2].map((i) => (
-                <Heart
-                  key={i}
-                  className={`w-3.5 h-3.5 filter drop-shadow-2xs ${i < tokensA ? 'text-[#8C1D35] fill-current animate-pulse' : 'text-[#D9C89E]'}`}
-                />
-              ))}
-            </div>
-          </div>
-
-          <span className="font-cinzel text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#8C1D35] text-[#FFE599] shadow-2xs">
-            {activePlayer === 'A' ? '👦 HE 出牌回合' : '👧 HER 出牌回合'}
-          </span>
-
-          {/* HER Hearts */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10px] text-[#8C7658] font-bold">👧 HER:</span>
-            <div className="flex gap-1">
-              {[0, 1, 2].map((i) => (
-                <Heart
-                  key={i}
-                  className={`w-3.5 h-3.5 filter drop-shadow-2xs ${i < tokensB ? 'text-[#8C1D35] fill-current animate-pulse' : 'text-[#D9C89E]'}`}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* ========================================================
-            CARD TABLE ZONE: OPPONENT HAND + VELVET FELT MAT
-        ======================================================== */}
-        <div className="p-3.5 rounded-3xl bg-gradient-to-b from-[#111A24] via-[#162231] to-[#0D141C] border-2 border-[#D4AF37]/60 text-[#FFFDF5] shadow-2xl relative overflow-hidden mb-3">
+        <div className="relative rounded-3xl border border-[#D4AF37]/50 bg-[#FCF9F2]/95 shadow-[0_16px_36px_-6px_rgba(45,30,15,0.09)] p-4 sm:p-5 text-[#2C241E] overflow-hidden">
           
-          {/* Opponent Area */}
-          <div className="flex items-center justify-between border-b border-[#D4AF37]/25 pb-2.5 mb-2.5">
+          {/* Header */}
+          <div className="flex items-center justify-between pb-2.5 border-b border-[#D9C89E]/60 mb-2.5">
             <div className="flex items-center gap-2">
-              <span className="text-base">{isPlayerA ? '👧' : '👦'}</span>
-              <span className="text-xs font-serif font-bold text-[#EADBC4]">
-                {isPlayerA ? 'HER 的手牌' : 'HE 的手牌'}
-              </span>
-              {oppProtected && (
-                <span className="flex items-center gap-0.5 text-[9.5px] px-2 py-0.5 rounded-full bg-[#14532D] text-[#86EFAC] border border-[#86EFAC]/40 animate-pulse">
-                  <Shield className="w-3 h-3" />
-                  已受护身庇护
+              <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-[#6B1226] via-[#8C1D35] to-[#B32645] border-2 border-[#D4AF37] text-[#FFE599] flex items-center justify-center shadow-md">
+                <Heart className="w-4 h-4 text-[#FFE599] fill-current filter drop-shadow-xs" />
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-cinzel tracking-[0.2em] text-[#8C7658] font-bold block leading-none">
+                    LOVE LETTER
+                  </span>
+                  <span className="text-[8px] px-1.5 py-0.2 rounded-full bg-emerald-500/15 text-emerald-700 font-cinzel font-bold border border-emerald-500/30 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    云端同步中
+                  </span>
+                </div>
+                <h2 className="text-xs font-bold text-[#2C241E] font-serif mt-0.5">
+                  王室情书 · 触感扇形打牌对弈
+                </h2>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setShowRules(true)}
+                className="px-2 py-1 rounded-xl bg-gradient-to-b from-[#FAF5EB] to-[#F0E4D0] text-[#8C1D35] hover:brightness-95 border border-[#D4AF37]/60 text-[10px] font-bold font-serif flex items-center gap-1 cursor-pointer transition-all shadow-2xs"
+              >
+                <HelpCircle className="w-3.5 h-3.5 text-[#C5A059]" />
+                <span>秘典</span>
+              </button>
+              <button
+                onClick={handleNextRound}
+                className="p-1 rounded-xl bg-gradient-to-b from-[#FAF5EB] to-[#F0E4D0] text-[#8C7658] hover:text-[#8C1D35] border border-[#D9C89E]/70 transition-all cursor-pointer shadow-2xs"
+                title="重开一局"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          {/* ONLINE MULTIPLAYER ROOM STATUS BAR (云端双人密室面板) */}
+          <div className="p-2 rounded-2xl bg-gradient-to-r from-[#182638] via-[#101924] to-[#182638] border-2 border-[#D4AF37]/50 text-[#FFFDF5] mb-2.5 shadow-md flex items-center justify-between text-[10px] font-cinzel">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
+                <Wifi className="w-3 h-3 text-emerald-400 animate-pulse" />
+                <span className="text-[#FFE599] font-bold">房号: {roomCode}</span>
+              </div>
+              <span className="text-[#A8987E]">|</span>
+              <span className="text-emerald-400 font-mono">24ms</span>
+            </div>
+
+            {/* Online Mode Switch & Perspective Toggle */}
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setIsOnlineMode(!isOnlineMode)}
+                className="px-2 py-0.5 rounded-lg bg-[#2A3B4D] hover:bg-[#3B4E63] text-[#FFE599] border border-[#D4AF37]/40 text-[9px] font-bold cursor-pointer transition-colors flex items-center gap-1"
+                title="切换单机同屏或双机在线模式"
+              >
+                <Users className="w-3 h-3" />
+                <span>{isOnlineMode ? '双端在线' : '单屏面对面'}</span>
+              </button>
+
+              {isOnlineMode && (
+                <button
+                  onClick={() => setMyOnlineRole((r) => (r === 'A' ? 'B' : 'A'))}
+                  className="px-2 py-0.5 rounded-lg bg-[#8C1D35] text-[#FFFDF5] border border-[#FFE599]/40 text-[9px] font-bold cursor-pointer transition-transform active:scale-95 shadow-2xs"
+                  title="模拟切换当前手机的第一人称视角"
+                >
+                  切视角: {myOnlineRole === 'A' ? '👦 HE' : '👧 HER'}
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Score & Deck Status Bar */}
+          <div className="flex items-center justify-between px-3 py-1.5 rounded-2xl bg-gradient-to-r from-[#FAF5EB] via-[#FFFDF9] to-[#FAF5EB] border-2 border-[#D4AF37]/45 mb-2.5 text-xs font-cinzel shadow-xs">
+            {/* HE Hearts */}
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] text-[#8C7658] font-bold">👦 HE:</span>
+              <div className="flex gap-0.5">
+                {[0, 1, 2].map((i) => (
+                  <Heart
+                    key={i}
+                    className={`w-3.5 h-3.5 filter drop-shadow-2xs ${i < tokensA ? 'text-[#8C1D35] fill-current animate-pulse' : 'text-[#D9C89E]'}`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Turn Indicator with ShinyText */}
+            <div className="px-2.5 py-0.5 rounded-full bg-[#8C1D35] shadow-2xs flex items-center gap-1">
+              {isMyTurn ? (
+                <ShinyText text="✨ 轮到你行动" className="text-[10px] font-cinzel font-bold text-[#FFE599]" speed={3} />
+              ) : (
+                <span className="text-[10px] font-cinzel font-bold text-[#FFE599]">
+                  {activePlayer === 'A' ? '👦 HE 出牌中' : '👧 HER 出牌中'}
                 </span>
               )}
             </div>
 
-            {/* Opponent Face-down Cards Back */}
-            <div className="flex gap-1.5">
-              {Array.from({ length: Math.max(1, oppCardsCount) }).map((_, i) => (
-                <div
-                  key={i}
-                  className="w-9 h-13 rounded-lg bg-gradient-to-tr from-[#6B1226] via-[#8C1D35] to-[#4A0E17] border border-[#D4AF37] shadow-md flex flex-col items-center justify-center"
-                >
-                  <span className="text-xs text-[#FFE599]">⚜️</span>
-                </div>
-              ))}
+            {/* HER Hearts */}
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] text-[#8C7658] font-bold">👧 HER:</span>
+              <div className="flex gap-0.5">
+                {[0, 1, 2].map((i) => (
+                  <Heart
+                    key={i}
+                    className={`w-3.5 h-3.5 filter drop-shadow-2xs ${i < tokensB ? 'text-[#8C1D35] fill-current animate-pulse' : 'text-[#D9C89E]'}`}
+                  />
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Central Battle Velvet Mat: Draw Deck & Discard Zone */}
-          <div className="grid grid-cols-2 gap-3 py-2 items-center">
+          {/* ========================================================
+              CARD TABLE FELT MAT: OPPONENT HAND + BATTLE FELT
+          ======================================================== */}
+          <div className="p-3.5 rounded-3xl bg-gradient-to-b from-[#111A24] via-[#162231] to-[#0D141C] border-2 border-[#D4AF37]/60 text-[#FFFDF5] shadow-2xl relative overflow-hidden mb-2.5">
             
-            {/* Draw Deck (3D stacked) */}
-            <div className="flex flex-col items-center">
-              <span className="text-[9.5px] font-cinzel text-[#C5A059] mb-1 font-bold">
-                🎴 牌库 ({state.deck.length}张)
-              </span>
-              <div className="relative">
-                {/* 3D stack shadow layers */}
-                <div className="w-16 h-22 rounded-xl bg-[#4A0E17] border border-[#D4AF37]/40 absolute -top-1.5 -left-1.5" />
-                <div className="w-16 h-22 rounded-xl bg-[#6B1226] border border-[#D4AF37]/60 absolute -top-0.5 -left-0.5" />
-                <div className="w-16 h-22 rounded-xl bg-gradient-to-tr from-[#8C1D35] to-[#5C0D1E] border-2 border-[#D4AF37] shadow-xl relative z-10 flex flex-col items-center justify-center p-1">
-                  <span className="text-lg">⚜️</span>
-                  <span className="text-[8px] font-cinzel text-[#FFE599] font-bold mt-1">DRAW</span>
+            {/* Soft Ambient Aurora on Tabletop */}
+            <div className="absolute inset-0 pointer-events-none opacity-20">
+              <div className="w-full h-full bg-gradient-to-tr from-amber-600/30 via-rose-700/20 to-blue-900/30 blur-2xl" />
+            </div>
+
+            {/* Opponent Area */}
+            <div className="flex items-center justify-between border-b border-[#D4AF37]/25 pb-2 mb-2 relative z-10">
+              <div className="flex items-center gap-2">
+                <span className="text-base">{activeRole === 'A' ? '👧' : '👦'}</span>
+                <div>
+                  <span className="text-xs font-serif font-bold text-[#EADBC4] block leading-tight">
+                    {activeRole === 'A' ? 'HER 的手牌' : 'HE 的手牌'}
+                  </span>
+                  {!isMyTurn && (
+                    <span className="text-[9px] text-[#FFE599] flex items-center gap-1 font-serif animate-pulse">
+                      <Hourglass className="w-2.5 h-2.5 animate-spin" />
+                      正在摸牌斟酌对策中...
+                    </span>
+                  )}
                 </div>
+                {oppProtected && (
+                  <span className="flex items-center gap-0.5 text-[9px] px-1.5 py-0.2 rounded-full bg-[#14532D] text-[#86EFAC] border border-[#86EFAC]/40 animate-pulse">
+                    <Shield className="w-2.5 h-2.5" />
+                    已护身
+                  </span>
+                )}
+              </div>
+
+              {/* Opponent Face-down Cards Back with subtle floating pulse */}
+              <div className="flex gap-1.5">
+                {Array.from({ length: Math.max(1, oppCardsCount) }).map((_, i) => (
+                  <motion.div
+                    key={i}
+                    animate={!isMyTurn ? { y: [0, -3, 0] } : {}}
+                    transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut', delay: i * 0.3 }}
+                    className="w-9 h-13 rounded-lg bg-gradient-to-tr from-[#6B1226] via-[#8C1D35] to-[#4A0E17] border border-[#D4AF37] shadow-md flex flex-col items-center justify-center relative"
+                  >
+                    <span className="text-xs text-[#FFE599]">⚜️</span>
+                    {!isMyTurn && (
+                      <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+                    )}
+                  </motion.div>
+                ))}
               </div>
             </div>
 
-            {/* Discard / Active Arena */}
-            <div className="flex flex-col items-center">
-              <span className="text-[9.5px] font-cinzel text-[#C5A059] mb-1 font-bold">
-                📜 弃牌堆 ({state.discardPile.length}张)
-              </span>
-              {lastDiscarded ? (
-                <motion.div
-                  key={lastDiscarded.id}
-                  initial={{ scale: 0.8, y: -10, rotate: -8 }}
-                  animate={{ scale: 1, y: 0, rotate: 2 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                  className={`w-18 h-24 rounded-xl bg-gradient-to-b ${lastDiscarded.artBg} border-2 border-[#D4AF37] shadow-xl p-1.5 flex flex-col justify-between`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="w-5 h-5 rounded-full bg-[#8C1D35] text-[#FFE599] flex items-center justify-center font-mono font-bold text-[10px]">
-                      {lastDiscarded.value}
-                    </span>
-                    <span className="text-sm">{lastDiscarded.icon}</span>
+            {/* Central Battle Velvet Mat: 3D Deck & Discard Zone */}
+            <div className="grid grid-cols-2 gap-3 py-1.5 items-center relative z-10">
+              
+              {/* Draw Deck (3D stacked with Draw Flight Animation) */}
+              <div className="flex flex-col items-center relative">
+                <span className="text-[9.5px] font-cinzel text-[#C5A059] mb-1 font-bold">
+                  🎴 牌库 ({state.deck.length}张)
+                </span>
+                <div className="relative">
+                  <div className="w-16 h-22 rounded-xl bg-[#4A0E17] border border-[#D4AF37]/40 absolute -top-1.5 -left-1.5" />
+                  <div className="w-16 h-22 rounded-xl bg-[#6B1226] border border-[#D4AF37]/60 absolute -top-0.5 -left-0.5" />
+                  <div className="w-16 h-22 rounded-xl bg-gradient-to-tr from-[#8C1D35] to-[#5C0D1E] border-2 border-[#D4AF37] shadow-xl relative z-10 flex flex-col items-center justify-center p-1">
+                    <span className="text-lg">⚜️</span>
+                    <span className="text-[8px] font-cinzel text-[#FFE599] font-bold mt-1">DRAW</span>
                   </div>
-                  <div className="text-center">
-                    <span className="text-[10.5px] font-bold font-serif text-[#FFFDF5] block leading-tight">
-                      {lastDiscarded.name.split(' · ')[0]}
-                    </span>
-                  </div>
-                </motion.div>
-              ) : (
-                <div className="w-18 h-24 rounded-xl border-2 border-dashed border-[#D4AF37]/40 bg-black/20 flex flex-col items-center justify-center text-center p-1 text-[#A8987E]">
-                  <span className="text-xs font-cinzel">空置牌桌</span>
+
+                  {/* Draw Flight Animated Card */}
+                  {drawingCardAnim && (
+                    <motion.div
+                      initial={{ scale: 0.6, y: -20, rotate: 15, opacity: 0 }}
+                      animate={{ scale: 1, y: 70, rotate: 0, opacity: 1 }}
+                      transition={{ type: 'spring', stiffness: 350, damping: 20 }}
+                      className="absolute inset-0 z-30 w-16 h-22 rounded-xl bg-gradient-to-b from-[#FAF5EB] to-[#EADBC4] border-2 border-[#FFE599] shadow-2xl flex items-center justify-center"
+                    >
+                      <span className="text-lg animate-bounce">✨</span>
+                    </motion.div>
+                  )}
                 </div>
-              )}
-            </div>
-          </div>
+              </div>
 
-          {/* Narrative Log on Felt */}
-          <div className="mt-2 pt-2 border-t border-[#D4AF37]/20 flex items-center justify-center gap-1.5 text-[11px] font-serif text-[#FFE599] text-center">
-            <Sparkles className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
-            <span className="font-bold">{log}</span>
-          </div>
-        </div>
-
-        {/* Pass & Play Masking Overlay (Prevent seeing opponent hand) */}
-        {hideHand && !roundWinner && (
-          <div className="p-6 rounded-3xl bg-gradient-to-b from-[#182638] to-[#0D141C] text-center text-[#FFFDF5] space-y-3 mb-3 border-2 border-[#D4AF37] shadow-2xl">
-            <span className="text-3xl block">💌</span>
-            <h4 className="text-sm font-cinzel font-bold text-[#FFE599]">
-              请将手机平稳转交给 {activePlayer === 'A' ? '👦 HE' : '👧 HER'}
-            </h4>
-            <p className="text-xs text-[#EADBC4] font-serif italic">
-              “保持神秘 · 严防偷看对方手牌”
-            </p>
-            <button
-              onClick={() => setHideHand(false)}
-              className="px-6 py-2 rounded-full bg-gradient-to-r from-[#8C1D35] to-[#6B1226] text-[#FFFDF5] text-xs font-cinzel font-bold tracking-wider cursor-pointer border-2 border-[#D4AF37] shadow-lg hover:scale-105 active:scale-95 transition-all"
-            >
-              我是本人 · 点击启封看牌 🔓
-            </button>
-          </div>
-        )}
-
-        {/* ========================================================
-            REALISTIC FAN OF HAND CARDS (真实扇形手牌握持感)
-        ======================================================== */}
-        {!hideHand && !roundWinner && (
-          <div className="space-y-2 mb-2">
-            <div className="flex items-center justify-between text-[11px] text-[#8C7658] font-cinzel px-1">
-              <span className="font-bold flex items-center gap-1">
-                🎴 你的手牌（轻触挑选 · 掷牌出击）：
-              </span>
-              <span>{isPlayerA ? (state.protectedA ? '🛡️ 护身符保护中' : '') : (state.protectedB ? '🛡️ 护身符保护中' : '')}</span>
-            </div>
-
-            {/* Overlapping Hand Fan Container */}
-            <div className="relative h-56 flex items-center justify-center pt-2">
-              {currentHandCards.map((card, idx) => {
-                const isSelected = selectedCardId === card.id || currentHandCards.length === 1;
-                // Fan rotations: card 0 tilts left (-7deg), card 1 tilts right (+7deg)
-                const defaultRotate = idx === 0 ? -6 : 6;
-                const defaultX = idx === 0 ? -38 : 38;
-
-                return (
+              {/* Discard / Active Slam Arena */}
+              <div className="flex flex-col items-center relative">
+                <span className="text-[9.5px] font-cinzel text-[#C5A059] mb-1 font-bold">
+                  📜 弃牌堆 ({state.discardPile.length}张)
+                </span>
+                
+                {slammingCardAnim ? (
                   <motion.div
-                    key={`${card.id}-${idx}`}
-                    animate={{
-                      rotate: isSelected ? 0 : defaultRotate,
-                      y: isSelected ? -24 : 0,
-                      x: isSelected ? (idx === 0 ? -24 : 24) : defaultX,
-                      scale: isSelected ? 1.08 : 1,
-                      zIndex: isSelected ? 30 : idx === 1 ? 20 : 10
-                    }}
-                    transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-                    onClick={() => {
-                      setSelectedCardId(card.id);
-                      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-                        try {
-                          navigator.vibrate([15]);
-                        } catch {}
-                      }
-                    }}
-                    className={`absolute w-44 h-50 rounded-2xl p-2.5 bg-gradient-to-b ${card.artBg} border-3 ${
-                      isSelected ? 'border-[#FFE599] shadow-[0_12px_28px_rgba(212,175,55,0.4)]' : 'border-[#D4AF37] shadow-xl'
-                    } text-left flex flex-col justify-between cursor-pointer select-none transition-colors overflow-hidden`}
+                    initial={{ scale: 1.4, y: 50, rotate: -15 }}
+                    animate={{ scale: [1.4, 1.05, 1], y: 0, rotate: 2 }}
+                    transition={{ type: 'spring', stiffness: 500, damping: 18 }}
+                    className={`w-18 h-24 rounded-xl bg-gradient-to-b ${slammingCardAnim.artBg} border-3 border-[#FFE599] shadow-[0_0_25px_rgba(255,229,153,0.8)] p-1.5 flex flex-col justify-between`}
                   >
-                    {/* Top Ribbon */}
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1">
-                        <span className="w-7 h-7 rounded-full bg-[#8C1D35] text-[#FFE599] flex items-center justify-center font-mono font-bold text-sm shadow-xs border border-[#FFE599]/60">
-                          {card.value}
-                        </span>
-                        <span className="text-[10px] font-cinzel text-[#FFE599] font-bold">
-                          {card.roman}
-                        </span>
-                      </div>
-                      <span className={`text-[9.5px] font-cinzel font-bold px-2 py-0.5 rounded-full border border-white/20 shadow-2xs ${card.badgeColor}`}>
-                        {card.effect}
+                      <span className="w-5 h-5 rounded-full bg-[#8C1D35] text-[#FFE599] flex items-center justify-center font-mono font-bold text-[10px]">
+                        {slammingCardAnim.value}
                       </span>
+                      <span className="text-sm">{slammingCardAnim.icon}</span>
                     </div>
-
-                    {/* Center Artwork Emblem */}
-                    <div className="my-auto text-center flex flex-col items-center justify-center">
-                      <span className="text-3xl filter drop-shadow-md mb-0.5">
-                        {card.icon}
+                    <div className="text-center">
+                      <span className="text-[10.5px] font-bold font-serif text-[#FFFDF5] block leading-tight">
+                        {slammingCardAnim.name.split(' · ')[0]}
                       </span>
-                      <h4 className="text-sm font-bold text-[#FFFDF5] font-serif drop-shadow-xs">
-                        {card.name}
-                      </h4>
-                    </div>
-
-                    {/* Bottom Rule Desc */}
-                    <div>
-                      <p className="text-[9.5px] text-[#F3E5AB] font-serif leading-tight line-clamp-2 opacity-95">
-                        {card.desc}
-                      </p>
-                      {isSelected && (
-                        <motion.button
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handlePlayCard(card);
-                          }}
-                          className="w-full mt-1.5 py-1 rounded-lg bg-gradient-to-r from-[#8C1D35] to-[#B32645] border border-[#FFE599] text-[#FFFDF5] text-[10px] font-cinzel font-bold text-center shadow-md active:scale-95 transition-all"
-                        >
-                          ⚡ 掷向牌桌出牌
-                        </motion.button>
-                      )}
                     </div>
                   </motion.div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Peek Opponent Card Modal (Priest Effect) */}
-        <AnimatePresence>
-          {peekingCard && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="p-3.5 rounded-2xl bg-[#182638] border-2 border-[#D4AF37] text-[#FFFDF5] mb-3 text-center space-y-1.5 shadow-xl"
-            >
-              <div className="flex items-center justify-center gap-1.5 text-xs font-cinzel text-[#FFE599] font-bold">
-                <Eye className="w-4 h-4 text-[#60A5FA]" />
-                <span>【牧师 · 窥心】探察结果</span>
-              </div>
-              <p className="text-xs font-serif">
-                对方此刻手里正握着的手牌是：
-                <strong className="text-[#FFE599] text-sm ml-1 font-mono">
-                  [{peekingCard.value}点] {peekingCard.name}
-                </strong>
-              </p>
-              <button
-                onClick={() => setPeekingCard(null)}
-                className="px-4 py-1 rounded-lg bg-[#8C1D35] text-[10.5px] font-serif cursor-pointer border border-[#D4AF37]/50 shadow-xs"
-              >
-                我知道了 · 闭上心眼 👁️
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Guess Card Modal (Guard Effect) */}
-        <AnimatePresence>
-          {showGuessModal && (
-            <div className="p-3.5 rounded-2xl bg-[#111A27] border-2 border-[#D4AF37] text-[#FFFDF5] mb-3 space-y-2 shadow-2xl">
-              <div className="flex items-center justify-between text-xs font-cinzel text-[#FFE599] font-bold">
-                <span className="flex items-center gap-1.5">
-                  <Swords className="w-4 h-4 text-[#FDE047]" />
-                  【卫兵魔杖】指定猜一张手牌：
-                </span>
-              </div>
-              <p className="text-[10px] text-[#A8987E] font-serif">
-                猜中对方手牌即可一击淘汰对方（不可猜卫兵自身）：
-              </p>
-              <div className="grid grid-cols-4 gap-1.5">
-                {LOVE_LETTER_CARDS.filter((c) => c.value > 1).map((c) => (
-                  <button
-                    key={c.value}
-                    onClick={() => handleConfirmGuess(c.value)}
-                    className="py-1.5 px-1 rounded-lg bg-[#182638] hover:bg-[#8C1D35] text-[10px] font-serif truncate border border-[#D4AF37]/40 text-[#FFE599] cursor-pointer shadow-xs active:scale-95 transition-all"
+                ) : lastDiscarded ? (
+                  <motion.div
+                    key={lastDiscarded.id}
+                    initial={{ scale: 0.85, y: -10, rotate: -8 }}
+                    animate={{ scale: 1, y: 0, rotate: 2 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                    className={`w-18 h-24 rounded-xl bg-gradient-to-b ${lastDiscarded.artBg} border-2 border-[#D4AF37] shadow-xl p-1.5 flex flex-col justify-between`}
                   >
-                    {c.value}. {c.name.split(' · ')[0]}
+                    <div className="flex items-center justify-between">
+                      <span className="w-5 h-5 rounded-full bg-[#8C1D35] text-[#FFE599] flex items-center justify-center font-mono font-bold text-[10px]">
+                        {lastDiscarded.value}
+                      </span>
+                      <span className="text-sm">{lastDiscarded.icon}</span>
+                    </div>
+                    <div className="text-center">
+                      <span className="text-[10.5px] font-bold font-serif text-[#FFFDF5] block leading-tight">
+                        {lastDiscarded.name.split(' · ')[0]}
+                      </span>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <div className="w-18 h-24 rounded-xl border-2 border-dashed border-[#D4AF37]/40 bg-black/20 flex flex-col items-center justify-center text-center p-1 text-[#A8987E]">
+                    <span className="text-xs font-cinzel">空置牌桌</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Tactical Narrative Log on Felt */}
+            <div className="mt-2 pt-2 border-t border-[#D4AF37]/20 flex items-center justify-center gap-1.5 text-[11px] font-serif text-[#FFE599] text-center relative z-10">
+              <Sparkles className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
+              <span className="font-bold">{log}</span>
+            </div>
+
+            {/* QUICK REACTION EMOJIS BAR (实时双向互动弹幕小气泡) */}
+            <div className="mt-2 pt-2 border-t border-[#D4AF37]/15 flex items-center justify-between relative z-10">
+              <span className="text-[9px] text-[#A8987E] font-cinzel">互动发弹幕:</span>
+              <div className="flex gap-1">
+                {['👀 偷瞄', '😏 别慌', '💖 爱你', '😱 别打公主', '⚡ 杀气'].map((item) => (
+                  <button
+                    key={item}
+                    onClick={() => handleSendReaction(item)}
+                    className="px-1.5 py-0.5 rounded-full bg-[#1F2E40] hover:bg-[#8C1D35] border border-[#D4AF37]/40 text-[9px] text-[#FFE599] transition-transform active:scale-90 cursor-pointer"
+                  >
+                    {item}
                   </button>
                 ))}
               </div>
             </div>
-          )}
-        </AnimatePresence>
+          </div>
 
-        {/* Round Win Banner */}
-        {roundWinner && (
-          <motion.div
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-4 rounded-2xl bg-gradient-to-r from-[#FAF5EB] to-[#FFFDF9] border-2 border-[#D4AF37] text-center space-y-2 shadow-md mb-3"
-          >
-            <div className="flex items-center justify-center gap-1.5 text-xs font-cinzel font-bold text-[#8C1D35]">
-              <Trophy className="w-4 h-4 text-[#D4AF37]" />
-              <span>本轮王室决斗结案！</span>
-            </div>
-            <p className="text-xs font-serif text-[#2C241E] font-bold">
-              {log}
-            </p>
-            <div className="pt-1">
+          {/* Pass & Play Masking Overlay (Only in offline mode) */}
+          {!isOnlineMode && hideHand && !roundWinner && (
+            <div className="p-6 rounded-3xl bg-gradient-to-b from-[#182638] to-[#0D141C] text-center text-[#FFFDF5] space-y-3 mb-3 border-2 border-[#D4AF37] shadow-2xl">
+              <span className="text-3xl block">💌</span>
+              <h4 className="text-sm font-cinzel font-bold text-[#FFE599]">
+                请将手机平稳转交给 {activePlayer === 'A' ? '👦 HE' : '👧 HER'}
+              </h4>
+              <p className="text-xs text-[#EADBC4] font-serif italic">
+                “保持神秘 · 严防偷看对方手牌”
+              </p>
               <button
-                onClick={handleNextRound}
-                className="px-5 py-2 rounded-full bg-gradient-to-r from-[#8C1D35] to-[#6B1226] text-[#FFFDF5] text-xs font-cinzel font-bold tracking-wider cursor-pointer border border-[#D4AF37]/50 shadow-md"
+                onClick={() => setHideHand(false)}
+                className="px-6 py-2 rounded-full bg-gradient-to-r from-[#8C1D35] to-[#6B1226] text-[#FFFDF5] text-xs font-cinzel font-bold tracking-wider cursor-pointer border-2 border-[#D4AF37] shadow-lg hover:scale-105 active:scale-95 transition-all"
               >
-                开启下一轮对决 ➡️
+                我是本人 · 点击启封看牌 🔓
               </button>
             </div>
-          </motion.div>
-        )}
+          )}
 
-        {/* Card Glossary Modal */}
-        <AnimatePresence>
-          {showRules && (
-            <div className="fixed inset-0 z-50 bg-[#111A27]/70 backdrop-blur-xs flex items-center justify-center p-4">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.94 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.94 }}
-                className="w-full max-w-sm rounded-3xl p-5 bg-[#FCF9F2] shadow-2xl border-2 border-[#D4AF37]/60 text-[#2C241E] space-y-3 relative"
-              >
-                <div className="flex items-center justify-between border-b border-[#D9C89E]/60 pb-2.5">
-                  <div className="flex items-center gap-2">
-                    <span className="text-base">👑</span>
-                    <h3 className="text-xs font-bold font-cinzel tracking-wider text-[#8C1D35]">
-                      LOVE LETTER · 8大卡牌效果秘典
-                    </h3>
-                  </div>
-                  <button
-                    onClick={() => setShowRules(false)}
-                    className="w-6 h-6 rounded-full bg-[#FAF5EB] text-[#8C7658] hover:text-[#8C1D35] flex items-center justify-center border border-[#D9C89E] text-xs cursor-pointer"
-                  >
-                    ✕
-                  </button>
-                </div>
+          {/* ========================================================
+              FAN OF HAND CARDS (真实扇形手牌握持感)
+          ======================================================== */}
+          {(!hideHand || isOnlineMode) && !roundWinner && (
+            <div className="space-y-1.5 mb-2">
+              <div className="flex items-center justify-between text-[11px] text-[#8C7658] font-cinzel px-1">
+                <span className="font-bold flex items-center gap-1">
+                  🎴 你的手牌（轻触上拔 · 拍桌打出）：
+                </span>
+                <span>
+                  {activeRole === 'A'
+                    ? (state.protectedA ? '🛡️ 护身符保护中' : '')
+                    : (state.protectedB ? '🛡️ 护身符保护中' : '')}
+                </span>
+              </div>
 
-                <div className="space-y-1.5 max-h-72 overflow-y-auto pr-1 text-[11px] font-serif">
-                  {LOVE_LETTER_CARDS.map((c) => (
-                    <div key={c.value} className="p-2 rounded-xl bg-[#FAF5EB] border border-[#D9C89E]/60">
-                      <div className="flex items-center justify-between font-bold text-[#8C1D35] mb-0.5">
-                        <span className="flex items-center gap-1">
-                          <span>{c.icon}</span>
-                          <span>{c.value}点 · {c.name} ({c.count}张)</span>
+              {/* Overlapping Hand Fan Container */}
+              <div className="relative h-56 flex items-center justify-center pt-2">
+                {currentHandCards.map((card, idx) => {
+                  const isSelected = selectedCardId === card.id || currentHandCards.length === 1;
+                  const defaultRotate = idx === 0 ? -6 : 6;
+                  const defaultX = idx === 0 ? -38 : 38;
+
+                  return (
+                    <motion.div
+                      key={`${card.id}-${idx}`}
+                      animate={{
+                        rotate: isSelected ? 0 : defaultRotate,
+                        y: isSelected ? -24 : 0,
+                        x: isSelected ? (idx === 0 ? -24 : 24) : defaultX,
+                        scale: isSelected ? 1.08 : 1,
+                        zIndex: isSelected ? 30 : idx === 1 ? 20 : 10
+                      }}
+                      transition={{ type: 'spring', stiffness: 450, damping: 25 }}
+                      onClick={() => {
+                        setSelectedCardId(card.id);
+                        if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+                          try {
+                            navigator.vibrate([15]);
+                          } catch {}
+                        }
+                      }}
+                      className={`absolute w-44 h-50 rounded-2xl p-2.5 bg-gradient-to-b ${card.artBg} border-3 ${
+                        isSelected ? 'border-[#FFE599] shadow-[0_12px_28px_rgba(212,175,55,0.4)]' : 'border-[#D4AF37] shadow-xl'
+                      } text-left flex flex-col justify-between cursor-pointer select-none transition-colors overflow-hidden`}
+                    >
+                      {/* Top Ribbon */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1">
+                          <span className="w-7 h-7 rounded-full bg-[#8C1D35] text-[#FFE599] flex items-center justify-center font-mono font-bold text-sm shadow-xs border border-[#FFE599]/60">
+                            {card.value}
+                          </span>
+                          <span className="text-[10px] font-cinzel text-[#FFE599] font-bold">
+                            {card.roman}
+                          </span>
+                        </div>
+                        <span className={`text-[9.5px] font-cinzel font-bold px-2 py-0.5 rounded-full border border-white/20 shadow-2xs ${card.badgeColor}`}>
+                          {card.effect}
                         </span>
-                        <span className="text-[9px] px-1 rounded bg-[#8C1D35]/10 text-[#8C1D35] font-cinzel">{c.effect}</span>
                       </div>
-                      <p className="text-[10px] text-[#524336] leading-relaxed">{c.desc}</p>
-                    </div>
-                  ))}
-                </div>
 
-                <button
-                  onClick={() => setShowRules(false)}
-                  className="w-full py-2 rounded-xl bg-gradient-to-r from-[#8C1D35] to-[#6B1226] text-[#FFFDF5] text-xs font-cinzel font-bold tracking-wider cursor-pointer border border-[#D4AF37]/50 shadow-xs"
-                >
-                  关闭秘典
-                </button>
-              </motion.div>
+                      {/* Center Artwork Emblem */}
+                      <div className="my-auto text-center flex flex-col items-center justify-center">
+                        <span className="text-3xl filter drop-shadow-md mb-0.5">
+                          {card.icon}
+                        </span>
+                        <h4 className="text-sm font-bold text-[#FFFDF5] font-serif drop-shadow-xs">
+                          {card.name}
+                        </h4>
+                      </div>
+
+                      {/* Bottom Rule Desc & Fling Action Button */}
+                      <div>
+                        <p className="text-[9.5px] text-[#F3E5AB] font-serif leading-tight line-clamp-2 opacity-95">
+                          {card.desc}
+                        </p>
+                        {isSelected && isMyTurn && (
+                          <motion.button
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handlePlayCard(card);
+                            }}
+                            className="w-full mt-1.5 py-1 rounded-lg bg-gradient-to-r from-[#8C1D35] to-[#B32645] border border-[#FFE599] text-[#FFFDF5] text-[10px] font-cinzel font-bold text-center shadow-md active:scale-95 transition-all flex items-center justify-center gap-1"
+                          >
+                            <Send className="w-3 h-3 text-[#FFE599]" />
+                            <span>⚡ 拍桌打出此牌</span>
+                          </motion.button>
+                        )}
+                        {isSelected && !isMyTurn && (
+                          <div className="w-full mt-1.5 py-1 rounded-lg bg-black/40 border border-white/20 text-[#A8987E] text-[9.5px] font-serif text-center">
+                            等待对方行动中...
+                          </div>
+                        )}
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
             </div>
           )}
-        </AnimatePresence>
+
+          {/* Peek Opponent Card Modal (Priest Effect) */}
+          <AnimatePresence>
+            {peekingCard && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="p-3.5 rounded-2xl bg-[#182638] border-2 border-[#D4AF37] text-[#FFFDF5] mb-3 text-center space-y-1.5 shadow-xl"
+              >
+                <div className="flex items-center justify-center gap-1.5 text-xs font-cinzel text-[#FFE599] font-bold">
+                  <Eye className="w-4 h-4 text-[#60A5FA]" />
+                  <span>【牧师 · 窥心】探察结果</span>
+                </div>
+                <p className="text-xs font-serif">
+                  对方此刻手里正握着的手牌是：
+                  <strong className="text-[#FFE599] text-sm ml-1 font-mono">
+                    [{peekingCard.value}点] {peekingCard.name}
+                  </strong>
+                </p>
+                <button
+                  onClick={() => setPeekingCard(null)}
+                  className="px-4 py-1 rounded-lg bg-[#8C1D35] text-[10.5px] font-serif cursor-pointer border border-[#D4AF37]/50 shadow-xs"
+                >
+                  我知道了 · 闭上心眼 👁️
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Guess Card Modal (Guard Effect) */}
+          <AnimatePresence>
+            {showGuessModal && (
+              <div className="p-3.5 rounded-2xl bg-[#111A27] border-2 border-[#D4AF37] text-[#FFFDF5] mb-3 space-y-2 shadow-2xl">
+                <div className="flex items-center justify-between text-xs font-cinzel text-[#FFE599] font-bold">
+                  <span className="flex items-center gap-1.5">
+                    <Swords className="w-4 h-4 text-[#FDE047]" />
+                    【卫兵魔杖】指定猜一张手牌：
+                  </span>
+                </div>
+                <p className="text-[10px] text-[#A8987E] font-serif">
+                  猜中对方手牌即可一击淘汰对方（不可猜卫兵自身）：
+                </p>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {LOVE_LETTER_CARDS.filter((c) => c.value > 1).map((c) => (
+                    <button
+                      key={c.value}
+                      onClick={() => handleConfirmGuess(c.value)}
+                      className="py-1.5 px-1 rounded-lg bg-[#182638] hover:bg-[#8C1D35] text-[10px] font-serif truncate border border-[#D4AF37]/40 text-[#FFE599] cursor-pointer shadow-xs active:scale-95 transition-all"
+                    >
+                      {c.value}. {c.name.split(' · ')[0]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </AnimatePresence>
+
+          {/* Round Win Banner */}
+          {roundWinner && (
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="p-4 rounded-2xl bg-gradient-to-r from-[#FAF5EB] to-[#FFFDF9] border-2 border-[#D4AF37] text-center space-y-2 shadow-md mb-3"
+            >
+              <div className="flex items-center justify-center gap-1.5 text-xs font-cinzel font-bold text-[#8C1D35]">
+                <Trophy className="w-4 h-4 text-[#D4AF37]" />
+                <span>本轮王室决斗结案！</span>
+              </div>
+              <p className="text-xs font-serif text-[#2C241E] font-bold">
+                {log}
+              </p>
+              <div className="pt-1">
+                <button
+                  onClick={handleNextRound}
+                  className="px-5 py-2 rounded-full bg-gradient-to-r from-[#8C1D35] to-[#6B1226] text-[#FFFDF5] text-xs font-cinzel font-bold tracking-wider cursor-pointer border border-[#D4AF37]/50 shadow-md"
+                >
+                  开启下一轮对决 ➡️
+                </button>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Card Glossary Modal */}
+          <AnimatePresence>
+            {showRules && (
+              <div className="fixed inset-0 z-50 bg-[#111A27]/70 backdrop-blur-xs flex items-center justify-center p-4">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.94 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.94 }}
+                  className="w-full max-w-sm rounded-3xl p-5 bg-[#FCF9F2] shadow-2xl border-2 border-[#D4AF37]/60 text-[#2C241E] space-y-3 relative"
+                >
+                  <div className="flex items-center justify-between border-b border-[#D9C89E]/60 pb-2.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-base">👑</span>
+                      <h3 className="text-xs font-bold font-cinzel tracking-wider text-[#8C1D35]">
+                        LOVE LETTER · 8大卡牌效果秘典
+                      </h3>
+                    </div>
+                    <button
+                      onClick={() => setShowRules(false)}
+                      className="w-6 h-6 rounded-full bg-[#FAF5EB] text-[#8C7658] hover:text-[#8C1D35] flex items-center justify-center border border-[#D9C89E] text-xs cursor-pointer"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <div className="space-y-1.5 max-h-72 overflow-y-auto pr-1 text-[11px] font-serif">
+                    {LOVE_LETTER_CARDS.map((c) => (
+                      <div key={c.value} className="p-2 rounded-xl bg-[#FAF5EB] border border-[#D9C89E]/60">
+                        <div className="flex items-center justify-between font-bold text-[#8C1D35] mb-0.5">
+                          <span className="flex items-center gap-1">
+                            <span>{c.icon}</span>
+                            <span>{c.value}点 · {c.name} ({c.count}张)</span>
+                          </span>
+                          <span className="text-[9px] px-1 rounded bg-[#8C1D35]/10 text-[#8C1D35] font-cinzel">{c.effect}</span>
+                        </div>
+                        <p className="text-[10px] text-[#524336] leading-relaxed">{c.desc}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button
+                    onClick={() => setShowRules(false)}
+                    className="w-full py-2 rounded-xl bg-gradient-to-r from-[#8C1D35] to-[#6B1226] text-[#FFFDF5] text-xs font-cinzel font-bold tracking-wider cursor-pointer border border-[#D4AF37]/50 shadow-xs"
+                  >
+                    关闭秘典
+                  </button>
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
-    </div>
+    </ClickSpark>
   );
 };
