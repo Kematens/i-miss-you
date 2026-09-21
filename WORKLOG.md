@@ -7,7 +7,26 @@
 
 ## 一、 今日核心里程碑成果
 
-### 1. 试炼游戏专区（TRIAL TAB）全模块殿堂级重塑
+### 1. 双人实时联机架构（Couple Sync Architecture）全面落地
+- **P0 基础底座架构完成**：
+  - `src/services/storage.ts`：本地键值持久化层，封装密令、身份、耳语记录、坐标与评分历史，确保网络离线时数据稳固不丢失；
+  - `src/hooks/useCoupleSync.ts` + `src/context/CoupleContext.tsx`：双模信道引擎（支持 Supabase Realtime Broadcast 云端跨网广播，并自动 Fallback 到浏览器 BroadcastChannel 多标签页联调）；
+  - `src/components/features/PairingModal.tsx`：暗号契约仪式弹窗，支持密令配置、身份自选（HE/HER）、握手仲裁与身份冲突自动补正。
+- **P1 五大 Tab 真实双人联动升级**：
+  - **SEAL · 启封**：一键荧光想念（`LUMOS_MISS_YOU`）跨机震动弹射；猫头鹰私语（`OWL_WHISPER`）实时双向送达并持久化归档；
+  - **STAR · 罗盘**：双方真实 GPS 经纬度双向交换上云，活点地图双头像位置同步；韦斯莱九态生活转盘实时同步；荧光脉冲引力波（`LUMOS_PULSE`）跨设备同频震颤；
+  - **PORTRAIT · 画像**：客户端 Canvas 图像压缩（<80KB WebP/JPEG）直传互显；拍立得贴纸（`STICKER_PEEL`）同步贴附；刮刮卡显影（`SCRATCH_REVEALED`）跨机彩带庆祝；
+  - **SCROLL · 卷轴**：每日心动打分与霍格沃茨 O.W.L. 考级评定云端双向投递并持久化存储；
+  - **TRIAL · 试炼**：
+    - 《The Mind · 心灵同步》：重构为 PlayerView 隔离模式，双方只看己方星轨手牌，对方手牌背面呈现；双手同频仪式网络连线校准；出牌与灵光一闪全量同步；
+    - 《王室情书 · Love Letter》：引入房间暗号与对手身份动态绑定，浮动表情云端互动。
+- **P2 安卓移动端 APK 交付准备**：
+  - 安装并配置 `@capacitor/camera`、`@capacitor/geolocation`、`@capacitor/network` 官方原生插件；
+  - 完善 `AndroidManifest.xml` 高精度定位、相机、相册读取与触感震动权限；
+  - 成功执行 `npx cap sync android` 同步原生工程；
+  - 验证 `.github/workflows/build-apk.yml` 自动化云端 APK 打包流水线。
+
+### 2. 试炼游戏专区（TRIAL TAB）全模块殿堂级重塑
 完成了从“简单表单界面”到“高触感拟物化实体桌游”的跨越式重构：
 - **《The Mind · 心灵同步》**：
   - 移植 BGG 全球双人合作榜 TOP 1 的经典神作；
