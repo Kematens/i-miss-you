@@ -16,7 +16,7 @@ export interface CardDef {
 
 export const LOVE_LETTER_CARDS: CardDef[] = [
   { id: 1, value: 1, name: '卫兵 · 探念', count: 5, effect: '猜牌淘汰', desc: '猜对方手牌（非卫兵），猜中直接击杀对方淘汰！', badgeColor: 'bg-[#1E3A8A] text-[#93C5FD]', artBg: 'from-[#1E3A8A]/20 to-[#0F172A]' },
-  { id: 2, value: 2, name: '牧师 · 窥心', count: 2, effect: '偷看底牌', desc: '私密偷看对方手里的底牌一眼，知己知彼。', badgeColor: 'bg-[#14532D] text-[#86EFAC]', artBg: 'from-[#14532D]/20 to-[#064E3B]' },
+  { id: 2, value: 2, name: '牧师 · 窥心', count: 2, effect: '偷看手牌', desc: '私密偷看对方当前手里握着的那张牌，知己知彼。', badgeColor: 'bg-[#14532D] text-[#86EFAC]', artBg: 'from-[#14532D]/20 to-[#064E3B]' },
   { id: 3, value: 3, name: '男爵 · 决斗', count: 2, effect: '比大小点', desc: '与对方秘密拼点，手牌较小的一方当场出局！', badgeColor: 'bg-[#7C2D12] text-[#FDBA74]', artBg: 'from-[#7C2D12]/20 to-[#431407]' },
   { id: 4, value: 4, name: '侍女 · 护身', count: 2, effect: '绝对无敌', desc: '到下一回合前，完全免疫对方所有的卡牌效果。', badgeColor: 'bg-[#047857] text-[#A7F3D0]', artBg: 'from-[#047857]/20 to-[#065F46]' },
   { id: 5, value: 5, name: '王子 · 弃牌', count: 2, effect: '强制换牌', desc: '强制对方扔掉手牌重摸一张；若弃掉公主则直接淘汰！', badgeColor: 'bg-[#581C87] text-[#D8B4FE]', artBg: 'from-[#581C87]/20 to-[#3B0764]' },
@@ -181,10 +181,10 @@ export const LoveLetterGame: React.FC = () => {
       const oppCard = isPlayerA ? state.handB[0] : state.handA[0];
       const oppProtected = isPlayerA ? state.protectedB : state.protectedA;
       if (oppProtected) {
-        setLog('对方受【盔甲护身】庇护，无法探察底牌！');
+        setLog('对方受【盔甲护身】庇护，无法探察手牌！');
       } else {
         setPeekingCard(oppCard);
-        setLog(`已施展【摄神取念】，偷看到了对方手牌！`);
+        setLog(`已施展【摄神取念】，偷看到了对方当前手牌！`);
       }
       finishPlayCard(remainingCard, false);
       return;
@@ -518,7 +518,7 @@ export const LoveLetterGame: React.FC = () => {
                 <span>【摄神取念】探察结果</span>
               </div>
               <p className="text-xs font-serif">
-                对方手中的秘密底牌是：
+                对方此刻手里正握着的手牌是：
                 <strong className="text-[#FFE599] ml-1">
                   [{peekingCard.value}点] {peekingCard.name}
                 </strong>
