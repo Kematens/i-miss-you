@@ -232,7 +232,7 @@ const MainApp: React.FC = () => {
                 </div>
                 <div className="flex justify-between items-center text-[10.5px]">
                   <span className="text-[#8C7658]">女巫 (SHE) 破壳日：</span>
-                  <span className="font-mono font-bold text-[#8C1D35]">12月16日 ({keyDates.sheBirthday})</span>
+                  <span className="font-mono font-bold text-[#8C1D35]">12月18日 ({keyDates.sheBirthday})</span>
                 </div>
               </div>
 

@@ -48,7 +48,7 @@ export interface KeyDatesConfig {
 export const DEFAULT_KEY_DATES: KeyDatesConfig = {
   anniversaryDate: '2024-06-18',
   heBirthday: '03-03',
-  sheBirthday: '12-16'
+  sheBirthday: '12-18'
 };
 
 export function calculateDaysTogether(startDateStr: string = DEFAULT_KEY_DATES.anniversaryDate): number {
@@ -85,7 +85,7 @@ export function checkSpecialDateToday(dates: KeyDatesConfig = DEFAULT_KEY_DATES)
   if (isAnniversary) {
     bannerMessage = '🎉 今天是我们在一起的纪念日（6月18日）！愿我们的心动如星轨般璀璨永恒！';
   } else if (isSheBirthday) {
-    bannerMessage = '🎂 祝亲爱的女巫生日快乐（12月16日）！愿所有的美好与魔法光芒都环绕着你！';
+    bannerMessage = '🎂 祝亲爱的女巫生日快乐（12月18日）！愿所有的美好与魔法光芒都环绕着你！';
   } else if (isHeBirthday) {
     bannerMessage = '🎂 祝亲爱的巫师生日快乐（3月3日）！今天是被爱意与魔法守护的幸运日！';
   }
