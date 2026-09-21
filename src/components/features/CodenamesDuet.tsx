@@ -65,6 +65,7 @@ export const CodenamesDuet: React.FC = () => {
   const [peekSecretKey, setPeekSecretKey] = useState(false);
   const [turnsLeft, setTurnsLeft] = useState(9);
   const [gameOver, setGameOver] = useState<'win' | 'lose_dementor' | 'lose_turns' | null>(null);
+  const [showRuleModal, setShowRuleModal] = useState(false);
 
   // Check victory
   const checkVictory = (currentCards: WordCard[]) => {
@@ -191,17 +192,26 @@ export const CodenamesDuet: React.FC = () => {
             </div>
           </div>
 
-          <button
-            onClick={handleReset}
-            className="p-1.5 rounded-xl bg-[#FAF5EB] text-[#8C7658] hover:text-[#8C1D35] hover:bg-[#EADBC4] border border-[#D9C89E]/70 transition-colors cursor-pointer"
-            title="重新洗牌发牌"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setShowRuleModal(true)}
+              className="px-2 py-1 rounded-xl bg-[#FAF5EB] text-[#8C1D35] hover:bg-[#EADBC4] border border-[#D4AF37]/50 text-[10px] font-bold font-serif flex items-center gap-1 cursor-pointer transition-colors"
+            >
+              <HelpCircle className="w-3.5 h-3.5 text-[#C5A059]" />
+              <span>玩法说明</span>
+            </button>
+            <button
+              onClick={handleReset}
+              className="p-1.5 rounded-xl bg-[#FAF5EB] text-[#8C7658] hover:text-[#8C1D35] hover:bg-[#EADBC4] border border-[#D9C89E]/70 transition-colors cursor-pointer"
+              title="重新洗牌发牌"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
 
         {/* Turn HUD & Key Card Peek Control */}
-        <div className="flex items-center justify-between px-2.5 py-2 rounded-xl bg-[#FAF5EB] border border-[#D9C89E]/60 mb-3 text-xs font-cinzel">
+        <div className="flex items-center justify-between px-2.5 py-2 rounded-xl bg-[#FAF5EB] border border-[#D9C89E]/60 mb-2 text-xs font-cinzel">
           <div className="flex items-center gap-1.5">
             <span className="text-[10px] text-[#8C7658]">VIEW:</span>
             <span className="font-bold text-[#8C1D35]">
@@ -226,6 +236,21 @@ export const CodenamesDuet: React.FC = () => {
             <span className="text-[10px] text-[#8C7658] mr-1">TURNS:</span>
             <span className="font-bold text-[#8C1D35]">{turnsLeft}</span>
           </div>
+        </div>
+
+        {/* Dynamic Inline Tutorial Tip */}
+        <div className="p-2 rounded-xl bg-[#FAF6EE] border border-[#D9C89E]/50 mb-3 text-[10px] text-[#7A6750] flex items-center justify-between">
+          <span>
+            {peekSecretKey ? (
+              <span className="text-[#8C1D35] font-bold">
+                私密提示：记住绿色目标词，对她说一个线索（例如“甜蜜 2”），不要让她看屏幕！
+              </span>
+            ) : (
+              <span>
+                轮到对方猜词时，在下方 16 个词中点击翻牌；猜完点击右下角【交换出题】。
+              </span>
+            )}
+          </span>
         </div>
 
         {/* Secret Key Card Map (Visible only when peeking) */}
@@ -373,6 +398,67 @@ export const CodenamesDuet: React.FC = () => {
             )}
           </motion.div>
         )}
+
+        {/* ========================================================
+            3. RULE & HOW TO PLAY MODAL (清晰玩法说明弹窗)
+        ======================================================== */}
+        <AnimatePresence>
+          {showRuleModal && (
+            <div className="fixed inset-0 z-50 bg-[#111A27]/70 backdrop-blur-xs flex items-center justify-center p-4">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.94 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.94 }}
+                className="w-full max-w-sm rounded-3xl p-5 bg-[#FCF9F2] shadow-2xl border-2 border-[#D4AF37]/60 text-[#2C241E] space-y-3 relative"
+              >
+                <div className="flex items-center justify-between border-b border-[#D9C89E]/60 pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-base">📜</span>
+                    <h3 className="text-xs font-bold font-cinzel tracking-wider text-[#8C1D35]">
+                      HOW TO PLAY · 30秒搞懂玩法
+                    </h3>
+                  </div>
+                  <button
+                    onClick={() => setShowRuleModal(false)}
+                    className="w-6 h-6 rounded-full bg-[#FAF5EB] text-[#8C7658] hover:text-[#8C1D35] flex items-center justify-center border border-[#D9C89E] text-xs cursor-pointer"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div className="space-y-2 text-[11px] leading-relaxed text-[#524336] font-serif max-h-72 overflow-y-auto pr-1">
+                  <div className="p-2 rounded-xl bg-[#FAF5EB] border border-[#D9C89E]/60">
+                    <span className="font-bold text-[#8C1D35] block mb-0.5">🎯 游戏目标</span>
+                    你们是霍格沃茨的双人搭档，需要在 <strong>9 个回合内</strong>，互相出题配合，共同找出所有的<strong>【绿色特工词】</strong>！
+                  </div>
+
+                  <div className="p-2 rounded-xl bg-[#FAF5EB] border border-[#D9C89E]/60">
+                    <span className="font-bold text-[#8C1D35] block mb-0.5">👁️ 步骤一：出题人看密码</span>
+                    轮到你出题时，点击<strong>「查看我方密码」</strong>（不要让对方看到）。你会看到哪些词是<strong>绿色（目标词）</strong>，哪一个是<strong>红色（摄魂怪，碰了直接输）</strong>。
+                  </div>
+
+                  <div className="p-2 rounded-xl bg-[#FAF5EB] border border-[#D9C89E]/60">
+                    <span className="font-bold text-[#8C1D35] block mb-0.5">🗣️ 步骤二：口头给线索</span>
+                    对对方说出：<strong>【1个线索词 + 1个数字】</strong>。<br />
+                    <em>例如你的绿色词有「金色飞贼」和「黄油啤酒」，你可以对她说：“甜蜜 2” 或 “霍格沃茨 2”。</em>
+                  </div>
+
+                  <div className="p-2 rounded-xl bg-[#FAF5EB] border border-[#D9C89E]/60">
+                    <span className="font-bold text-[#8C1D35] block mb-0.5">👆 步骤三：对方猜词翻牌</span>
+                    对方根据你的提示，在 16 个方格中点击猜词。猜完后点击<strong>「交换出题」</strong>换对方出题。避开摄魂怪全部找齐即默契通关！
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setShowRuleModal(false)}
+                  className="w-full py-2 rounded-xl bg-gradient-to-r from-[#8C1D35] to-[#6B1226] text-[#FFFDF5] text-xs font-cinzel font-bold tracking-wider cursor-pointer border border-[#D4AF37]/50 shadow-xs"
+                >
+                  我懂了 · 立即开始心有灵犀
+                </button>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
