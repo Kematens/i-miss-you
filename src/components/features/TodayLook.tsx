@@ -66,11 +66,8 @@ export const TodayLook: React.FC = () => {
     return appStorage.getMyPhoto()?.dataUrl || null;
   });
 
-  const [partnerPhoto, setPartnerPhoto] = useState<string>(() => {
-    return (
-      appStorage.getPartnerPhoto()?.dataUrl ||
-      'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=600&q=80'
-    );
+  const [partnerPhoto, setPartnerPhoto] = useState<string | null>(() => {
+    return appStorage.getPartnerPhoto()?.dataUrl || null;
   });
 
   const [stickers, setStickers] = useState<FloatingSticker[]>([]);
@@ -261,13 +258,27 @@ export const TodayLook: React.FC = () => {
             <StickerPeel tag={`PARTNER (${partnerRole})`} className="w-full">
               <div className="p-2.5 bg-[#FAF6EE] border border-[#E8DCB8] flex flex-col items-center shadow-sm">
                 <div className="relative w-full aspect-[4/5] rounded-xl overflow-hidden bg-[#EFE7D5] flex items-center justify-center border border-[#D9C89E]/60">
-                  <img
-                    src={partnerPhoto}
-                    alt="对方画像"
-                    className={`w-full h-full object-cover transition-all duration-700 ${
-                      isUnlocked ? 'filter-none scale-100' : 'filter blur-md scale-105 opacity-60'
-                    }`}
-                  />
+                  {partnerPhoto ? (
+                    <img
+                      src={partnerPhoto}
+                      alt="对方画像"
+                      className={`w-full h-full object-cover transition-all duration-700 ${
+                        isUnlocked ? 'filter-none scale-100' : 'filter blur-md scale-105 opacity-60'
+                      }`}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center p-4 bg-gradient-to-b from-[#FAF5EB] to-[#EAE0CD] text-[#8C7658] text-center select-none">
+                      <div className="w-12 h-12 rounded-full bg-[#D4AF37]/15 border-2 border-dashed border-[#D4AF37]/50 flex items-center justify-center mb-1.5 shadow-inner">
+                        <span className="text-xl">🪄</span>
+                      </div>
+                      <span className="text-xs font-serif font-bold text-[#524336]">
+                        静候对方显影今日画像
+                      </span>
+                      <span className="text-[8.5px] font-cinzel text-[#A8987E] mt-0.5">
+                        AWAITING PEER PORTRAIT
+                      </span>
+                    </div>
+                  )}
 
                   {!isUnlocked && (
                     <div className="absolute inset-0 bg-[#1A140F]/45 backdrop-blur-xs flex flex-col items-center justify-center p-3 text-center text-[#FAF5EB]">

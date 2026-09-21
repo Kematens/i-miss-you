@@ -51,12 +51,12 @@ export const LocationRadar: React.FC = () => {
 
   const [myAddress, setMyAddress] = useState(() => {
     const saved = appStorage.getMyLocation();
-    return saved?.address || '正在定位本机物理街角...';
+    return saved?.address || '尚未校准定位 · 点击下方按钮获取真机GPS';
   });
 
   const [herAddress, setHerAddress] = useState(() => {
     const saved = appStorage.getPartnerLocation();
-    return saved?.address || '春熙路步行街附近 · 正在移动中';
+    return saved?.address || '尚未接入定位 · 对方上线后自动同步';
   });
 
   const [isLocating, setIsLocating] = useState(false);

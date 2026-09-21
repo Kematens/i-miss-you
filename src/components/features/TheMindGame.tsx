@@ -190,12 +190,14 @@ export const TheMindGame: React.FC = () => {
     }
   }, [shurikens, gameState, handHE, handHER, handleLevelComplete, isRemoteMode, sendEvent]);
 
-  // Initial deal
+  // Initial deal: HE is the dealer authority in remote mode
   useEffect(() => {
-    dealLevel(1, false);
-    setLives(3);
-    setShurikens(1);
-  }, [dealLevel]);
+    if (!isRemoteMode || myRole === 'HE') {
+      dealLevel(1, isRemoteMode);
+      setLives(3);
+      setShurikens(1);
+    }
+  }, [dealLevel, isRemoteMode, myRole]);
 
   // Listen for real-time multiplayer actions
   useEffect(() => {
@@ -210,6 +212,21 @@ export const TheMindGame: React.FC = () => {
         setHerSynced(false);
         setGameState('syncing');
         setLog(`第 ${payload.level} 阶：每人手握 ${payload.level} 张星轨卡。请双手静心触碰水晶！`);
+      }
+    });
+
+    const unsubRequestDeal = onEvent<{ level: number; restart?: boolean }>('MIND_REQUEST_DEAL', (payload) => {
+      if (myRole === 'HE') {
+        if (payload?.restart) {
+          setLevel(1);
+          setLives(3);
+          setShurikens(1);
+          dealLevel(1, true);
+        } else {
+          const nextLvl = payload?.level || 1;
+          setLevel(nextLvl);
+          dealLevel(nextLvl, true);
+        }
       }
     });
 
@@ -233,11 +250,12 @@ export const TheMindGame: React.FC = () => {
 
     return () => {
       unsubDeal();
+      unsubRequestDeal();
       unsubPlay();
       unsubSync();
       unsubShuriken();
     };
-  }, [onEvent, handlePlayCardInternal, handleUseShurikenInternal]);
+  }, [onEvent, handlePlayCardInternal, handleUseShurikenInternal, myRole, dealLevel]);
 
   // When both sync, start playing
   useEffect(() => {
@@ -256,6 +274,11 @@ export const TheMindGame: React.FC = () => {
 
   const nextLevel = () => {
     const nextLvl = level + 1;
+    if (isRemoteMode && myRole !== 'HE') {
+      setLog('✨ 已向巫师 (HE) 发送开启下一阶星轨请求...');
+      sendEvent('MIND_REQUEST_DEAL', { level: nextLvl, restart: false });
+      return;
+    }
     setLevel(nextLvl);
     if (nextLvl === 3) setLives((l) => Math.min(l + 1, 5));
     if (nextLvl === 2) setShurikens((s) => s + 1);
@@ -263,6 +286,11 @@ export const TheMindGame: React.FC = () => {
   };
 
   const restartAll = () => {
+    if (isRemoteMode && myRole !== 'HE') {
+      setLog('✨ 已向巫师 (HE) 请求重新发牌洗牌...');
+      sendEvent('MIND_REQUEST_DEAL', { level: 1, restart: true });
+      return;
+    }
     setLevel(1);
     setLives(3);
     setShurikens(1);

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, Suspense, lazy } from 'react';
 import confetti from 'canvas-confetti';
 import { SoftAurora } from './components/animations/SoftAurora';
 import { CountUp } from './components/animations/CountUp';
@@ -6,20 +6,36 @@ import { ShinyText } from './components/animations/ShinyText';
 import { AnimatedContent } from './components/animations/AnimatedContent';
 import { DockNav, NavTab } from './components/animations/DockNav';
 import { MissYouButton } from './components/features/MissYouButton';
-import { LocationRadar } from './components/features/LocationRadar';
-import { TodayLook } from './components/features/TodayLook';
-import { DailyRating } from './components/features/DailyRating';
-import { TrialHub } from './components/features/TrialHub';
-import { ScratchCard } from './components/features/ScratchCard';
 import { PairingModal } from './components/features/PairingModal';
 import { CoupleProvider, useCouple } from './context/CoupleContext';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { appStorage, calculateDaysTogether, checkSpecialDateToday, KeyDatesConfig } from './services/storage';
-import { Settings, Heart } from 'lucide-react';
+import { Settings, Heart, Sparkles } from 'lucide-react';
+
+// Code-split tabs for optimized bundle delivery (<500KB)
+const LocationRadar = lazy(() => import('./components/features/LocationRadar').then(m => ({ default: m.LocationRadar })));
+const TodayLook = lazy(() => import('./components/features/TodayLook').then(m => ({ default: m.TodayLook })));
+const DailyRating = lazy(() => import('./components/features/DailyRating').then(m => ({ default: m.DailyRating })));
+const TrialHub = lazy(() => import('./components/features/TrialHub').then(m => ({ default: m.TrialHub })));
+const ScratchCard = lazy(() => import('./components/features/ScratchCard').then(m => ({ default: m.ScratchCard })));
+
+const TabLoadingSkeleton = () => (
+  <div className="w-full max-w-md mx-auto p-4 sm:p-5 font-serif select-none animate-pulse">
+    <div className="rounded-3xl border border-[#D4AF37]/40 bg-[#FCF9F2]/80 p-8 text-center space-y-3">
+      <div className="w-10 h-10 mx-auto rounded-2xl bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-[#8C1D35]">
+        <Sparkles className="w-5 h-5 animate-spin text-[#D4AF37]" />
+      </div>
+      <div className="text-xs font-cinzel tracking-widest text-[#8C7658]">
+        UNROLLING PARCHMENT · 魔法卷轴展开中...
+      </div>
+    </div>
+  </div>
+);
 
 const MainApp: React.FC = () => {
   const [activeTab, setActiveTab] = useState<NavTab>('seal');
   const [showPushModal, setShowPushModal] = useState(false);
-  const [pushToken, setPushToken] = useState('');
+  const [pushToken, setPushToken] = useState(() => appStorage.getPushToken());
   const [tokenSaved, setTokenSaved] = useState(false);
 
   const { partnerOnline, myRole, setShowPairingModal } = useCouple();
@@ -66,6 +82,7 @@ const MainApp: React.FC = () => {
   };
 
   const handleSaveToken = () => {
+    appStorage.setPushToken(pushToken);
     setTokenSaved(true);
     setTimeout(() => {
       setTokenSaved(false);
@@ -160,41 +177,43 @@ const MainApp: React.FC = () => {
       {/* Main Content with AnimatedContent wrapper */}
       <main className="w-full max-w-md flex-1">
         <AnimatedContent keyId={activeTab} distance={12} duration={0.32}>
-          {/* Tab 1: Dedicated Parchment Sealed Letter */}
-          {activeTab === 'seal' && (
-            <div>
-              <MissYouButton onNotify={handleNotify} />
-            </div>
-          )}
+          <Suspense fallback={<TabLoadingSkeleton />}>
+            {/* Tab 1: Dedicated Parchment Sealed Letter */}
+            {activeTab === 'seal' && (
+              <div>
+                <MissYouButton onNotify={handleNotify} />
+              </div>
+            )}
 
-          {/* Tab 2: Dedicated Midnight Celestial Astrolabe & Compass */}
-          {activeTab === 'compass' && (
-            <div>
-              <LocationRadar />
-            </div>
-          )}
+            {/* Tab 2: Dedicated Midnight Celestial Astrolabe & Compass */}
+            {activeTab === 'compass' && (
+              <div>
+                <LocationRadar />
+              </div>
+            )}
 
-          {/* Tab 3: Magic Portraits & Invisible Ink */}
-          {activeTab === 'today' && (
-            <div className="space-y-1">
-              <TodayLook />
-              <ScratchCard />
-            </div>
-          )}
+            {/* Tab 3: Magic Portraits & Invisible Ink */}
+            {activeTab === 'today' && (
+              <div className="space-y-1">
+                <TodayLook />
+                <ScratchCard />
+              </div>
+            )}
 
-          {/* Tab 4: Chronicle Rating Scroll */}
-          {activeTab === 'rating' && (
-            <div>
-              <DailyRating />
-            </div>
-          )}
+            {/* Tab 4: Chronicle Rating Scroll */}
+            {activeTab === 'rating' && (
+              <div>
+                <DailyRating />
+              </div>
+            )}
 
-          {/* Tab 5: Quill Sketch & Soul Trial */}
-          {activeTab === 'fun' && (
-            <div>
-              <TrialHub />
-            </div>
-          )}
+            {/* Tab 5: Quill Sketch & Soul Trial */}
+            {activeTab === 'fun' && (
+              <div>
+                <TrialHub />
+              </div>
+            )}
+          </Suspense>
         </AnimatedContent>
       </main>
 
@@ -292,9 +311,11 @@ const MainApp: React.FC = () => {
 
 export const App: React.FC = () => {
   return (
-    <CoupleProvider>
-      <MainApp />
-    </CoupleProvider>
+    <ErrorBoundary>
+      <CoupleProvider>
+        <MainApp />
+      </CoupleProvider>
+    </ErrorBoundary>
   );
 };
 

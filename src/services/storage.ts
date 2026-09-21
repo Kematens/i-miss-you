@@ -228,6 +228,22 @@ class AppStorage {
     if (birthdays.she) update.sheBirthday = birthdays.she.trim();
     this.setKeyDates(update);
   }
+
+  getPushToken(): string {
+    return this.get<string>('push_token', '');
+  }
+
+  setPushToken(token: string): void {
+    this.set<string>('push_token', token.trim());
+  }
+
+  getScratchState(dateStr: string): { scratched: boolean; revealedAt: number } | null {
+    return this.get<{ scratched: boolean; revealedAt: number } | null>(`scratch_${dateStr}`, null);
+  }
+
+  setScratchState(dateStr: string, state: { scratched: boolean; revealedAt: number }): void {
+    this.set(`scratch_${dateStr}`, state);
+  }
 }
 
 export const appStorage = new AppStorage();

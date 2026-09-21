@@ -14,6 +14,49 @@ interface MissYouButtonProps {
   onNotify?: (message: string) => void;
 }
 
+const LOVE_LETTERS_POOL = [
+  {
+    line1: '“纵使相隔山海长街，”',
+    line2: '“心跳同频之处，即是魔法所在。”',
+    signature: '今日第一份想念已抵达，愿此光长伴于你 —— Always.'
+  },
+  {
+    line1: '“世界喧嚣如翻涌浪潮，”',
+    line2: '“唯有你的名字，是我永远的荧光闪烁（Lumos）。”',
+    signature: '无论身处何地，你都在我最温软的心头。'
+  },
+  {
+    line1: '“银河跌宕，星辰转动，”',
+    line2: '“指针每一次微颤，都是我在无声地奔向你。”',
+    signature: '想念跨越千山，已由夜翼猫头鹰衔至窗前。'
+  },
+  {
+    line1: '“在平淡岁月的每一次呼吸间，”',
+    line2: '“你是我永不熄灭的火焰杯，盛满所有的心动与偏爱。”',
+    signature: '风有归期，心有归宿，愿岁月深爱于你。'
+  },
+  {
+    line1: '“时间转换器能逆转光阴，”',
+    line2: '“但关于你的每一秒，我都想完完整整地深深刻下。”',
+    signature: '见信如面，愿你今日所有微风都带有蜜糖的清甜。'
+  },
+  {
+    line1: '“霍格沃茨的猫头鹰掠过塔尖，”',
+    line2: '“寄去的不止是一封信笺，而是我一整颗想念你的心。”',
+    signature: '此时此刻，特别想你。'
+  },
+  {
+    line1: '“若世间万物皆有引力，”',
+    line2: '“那我所有的心轨，都只为你一人偏转。”',
+    signature: '双星共振，引力波所至，爱意恒常。'
+  },
+  {
+    line1: '“夜色落入羊皮纸的墨香，”',
+    line2: '“愿梦里有林间微风，有漫天流光，还有我紧握你的手。”',
+    signature: '晚安好梦，明日破晓时第一缕晨光也是想你的证明。'
+  }
+];
+
 export const MissYouButton: React.FC<MissYouButtonProps> = ({ onNotify }) => {
   const { sendEvent, onEvent, myRole, partnerOnline } = useCouple();
 
@@ -23,6 +66,10 @@ export const MissYouButton: React.FC<MissYouButtonProps> = ({ onNotify }) => {
   const [activeWhispers, setActiveWhispers] = useState<string[]>([]);
   const [justSent, setJustSent] = useState(false);
   const [incomingAlert, setIncomingAlert] = useState<string | null>(null);
+
+  const recipientTitle = myRole === 'HE' ? '女孩' : '少年';
+  const letterIndex = (tapCount + new Date().getDate()) % LOVE_LETTERS_POOL.length;
+  const currentLetter = LOVE_LETTERS_POOL[letterIndex] || LOVE_LETTERS_POOL[0];
 
   // Load persisted whispers on mount
   useEffect(() => {
@@ -259,7 +306,7 @@ export const MissYouButton: React.FC<MissYouButtonProps> = ({ onNotify }) => {
               <span>OWL EXPRESS · 皇家特快信使</span>
             </div>
             <div className="text-xs font-serif font-bold text-[#2C241E] mt-0.5">
-              致：心间至珍至爱之女孩 · 展信舒颜
+              致：心间至珍至爱之{recipientTitle} · 展信舒颜
             </div>
             <div className="text-[9.5px] text-[#A8987E] font-serif italic flex items-center gap-1.5">
               <span>霍格莫德街角 · 彼此心跳同频处</span>
@@ -319,7 +366,7 @@ export const MissYouButton: React.FC<MissYouButtonProps> = ({ onNotify }) => {
                           霍格沃茨致候密札 · 第 {tapCount} 封
                         </span>
                         <h3 className="text-xs font-bold text-[#2C241E] font-serif mt-0.5">
-                          致 我最珍视的女孩：
+                          致 我最珍视的{recipientTitle}：
                         </h3>
                       </div>
                     </div>
@@ -342,7 +389,7 @@ export const MissYouButton: React.FC<MissYouButtonProps> = ({ onNotify }) => {
                         transition={{ duration: 0.9, delay: 0.15, ease: 'easeOut' }}
                         className="text-xs text-[#4A3525] font-serif italic tracking-wide"
                       >
-                        “纵使相隔山海长街，”
+                        {currentLetter.line1}
                       </motion.p>
                     </div>
 
@@ -354,7 +401,7 @@ export const MissYouButton: React.FC<MissYouButtonProps> = ({ onNotify }) => {
                         transition={{ duration: 1.1, delay: 0.75, ease: 'easeOut' }}
                         className="text-xs text-[#4A3525] font-serif italic tracking-wide font-medium"
                       >
-                        “心跳同频之处，即是魔法所在。”
+                        {currentLetter.line2}
                       </motion.p>
                     </div>
 
@@ -366,7 +413,7 @@ export const MissYouButton: React.FC<MissYouButtonProps> = ({ onNotify }) => {
                         transition={{ duration: 1.2, delay: 1.5, ease: 'easeOut' }}
                         className="text-[11.5px] text-[#8C1D35] font-serif font-semibold drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)]"
                       >
-                        今日第一份想念已抵达，愿此光长伴于你 —— Always.
+                        {currentLetter.signature}
                       </motion.div>
                     </div>
                   </div>

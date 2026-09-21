@@ -39,24 +39,7 @@ export const DailyRating: React.FC = () => {
         senderRole: r.senderRole
       }));
     }
-    return [
-      {
-        id: '1',
-        date: '昨日案卷',
-        score: 98,
-        moodTag: '温存之德',
-        comment: '夜深时主动煮了热饮并剥好温热水果，举止温存，态度诚挚。',
-        senderRole: 'SHE'
-      },
-      {
-        id: '2',
-        date: '前日案卷',
-        score: 91,
-        moodTag: '值得表彰',
-        comment: '准时赴约，并在散步迎风时细心披上外套，特此载入案卷。',
-        senderRole: 'SHE'
-      }
-    ];
+    return [];
   });
 
   // Listen for partner submitting a rating
@@ -435,9 +418,16 @@ export const DailyRating: React.FC = () => {
           </div>
 
           <div className="space-y-2.5 max-h-48 overflow-y-auto pr-1">
-            <AnimatePresence>
-              {history.map((record) => (
-                <DecayCard key={record.id} tiltFactor={8}>
+            {history.length === 0 ? (
+              <div className="p-5 rounded-2xl bg-[#FAF5EB]/70 border border-dashed border-[#D9C89E] text-center text-xs text-[#8C7658] font-serif space-y-1">
+                <span className="text-xl block">📜</span>
+                <p className="font-bold text-[#524336]">尚无历史案卷手札</p>
+                <p className="text-[11px] text-[#A8987E]">滑动上方星轨刻度尺，为彼此留下今天的第一份评卷吧 ✨</p>
+              </div>
+            ) : (
+              <AnimatePresence>
+                {history.map((record) => (
+                  <DecayCard key={record.id} tiltFactor={8}>
                   <div className="p-3.5 rounded-2xl bg-[#FAF5EB] border border-[#D4AF37]/45 text-xs shadow-2xs relative overflow-hidden group cursor-pointer hover:border-[#D4AF37]">
                     
                     {/* Header line of the archive folio */}
@@ -473,6 +463,7 @@ export const DailyRating: React.FC = () => {
                 </DecayCard>
               ))}
             </AnimatePresence>
+            )}
           </div>
         </div>
       </div>

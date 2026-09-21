@@ -1,23 +1,64 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { Clock, Feather, Wand2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { BlurText } from '../animations/BlurText';
 import { useCouple } from '../../context/CoupleContext';
+import { appStorage } from '../../services/storage';
+
+const SCRATCH_MESSAGES_POOL = [
+  '“在漫长岁月中，你是我唯一的魔杖光芒 —— Always.”',
+  '“浮世万千，唯有触碰你时，星光才悄然苏醒。”',
+  '“世间所有魔法咒语，都不如你唤我名字时的温柔。”',
+  '“金色的飞贼绕过天际，最终落进你盛满笑意的眼里。”',
+  '“若思念有实体，早已在窗台叠起整座霍格沃茨书塔。”',
+  '“把今天的第一缕阳光折进信笺，连同我所有的偏爱寄给你。”',
+  '“在彼此心跳共振的频率里，风也变得格外清甜。”',
+  '“愿所有的晦涩都随落日散去，留下的每一刻都是和你。”',
+  '“岁月是一张未干的羊皮纸，每一行都想与你一笔一划书写。”',
+  '“你是我在这个纷扰世界里，永远安稳的避风港湾。”',
+  '“哪怕相隔千里，抬眸望见的是同一轮被爱意照亮的明月。”',
+  '“爱不是奇迹的偶尔降临，而是你我相视一笑的每个日常。”'
+];
+
+function getTodayDateKey(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function getDailyCipherForDate(dateKey: string): string {
+  let hash = 0;
+  for (let i = 0; i < dateKey.length; i++) {
+    hash = (hash << 5) - hash + dateKey.charCodeAt(i);
+    hash |= 0;
+  }
+  const idx = Math.abs(hash) % SCRATCH_MESSAGES_POOL.length;
+  return SCRATCH_MESSAGES_POOL[idx];
+}
 
 export const ScratchCard: React.FC = () => {
   const { sendEvent, onEvent } = useCouple();
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isScratched, setIsScratched] = useState(false);
+  const todayKey = useMemo(() => getTodayDateKey(), []);
+  const secretMessage = useMemo(() => getDailyCipherForDate(todayKey), [todayKey]);
+
+  const [isScratched, setIsScratched] = useState(() => {
+    const saved = appStorage.getScratchState(todayKey);
+    return !!saved?.scratched;
+  });
   const [scratchedPercent, setScratchedPercent] = useState(0);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
 
-  const secretMessage = "“在漫长岁月中，你是我唯一的魔杖光芒 —— Always.”";
+  // Sync scratch to local storage
+  const markScratchedToday = () => {
+    setIsScratched(true);
+    setTimeLeft(120);
+    appStorage.setScratchState(todayKey, { scratched: true, revealedAt: Date.now() });
+  };
 
   // Listen for partner revealing the card
   useEffect(() => {
     const unsub = onEvent('SCRATCH_REVEALED', () => {
-      setIsScratched(true);
-      setTimeLeft(60);
+      markScratchedToday();
       const canvas = canvasRef.current;
       if (canvas) {
         const ctx = canvas.getContext('2d');
@@ -36,7 +77,7 @@ export const ScratchCard: React.FC = () => {
       });
     });
     return unsub;
-  }, [onEvent]);
+  }, [onEvent, todayKey]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -47,6 +88,11 @@ export const ScratchCard: React.FC = () => {
     const rect = canvas.getBoundingClientRect();
     canvas.width = rect.width;
     canvas.height = rect.height;
+
+    if (isScratched) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      return;
+    }
 
     // Antique Gold Leaf Foil Texture
     const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
@@ -62,7 +108,7 @@ export const ScratchCard: React.FC = () => {
     ctx.font = 'bold 10px Cinzel, serif';
     ctx.textAlign = 'center';
     ctx.fillText('✧ APARECIUM · 荧光咒唤醒隐形金墨 ✧', canvas.width / 2, canvas.height / 2 + 3);
-  }, []);
+  }, [isScratched]);
 
   const handleScratch = (e: React.MouseEvent | React.TouchEvent) => {
     const canvas = canvasRef.current;
@@ -83,8 +129,7 @@ export const ScratchCard: React.FC = () => {
       setScratchedPercent((prev) => {
         const next = prev + 3;
         if (next >= 40 && !isScratched) {
-          setIsScratched(true);
-          setTimeLeft(60);
+          markScratchedToday();
           sendEvent('SCRATCH_REVEALED', { timestamp: Date.now() });
           if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
             try {
