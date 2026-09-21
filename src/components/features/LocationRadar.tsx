@@ -4,6 +4,8 @@ import { Compass, MapPin, Wand2, Battery, RefreshCw, Layers, Zap, Sparkles } fro
 import confetti from 'canvas-confetti';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { useCouple } from '../../context/CoupleContext';
+import { appStorage } from '../../services/storage';
 
 // Mathematical Geodesy Utilities
 function calculateDistanceMeters(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -32,24 +34,39 @@ function calculateBearing(lat1: number, lon1: number, lat2: number, lon2: number
 }
 
 export const LocationRadar: React.FC = () => {
+  const { sendEvent, onEvent, myRole, partnerRole, partnerOnline, pairingCode, setShowPairingModal } = useCouple();
+
   const [viewMode, setViewMode] = useState<'compass' | 'map'>('compass');
 
-  // Real GPS Coordinates (Default initial positions)
-  const [myCoords, setMyCoords] = useState<{ lat: number; lng: number }>({
-    lat: 30.6586,
-    lng: 104.0648
-  });
-  const [herCoords] = useState<{ lat: number; lng: number }>({
-    lat: 30.6486,
-    lng: 104.0758
+  // Real GPS Coordinates with persistence
+  const [myCoords, setMyCoords] = useState<{ lat: number; lng: number }>(() => {
+    const saved = appStorage.getMyLocation();
+    return saved ? { lat: saved.lat, lng: saved.lng } : { lat: 30.6586, lng: 104.0648 };
   });
 
-  const [myAddress, setMyAddress] = useState('正在定位本机物理街角...');
-  const [herAddress] = useState('春熙路步行街附近 · 正在移动中');
+  const [herCoords, setHerCoords] = useState<{ lat: number; lng: number }>(() => {
+    const saved = appStorage.getPartnerLocation();
+    return saved ? { lat: saved.lat, lng: saved.lng } : { lat: 30.6486, lng: 104.0758 };
+  });
+
+  const [myAddress, setMyAddress] = useState(() => {
+    const saved = appStorage.getMyLocation();
+    return saved?.address || '正在定位本机物理街角...';
+  });
+
+  const [herAddress, setHerAddress] = useState(() => {
+    const saved = appStorage.getPartnerLocation();
+    return saved?.address || '春熙路步行街附近 · 正在移动中';
+  });
+
   const [isLocating, setIsLocating] = useState(false);
   const [isCalibrating, setIsCalibrating] = useState(false);
-  const [distanceMeters, setDistanceMeters] = useState(1314);
-  const [trueBearing, setTrueBearing] = useState(42);
+  const [distanceMeters, setDistanceMeters] = useState(() => {
+    return calculateDistanceMeters(myCoords.lat, myCoords.lng, herCoords.lat, herCoords.lng);
+  });
+  const [trueBearing, setTrueBearing] = useState(() => {
+    return calculateBearing(myCoords.lat, myCoords.lng, herCoords.lat, herCoords.lng);
+  });
   const [isPulsing, setIsPulsing] = useState(false);
 
   // Weasley Clock 9-state life status system
@@ -63,43 +80,56 @@ export const LocationRadar: React.FC = () => {
   ];
 
   const [myStatusIndex, setMyStatusIndex] = useState(1); // 归途漫漫
-  const [herStatusIndex] = useState(5); // 极度想你
+  const [herStatusIndex, setHerStatusIndex] = useState(5); // 极度想你
 
-  // Secret Cipher Pairing System (双向魔法暗号配对密匣)
-  const [showPairModal, setShowPairModal] = useState(false);
-  const [pairingCode, setPairingCode] = useState(() => {
-    return localStorage.getItem('marauder_pairing_code') || 'LUMOS-7788';
-  });
-  const [inputPairCode, setInputPairCode] = useState('');
+  // Listen for partner real-time updates
+  useEffect(() => {
+    const unsubLocation = onEvent<{ lat: number; lng: number; address?: string }>('LOCATION_UPDATE', (payload) => {
+      if (payload?.lat && payload?.lng) {
+        setHerCoords({ lat: payload.lat, lng: payload.lng });
+        if (payload.address) setHerAddress(payload.address);
+        appStorage.setPartnerLocation({
+          lat: payload.lat,
+          lng: payload.lng,
+          address: payload.address,
+          updatedAt: Date.now()
+        });
+        setDistanceMeters(calculateDistanceMeters(myCoords.lat, myCoords.lng, payload.lat, payload.lng));
+        setTrueBearing(calculateBearing(myCoords.lat, myCoords.lng, payload.lat, payload.lng));
+      }
+    });
+
+    const unsubStatus = onEvent<{ statusIndex: number }>('WEASLEY_STATUS', (payload) => {
+      if (typeof payload?.statusIndex === 'number') {
+        setHerStatusIndex(payload.statusIndex);
+      }
+    });
+
+    const unsubPulse = onEvent('LUMOS_PULSE', () => {
+      setIsPulsing(true);
+      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+        try {
+          navigator.vibrate([30, 40, 50, 40, 80]);
+        } catch {}
+      }
+      setTimeout(() => setIsPulsing(false), 2400);
+    });
+
+    return () => {
+      unsubLocation();
+      unsubStatus();
+      unsubPulse();
+    };
+  }, [onEvent, myCoords]);
 
   const handleToggleMyStatus = (idx: number) => {
     setMyStatusIndex(idx);
+    sendEvent('WEASLEY_STATUS', { statusIndex: idx });
     if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
       try {
         navigator.vibrate([15, 20]); // Mechanical gear tick
       } catch {}
     }
-  };
-
-  const handleSavePairing = () => {
-    if (!inputPairCode.trim()) return;
-    const clean = inputPairCode.trim().toUpperCase();
-    setPairingCode(clean);
-    localStorage.setItem('marauder_pairing_code', clean);
-    setShowPairModal(false);
-
-    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-      try {
-        navigator.vibrate([20, 30, 60]);
-      } catch {}
-    }
-
-    confetti({
-      particleCount: 35,
-      spread: 60,
-      origin: { y: 0.5 },
-      colors: ['#FFE599', '#D4AF37', '#8C1D35']
-    });
   };
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -137,6 +167,7 @@ export const LocationRadar: React.FC = () => {
           colors: ['#D4AF37', '#FFF2CE', '#AA822A']
         });
 
+        let finalAddr = `${latitude.toFixed(4)}°N, ${longitude.toFixed(4)}°E`;
         try {
           const res = await fetch(
             `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=16&addressdetails=1`,
@@ -149,14 +180,20 @@ export const LocationRadar: React.FC = () => {
               data.address?.road ||
               data.address?.city ||
               data.display_name?.split(',')[0] ||
-              `${latitude.toFixed(4)}°N, ${longitude.toFixed(4)}°E`;
-            setMyAddress(`${addr} · GPS已锁定`);
+              finalAddr;
+            finalAddr = `${addr} · GPS已锁定`;
           } else {
-            setMyAddress(`纬度 ${latitude.toFixed(4)}°, 经度 ${longitude.toFixed(4)}°`);
+            finalAddr = `纬度 ${latitude.toFixed(4)}°, 经度 ${longitude.toFixed(4)}°`;
           }
         } catch {
-          setMyAddress(`纬度 ${latitude.toFixed(4)}°, 经度 ${longitude.toFixed(4)}°`);
+          finalAddr = `纬度 ${latitude.toFixed(4)}°, 经度 ${longitude.toFixed(4)}°`;
         }
+
+        setMyAddress(finalAddr);
+
+        // Persist local and broadcast to partner
+        appStorage.setMyLocation({ lat: latitude, lng: longitude, address: finalAddr, updatedAt: Date.now() });
+        sendEvent('LOCATION_UPDATE', { lat: latitude, lng: longitude, address: finalAddr });
 
         setIsLocating(false);
       },
@@ -359,12 +396,9 @@ export const LocationRadar: React.FC = () => {
                   MARAUDER'S ASTROLABE · 活点灵犀
                 </span>
                 <button
-                  onClick={() => {
-                    setInputPairCode(pairingCode);
-                    setShowPairModal(true);
-                  }}
+                  onClick={() => setShowPairingModal(true)}
                   className="text-[8px] px-1.5 py-0.2 rounded bg-[#D4AF37]/15 hover:bg-[#D4AF37]/30 text-[#FFE599] font-cinzel border border-[#D4AF37]/30 transition-colors cursor-pointer flex items-center gap-1"
-                  title="点击配置双向同步魔法暗号"
+                  title="点击配置双向同步魔法暗号与身份"
                 >
                   <span>{pairingCode}</span>
                   <span className="text-[7px]">⚡</span>
@@ -622,7 +656,7 @@ export const LocationRadar: React.FC = () => {
                   </div>
                   {/* Mini Tag */}
                   <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 px-1.5 py-0.2 rounded-full bg-[#8C1D35] border border-[#FFE599] text-[#FFFDF5] text-[7.5px] font-cinzel font-bold shadow-xs whitespace-nowrap">
-                    HER · {WEASLEY_STATUSES[herStatusIndex].label}
+                    {partnerRole} · {WEASLEY_STATUSES[herStatusIndex].label} {partnerOnline ? '✨' : ''}
                   </span>
                 </div>
               </motion.div>
@@ -644,7 +678,7 @@ export const LocationRadar: React.FC = () => {
                     />
                   </div>
                   <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 px-1.5 py-0.2 rounded-full bg-[#182638] border border-[#D4AF37] text-[#FFE599] text-[7.5px] font-cinzel font-bold shadow-xs whitespace-nowrap">
-                    ME · {WEASLEY_STATUSES[myStatusIndex].label}
+                    ME ({myRole}) · {WEASLEY_STATUSES[myStatusIndex].label}
                   </span>
                 </div>
               </motion.div>
@@ -714,8 +748,8 @@ export const LocationRadar: React.FC = () => {
           <div className="p-3.5 rounded-2xl bg-[#FAF5EB] border border-[#D4AF37]/50 shadow-2xs space-y-1.5">
             <div className="flex items-center justify-between">
               <span className="text-[9.5px] font-cinzel font-bold text-[#8C1D35] flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-[#8C1D35] animate-ping" />
-                HER · 对方实时所在与韦斯莱钟态
+                <span className={`w-2 h-2 rounded-full ${partnerOnline ? 'bg-emerald-500 animate-ping' : 'bg-[#8C1D35]'}`} />
+                {partnerRole} · 对方实时所在与韦斯莱钟态 {partnerOnline ? '· 在线同频' : '· 离线等候'}
               </span>
               <span className="text-[8.5px] font-mono text-[#8C7658]">
                 {herCoords.lat.toFixed(4)}°N, {herCoords.lng.toFixed(4)}°E
@@ -791,6 +825,7 @@ export const LocationRadar: React.FC = () => {
           <button
             onClick={() => {
               setIsPulsing(true);
+              sendEvent('LUMOS_PULSE', { timestamp: Date.now() });
               if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
                 try {
                   navigator.vibrate([30, 40, 70, 90]);
@@ -807,66 +842,10 @@ export const LocationRadar: React.FC = () => {
             className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#8C1D35] to-[#6B1226] text-[#FFFDF5] text-xs font-serif font-bold flex items-center justify-center gap-1.5 shadow-sm hover:brightness-105 transition-all cursor-pointer border border-[#D4AF37]/50"
           >
             <Zap className={`w-3.5 h-3.5 text-[#FFE599] ${isPulsing ? 'animate-bounce' : ''}`} />
-            <span>{isPulsing ? '✨ 荧光脉冲引力波穿透天穹抵达对方！' : '向她发射心灵荧光脉冲 · LUMOS PULSE'}</span>
+            <span>{isPulsing ? '✨ 荧光脉冲引力波穿透天穹抵达对方！' : '向对方发射心灵荧光脉冲 · LUMOS PULSE'}</span>
           </button>
         </div>
       </div>
-
-      {/* ========================================================
-          4. SECRET PAIRING CIPHER MODAL (魔法同步暗号密匣弹窗)
-      ======================================================== */}
-      {showPairModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-          <div className="w-full max-w-sm rounded-3xl bg-[#FAF5EB] border-2 border-[#D4AF37] p-5 shadow-2xl text-[#2C241E] space-y-3">
-            <div className="flex items-center justify-between pb-2 border-b border-[#D9C89E]">
-              <div className="flex items-center gap-2">
-                <span className="text-base">🗝️</span>
-                <h3 className="font-serif font-bold text-sm text-[#8C1D35]">
-                  活点星盘 · 专属配对暗号
-                </h3>
-              </div>
-              <button
-                onClick={() => setShowPairModal(false)}
-                className="text-xs text-[#8C7658] hover:text-[#2C241E] cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            <p className="text-[11px] text-[#7A6750] font-serif leading-relaxed">
-              两台安装本 APP 的手机输入相同的【魔法暗号】，活点星盘与韦斯莱钟态即可瞬间实现云端同频感应。
-            </p>
-
-            <div className="space-y-1.5 pt-1">
-              <label className="text-[9.5px] font-cinzel text-[#8C7658] block">
-                PAIRING CIPHER · 双方私密暗号
-              </label>
-              <input
-                type="text"
-                value={inputPairCode}
-                onChange={(e) => setInputPairCode(e.target.value)}
-                placeholder="例如: LUMOS-8899"
-                className="w-full px-3 py-2 rounded-xl border border-[#D4AF37] bg-[#FFFDF9] text-sm font-mono tracking-wider text-[#8C1D35] font-bold focus:outline-none focus:ring-1 focus:ring-[#8C1D35]"
-              />
-            </div>
-
-            <div className="pt-2 flex items-center gap-2">
-              <button
-                onClick={handleSavePairing}
-                className="flex-1 py-2 rounded-xl bg-gradient-to-r from-[#8C1D35] to-[#6B1226] text-[#FFFDF5] font-serif text-xs font-bold shadow-md hover:brightness-105 cursor-pointer"
-              >
-                绑定并开启双向同频
-              </button>
-              <button
-                onClick={() => setShowPairModal(false)}
-                className="px-3 py-2 rounded-xl bg-[#EADBC4]/60 text-[#7A6750] text-xs font-serif cursor-pointer hover:bg-[#EADBC4]"
-              >
-                取消
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
