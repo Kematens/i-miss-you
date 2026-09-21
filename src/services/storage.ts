@@ -39,6 +39,60 @@ export interface StoredPhoto {
   senderRole: UserRole;
 }
 
+export interface KeyDatesConfig {
+  anniversaryDate: string; // '2024-06-18' (YYYY-MM-DD)
+  heBirthday: string;      // '03-03' (MM-DD)
+  sheBirthday: string;     // '12-16' (MM-DD)
+}
+
+export const DEFAULT_KEY_DATES: KeyDatesConfig = {
+  anniversaryDate: '2024-06-18',
+  heBirthday: '03-03',
+  sheBirthday: '12-16'
+};
+
+export function calculateDaysTogether(startDateStr: string = DEFAULT_KEY_DATES.anniversaryDate): number {
+  const parts = startDateStr.split('-').map(Number);
+  const startYear = parts[0] || 2024;
+  const startMonth = (parts[1] || 6) - 1;
+  const startDay = parts[2] || 18;
+
+  const start = new Date(startYear, startMonth, startDay);
+  const now = new Date();
+  const current = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  const diffTime = current.getTime() - start.getTime();
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  return Math.max(1, diffDays);
+}
+
+export function checkSpecialDateToday(dates: KeyDatesConfig = DEFAULT_KEY_DATES): {
+  isAnniversary: boolean;
+  isHeBirthday: boolean;
+  isSheBirthday: boolean;
+  bannerMessage: string | null;
+} {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const todayMMDD = `${month}-${day}`;
+
+  const isHeBirthday = todayMMDD === dates.heBirthday;
+  const isSheBirthday = todayMMDD === dates.sheBirthday;
+  const isAnniversary = todayMMDD === dates.anniversaryDate.slice(5);
+
+  let bannerMessage: string | null = null;
+  if (isAnniversary) {
+    bannerMessage = '🎉 今天是我们在一起的纪念日（6月18日）！愿我们的心动如星轨般璀璨永恒！';
+  } else if (isSheBirthday) {
+    bannerMessage = '🎂 祝亲爱的女巫生日快乐（12月16日）！愿所有的美好与魔法光芒都环绕着你！';
+  } else if (isHeBirthday) {
+    bannerMessage = '🎂 祝亲爱的巫师生日快乐（3月3日）！今天是被爱意与魔法守护的幸运日！';
+  }
+
+  return { isAnniversary, isHeBirthday, isSheBirthday, bannerMessage };
+}
+
 class AppStorage {
   private getKey(key: string): string {
     return `${STORAGE_PREFIX}${key}`;
@@ -144,6 +198,15 @@ class AppStorage {
     const list = this.getRatings();
     const updated = [rating, ...list.filter(r => r.id !== rating.id)].slice(0, 20);
     this.set('ratings', updated);
+  }
+
+  getKeyDates(): KeyDatesConfig {
+    return this.get<KeyDatesConfig>('key_dates', DEFAULT_KEY_DATES);
+  }
+
+  setKeyDates(dates: Partial<KeyDatesConfig>): void {
+    const current = this.getKeyDates();
+    this.set('key_dates', { ...current, ...dates });
   }
 }
 

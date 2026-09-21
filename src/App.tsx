@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import confetti from 'canvas-confetti';
 import { SoftAurora } from './components/animations/SoftAurora';
 import { CountUp } from './components/animations/CountUp';
 import { ShinyText } from './components/animations/ShinyText';
@@ -12,6 +13,7 @@ import { TrialHub } from './components/features/TrialHub';
 import { ScratchCard } from './components/features/ScratchCard';
 import { PairingModal } from './components/features/PairingModal';
 import { CoupleProvider, useCouple } from './context/CoupleContext';
+import { appStorage, calculateDaysTogether, checkSpecialDateToday, KeyDatesConfig } from './services/storage';
 import { Settings, Heart } from 'lucide-react';
 
 const MainApp: React.FC = () => {
@@ -22,7 +24,27 @@ const MainApp: React.FC = () => {
 
   const { partnerOnline, myRole, setShowPairingModal } = useCouple();
 
-  const anniversaryDays = 520;
+  const [keyDates] = useState<KeyDatesConfig>(() => appStorage.getKeyDates());
+
+  const anniversaryDays = useMemo(() => calculateDaysTogether(keyDates.anniversaryDate), [keyDates.anniversaryDate]);
+  const specialDayInfo = useMemo(() => checkSpecialDateToday(keyDates), [keyDates]);
+
+  // Birthday / Anniversary celebration effect on mount
+  useEffect(() => {
+    if (specialDayInfo.bannerMessage) {
+      confetti({
+        particleCount: 80,
+        spread: 90,
+        origin: { y: 0.35 },
+        colors: ['#D4AF37', '#8C1D35', '#F5E8BE', '#3B82F6']
+      });
+      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+        try {
+          navigator.vibrate([100, 50, 100]);
+        } catch {}
+      }
+    }
+  }, [specialDayInfo.bannerMessage]);
 
   const handleNotify = async (msg: string) => {
     if (pushToken.trim()) {
@@ -96,6 +118,21 @@ const MainApp: React.FC = () => {
           </button>
         </div>
       </header>
+
+      {/* Special Day Banner (Birthday / Anniversary Celebration) */}
+      {specialDayInfo.bannerMessage && (
+        <div className="w-full max-w-md px-4 mb-2 animate-pulse">
+          <div className="rounded-2xl p-3 bg-gradient-to-r from-[#8C1D35] via-[#A51D38] to-[#6B1226] text-[#FFE599] border-2 border-[#D4AF37] shadow-lg flex items-center gap-2.5">
+            <span className="text-xl">🎂</span>
+            <div className="flex-1 text-xs font-serif leading-snug">
+              <span className="font-bold block text-[10px] font-cinzel text-[#FDE047] tracking-wider">
+                SPECIAL CELEBRATION · 专属魔法时刻
+              </span>
+              <span className="text-[#FFFDF5] font-medium">{specialDayInfo.bannerMessage}</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Covenant Milestone Banner */}
       <div className="w-full max-w-md px-4 mb-1">
@@ -179,6 +216,26 @@ const MainApp: React.FC = () => {
             </p>
 
             <div className="space-y-3">
+              {/* Key Dates Overview */}
+              <div className="p-3 rounded-2xl bg-[#FAF5EB] border border-[#D9C89E]/60 text-xs text-[#524336] space-y-1.5 font-serif">
+                <div className="flex items-center justify-between text-[11px] font-cinzel font-bold text-[#8C1D35] pb-1 border-b border-[#D9C89E]/40">
+                  <span>KEY DATES · 岁月密契</span>
+                  <span>⚜️</span>
+                </div>
+                <div className="flex justify-between items-center text-[10.5px]">
+                  <span className="text-[#8C7658]">在一起相依日：</span>
+                  <span className="font-mono font-bold text-[#8C1D35]">{keyDates.anniversaryDate}</span>
+                </div>
+                <div className="flex justify-between items-center text-[10.5px]">
+                  <span className="text-[#8C7658]">巫师 (HE) 破壳日：</span>
+                  <span className="font-mono font-bold text-[#1E3A8A]">3月3日 ({keyDates.heBirthday})</span>
+                </div>
+                <div className="flex justify-between items-center text-[10.5px]">
+                  <span className="text-[#8C7658]">女巫 (SHE) 破壳日：</span>
+                  <span className="font-mono font-bold text-[#8C1D35]">12月16日 ({keyDates.sheBirthday})</span>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-[11px] font-medium text-[#524336] mb-1 font-cinzel">
                   PushPlus Token
