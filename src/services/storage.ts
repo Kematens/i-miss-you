@@ -42,7 +42,7 @@ export interface StoredPhoto {
 export interface KeyDatesConfig {
   anniversaryDate: string; // '2024-06-18' (YYYY-MM-DD)
   heBirthday: string;      // '03-03' (MM-DD)
-  sheBirthday: string;     // '12-16' (MM-DD)
+  sheBirthday: string;     // '12-18' (MM-DD)
 }
 
 export const DEFAULT_KEY_DATES: KeyDatesConfig = {
@@ -207,6 +207,26 @@ class AppStorage {
   setKeyDates(dates: Partial<KeyDatesConfig>): void {
     const current = this.getKeyDates();
     this.set('key_dates', { ...current, ...dates });
+  }
+
+  getAnniversaryDate(): string {
+    return this.getKeyDates().anniversaryDate;
+  }
+
+  setAnniversaryDate(date: string): void {
+    this.setKeyDates({ anniversaryDate: date.trim() });
+  }
+
+  getBirthdays(): { he: string; she: string } {
+    const dates = this.getKeyDates();
+    return { he: dates.heBirthday, she: dates.sheBirthday };
+  }
+
+  setBirthdays(birthdays: { he?: string; she?: string }): void {
+    const update: Partial<KeyDatesConfig> = {};
+    if (birthdays.he) update.heBirthday = birthdays.he.trim();
+    if (birthdays.she) update.sheBirthday = birthdays.she.trim();
+    this.setKeyDates(update);
   }
 }
 

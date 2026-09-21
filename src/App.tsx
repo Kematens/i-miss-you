@@ -234,6 +234,25 @@ const MainApp: React.FC = () => {
                   <span className="text-[#8C7658]">女巫 (SHE) 破壳日：</span>
                   <span className="font-mono font-bold text-[#8C1D35]">12月18日 ({keyDates.sheBirthday})</span>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    confetti({
+                      particleCount: 120,
+                      spread: 100,
+                      origin: { y: 0.4 },
+                      colors: ['#D4AF37', '#8C1D35', '#F5E8BE', '#3B82F6', '#10B981']
+                    });
+                    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+                      try {
+                        navigator.vibrate([80, 40, 100, 50, 120]);
+                      } catch {}
+                    }
+                  }}
+                  className="w-full mt-1.5 py-1.5 rounded-xl text-[10.5px] font-serif bg-gradient-to-r from-[#D4AF37]/20 to-[#8C1D35]/15 border border-[#D4AF37]/60 text-[#8C1D35] hover:bg-[#D4AF37]/30 transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                >
+                  <span>✨ 预览生日/纪念日全屏魔法礼花</span>
+                </button>
               </div>
 
               <div>
