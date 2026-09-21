@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, RotateCcw, Sparkles, Skull, CheckCircle2, HelpCircle } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { CODENAMES_CATEGORIES, ALL_CODENAMES_WORDS } from './codenamesWords';
 
 interface WordCard {
   id: number;
@@ -14,21 +15,21 @@ interface WordCard {
   revealedBy?: 'A' | 'B';
 }
 
-// 情侣真实生活日常与甜蜜心动词库（通俗易懂、好出题、好联想）
-const SWEET_COUPLE_WORDS = [
-  '奶茶', '火锅', '看电影', '牵手',
-  '晚安吻', '拥抱', '散步', '做饭',
-  '毛毯', '下雨天', '听歌', '礼物',
-  '拍照', '吃夜宵', '旅行', '游乐园',
-  '被窝', '甜品', '猫咪', '吹头发',
-  '便利店', '夕阳', '奶芙', '摩天轮'
-];
-
 export const CodenamesDuet: React.FC = () => {
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+
   // Generate a 4x4 matrix game
-  const initGame = () => {
-    // Pick 16 words from common romance pool
-    const shuffledWords = [...SWEET_COUPLE_WORDS].sort(() => Math.random() - 0.5).slice(0, 16);
+  const initGame = (catId: string = selectedCategory) => {
+    let pool: string[];
+    if (catId === 'all') {
+      pool = ALL_CODENAMES_WORDS;
+    } else {
+      const found = CODENAMES_CATEGORIES.find((c) => c.id === catId);
+      pool = found ? found.words : ALL_CODENAMES_WORDS;
+    }
+
+    // Pick 16 random words from the pool
+    const shuffledWords = [...pool].sort(() => Math.random() - 0.5).slice(0, 16);
 
     // Distribution:
     // 5 agents for A, 5 agents for B (with 1 or 2 overlaps)
@@ -63,12 +64,27 @@ export const CodenamesDuet: React.FC = () => {
     return cards.sort(() => Math.random() - 0.5);
   };
 
-  const [cards, setCards] = useState<WordCard[]>(initGame);
+  const [cards, setCards] = useState<WordCard[]>(() => initGame('all'));
   const [currentView, setCurrentView] = useState<'A' | 'B'>('A'); // Player A (HE) or Player B (HER) key viewer
   const [peekSecretKey, setPeekSecretKey] = useState(false);
   const [turnsLeft, setTurnsLeft] = useState(9);
   const [gameOver, setGameOver] = useState<'win' | 'lose_dementor' | 'lose_turns' | null>(null);
   const [showRuleModal, setShowRuleModal] = useState(false);
+
+  const handleCategoryChange = (catId: string) => {
+    setSelectedCategory(catId);
+    setCards(initGame(catId));
+    setTurnsLeft(9);
+    setGameOver(null);
+    setPeekSecretKey(false);
+    setCurrentView('A');
+
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      try {
+        navigator.vibrate([15]);
+      } catch {}
+    }
+  };
 
   // Check victory
   const checkVictory = (currentCards: WordCard[]) => {
@@ -211,6 +227,33 @@ export const CodenamesDuet: React.FC = () => {
               <RotateCcw className="w-3.5 h-3.5" />
             </button>
           </div>
+        </div>
+
+        {/* Theme Category Selector Bar */}
+        <div className="flex items-center gap-1 overflow-x-auto pb-2 mb-2 scrollbar-none text-[10px] font-serif">
+          <button
+            onClick={() => handleCategoryChange('all')}
+            className={`px-2.5 py-1 rounded-xl whitespace-nowrap transition-all cursor-pointer border ${
+              selectedCategory === 'all'
+                ? 'bg-[#8C1D35] text-[#FFFDF5] border-[#D4AF37] font-bold shadow-2xs'
+                : 'bg-[#FAF6EE] text-[#7A6750] border-[#D9C89E]/60 hover:bg-[#F4EBD9]'
+            }`}
+          >
+            🎲 全部混合 ({ALL_CODENAMES_WORDS.length}词)
+          </button>
+          {CODENAMES_CATEGORIES.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => handleCategoryChange(cat.id)}
+              className={`px-2.5 py-1 rounded-xl whitespace-nowrap transition-all cursor-pointer border ${
+                selectedCategory === cat.id
+                  ? 'bg-[#8C1D35] text-[#FFFDF5] border-[#D4AF37] font-bold shadow-2xs'
+                  : 'bg-[#FAF6EE] text-[#7A6750] border-[#D9C89E]/60 hover:bg-[#F4EBD9]'
+              }`}
+            >
+              {cat.name}
+            </button>
+          ))}
         </div>
 
         {/* Turn HUD & Key Card Peek Control */}

@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Feather, Wand2, Zap, Crown, Sparkles } from 'lucide-react';
+import { Feather, Wand2, Zap, Crown, Sparkles, Heart } from 'lucide-react';
 import { DoodleCanvas } from './DoodleCanvas';
 import { CoupleDuel } from './CoupleDuel';
 import { SnitchGame } from './SnitchGame';
 import { RuneChess } from './RuneChess';
 import { CodenamesDuet } from './CodenamesDuet';
+import { LoveLetterGame } from './LoveLetterGame';
 
-export type TrialSubMode = 'codenames' | 'snitch' | 'chess' | 'duel' | 'canvas';
+export type TrialSubMode = 'codenames' | 'loveletter' | 'snitch' | 'chess' | 'duel' | 'canvas';
 
 export const TrialHub: React.FC = () => {
   const [subMode, setSubMode] = useState<TrialSubMode>('codenames');
@@ -23,6 +24,7 @@ export const TrialHub: React.FC = () => {
 
   const navItems = [
     { id: 'codenames' as TrialSubMode, label: '代号双子', icon: Sparkles },
+    { id: 'loveletter' as TrialSubMode, label: '情书心机', icon: Heart },
     { id: 'snitch' as TrialSubMode, label: '追逐飞贼', icon: Zap },
     { id: 'chess' as TrialSubMode, label: '如尼连珠', icon: Crown },
     { id: 'duel' as TrialSubMode, label: '闪回对决', icon: Wand2 },
@@ -31,9 +33,9 @@ export const TrialHub: React.FC = () => {
 
   return (
     <div className="w-full max-w-md mx-auto space-y-3 font-serif select-none">
-      {/* Victorian 5-Segment Arena Switcher */}
+      {/* Victorian Arena Switcher with Scrollable Support */}
       <div className="px-3 sm:px-4">
-        <div className="p-1 rounded-2xl bg-[#FCF9F2]/90 border border-[#D4AF37]/45 shadow-sm grid grid-cols-5 gap-0.5">
+        <div className="p-1 rounded-2xl bg-[#FCF9F2]/90 border border-[#D4AF37]/45 shadow-sm flex items-center gap-1 overflow-x-auto scrollbar-none">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = subMode === item.id;
@@ -42,7 +44,7 @@ export const TrialHub: React.FC = () => {
               <button
                 key={item.id}
                 onClick={() => handleSwitch(item.id)}
-                className={`py-2 px-0.5 rounded-xl text-[10px] font-serif font-bold transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer relative ${
+                className={`flex-1 min-w-[54px] py-1.5 px-1 rounded-xl text-[10px] font-serif font-bold transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer relative shrink-0 ${
                   isActive ? 'text-[#FFFDF5]' : 'text-[#8C7658] hover:text-[#2C241E]'
                 }`}
               >
@@ -54,7 +56,7 @@ export const TrialHub: React.FC = () => {
                   />
                 )}
                 <Icon className={`w-3.5 h-3.5 relative z-10 ${isActive ? 'text-[#FFE599]' : ''}`} />
-                <span className="relative z-10 leading-none scale-90 sm:scale-100">{item.label}</span>
+                <span className="relative z-10 leading-none whitespace-nowrap">{item.label}</span>
               </button>
             );
           })}
@@ -72,6 +74,18 @@ export const TrialHub: React.FC = () => {
             transition={{ duration: 0.18 }}
           >
             <CodenamesDuet />
+          </motion.div>
+        )}
+
+        {subMode === 'loveletter' && (
+          <motion.div
+            key="loveletter"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.18 }}
+          >
+            <LoveLetterGame />
           </motion.div>
         )}
 
