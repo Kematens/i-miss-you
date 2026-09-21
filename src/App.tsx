@@ -8,8 +8,7 @@ import { MissYouButton } from './components/features/MissYouButton';
 import { LocationRadar } from './components/features/LocationRadar';
 import { TodayLook } from './components/features/TodayLook';
 import { DailyRating } from './components/features/DailyRating';
-import { DoodleCanvas } from './components/features/DoodleCanvas';
-import { CoupleDuel } from './components/features/CoupleDuel';
+import { TrialHub } from './components/features/TrialHub';
 import { ScratchCard } from './components/features/ScratchCard';
 import { Settings, Heart } from 'lucide-react';
 
@@ -135,9 +134,8 @@ export const App: React.FC = () => {
 
           {/* Tab 5: Quill Sketch & Soul Trial */}
           {activeTab === 'fun' && (
-            <div className="space-y-1">
-              <DoodleCanvas />
-              <CoupleDuel />
+            <div>
+              <TrialHub />
             </div>
           )}
         </AnimatedContent>

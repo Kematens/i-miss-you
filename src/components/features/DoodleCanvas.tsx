@@ -191,7 +191,7 @@ export const DoodleCanvas: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto p-4 sm:p-5 font-serif select-none">
+    <div className="w-full max-w-md mx-auto px-4 sm:px-5 font-serif select-none">
       {/* Victorian Parchment Drawing Desk */}
       <div className="relative rounded-3xl border border-[#D4AF37]/50 bg-[#FCF9F2]/95 shadow-[0_16px_36px_-6px_rgba(45,30,15,0.09)] p-4 sm:p-5 text-[#2C241E] overflow-hidden">
         
