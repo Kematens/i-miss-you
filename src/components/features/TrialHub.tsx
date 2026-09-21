@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Feather, Wand2, Zap, Crown, Sparkles, Heart } from 'lucide-react';
-import { DoodleCanvas } from './DoodleCanvas';
 import { CoupleDuel } from './CoupleDuel';
 import { SnitchGame } from './SnitchGame';
 import { RuneChess } from './RuneChess';
 import { CodenamesDuet } from './CodenamesDuet';
 import { LoveLetterGame } from './LoveLetterGame';
+import { MemoryFlipGame } from './MemoryFlipGame';
 
-export type TrialSubMode = 'codenames' | 'loveletter' | 'snitch' | 'chess' | 'duel' | 'canvas';
+export type TrialSubMode = 'memory' | 'codenames' | 'loveletter' | 'snitch' | 'chess' | 'duel' | 'canvas';
 
 export const TrialHub: React.FC = () => {
-  const [subMode, setSubMode] = useState<TrialSubMode>('codenames');
+  const [subMode, setSubMode] = useState<TrialSubMode>('memory');
 
   const handleSwitch = (mode: TrialSubMode) => {
     setSubMode(mode);
@@ -23,12 +23,12 @@ export const TrialHub: React.FC = () => {
   };
 
   const navItems = [
-    { id: 'codenames' as TrialSubMode, label: '代号双子', icon: Sparkles },
-    { id: 'loveletter' as TrialSubMode, label: '情书心机', icon: Heart },
-    { id: 'snitch' as TrialSubMode, label: '追逐飞贼', icon: Zap },
+    { id: 'memory' as TrialSubMode, label: '记忆对对碰', icon: Sparkles },
     { id: 'chess' as TrialSubMode, label: '如尼连珠', icon: Crown },
+    { id: 'snitch' as TrialSubMode, label: '追逐飞贼', icon: Zap },
     { id: 'duel' as TrialSubMode, label: '闪回对决', icon: Wand2 },
-    { id: 'canvas' as TrialSubMode, label: '金墨传情', icon: Feather }
+    { id: 'codenames' as TrialSubMode, label: '代号双子', icon: Heart },
+    { id: 'loveletter' as TrialSubMode, label: '情书心机', icon: Feather }
   ];
 
   return (
@@ -44,7 +44,7 @@ export const TrialHub: React.FC = () => {
               <button
                 key={item.id}
                 onClick={() => handleSwitch(item.id)}
-                className={`flex-1 min-w-[54px] py-1.5 px-1 rounded-xl text-[10px] font-serif font-bold transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer relative shrink-0 ${
+                className={`flex-1 min-w-[56px] py-1.5 px-1 rounded-xl text-[10px] font-serif font-bold transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer relative shrink-0 ${
                   isActive ? 'text-[#FFFDF5]' : 'text-[#8C7658] hover:text-[#2C241E]'
                 }`}
               >
@@ -65,6 +65,54 @@ export const TrialHub: React.FC = () => {
 
       {/* Main Mode Stage */}
       <AnimatePresence mode="wait">
+        {subMode === 'memory' && (
+          <motion.div
+            key="memory"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.18 }}
+          >
+            <MemoryFlipGame />
+          </motion.div>
+        )}
+
+        {subMode === 'chess' && (
+          <motion.div
+            key="chess"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.18 }}
+          >
+            <RuneChess />
+          </motion.div>
+        )}
+
+        {subMode === 'snitch' && (
+          <motion.div
+            key="snitch"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.18 }}
+          >
+            <SnitchGame />
+          </motion.div>
+        )}
+
+        {subMode === 'duel' && (
+          <motion.div
+            key="duel"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.18 }}
+          >
+            <CoupleDuel />
+          </motion.div>
+        )}
+
         {subMode === 'codenames' && (
           <motion.div
             key="codenames"
@@ -86,54 +134,6 @@ export const TrialHub: React.FC = () => {
             transition={{ duration: 0.18 }}
           >
             <LoveLetterGame />
-          </motion.div>
-        )}
-
-        {subMode === 'snitch' && (
-          <motion.div
-            key="snitch"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.18 }}
-          >
-            <SnitchGame />
-          </motion.div>
-        )}
-
-        {subMode === 'chess' && (
-          <motion.div
-            key="chess"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.18 }}
-          >
-            <RuneChess />
-          </motion.div>
-        )}
-
-        {subMode === 'duel' && (
-          <motion.div
-            key="duel"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.18 }}
-          >
-            <CoupleDuel />
-          </motion.div>
-        )}
-
-        {subMode === 'canvas' && (
-          <motion.div
-            key="canvas"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.18 }}
-          >
-            <DoodleCanvas />
           </motion.div>
         )}
       </AnimatePresence>
