@@ -52,6 +52,28 @@ export const LocationRadar: React.FC = () => {
   const [trueBearing, setTrueBearing] = useState(42);
   const [isPulsing, setIsPulsing] = useState(false);
 
+  // Weasley Clock 9-state life status system
+  const WEASLEY_STATUSES = [
+    { id: 'home', label: '家宅安歇', icon: '🏰', desc: '炉火融融 · 守候身心' },
+    { id: 'transit', label: '归途漫漫', icon: '🚂', desc: '疾驰于长街晚风之中' },
+    { id: 'work', label: '全神贯注', icon: '📜', desc: '深思研习 · 墨香未干' },
+    { id: 'tea', label: '茶歇漫步', icon: '☕', desc: '品尝甜点与黄油啤酒' },
+    { id: 'sleep', label: '梦境漫游', icon: '🌙', desc: '星夜深沉 · 入梦相见' },
+    { id: 'miss', label: '极度想你', icon: '💫', desc: '心弦微颤 · 同频感应' }
+  ];
+
+  const [myStatusIndex, setMyStatusIndex] = useState(1); // 归途漫漫
+  const [herStatusIndex] = useState(5); // 极度想你
+
+  const handleToggleMyStatus = (idx: number) => {
+    setMyStatusIndex(idx);
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      try {
+        navigator.vibrate([15, 20]); // Mechanical gear tick
+      } catch {}
+    }
+  };
+
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersRef = useRef<{ me?: L.Marker; her?: L.Marker; line?: L.Polyline; steps?: L.Marker[] }>({});
@@ -538,7 +560,7 @@ export const LocationRadar: React.FC = () => {
                   </div>
                   {/* Mini Tag */}
                   <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 px-1.5 py-0.2 rounded-full bg-[#8C1D35] border border-[#FFE599] text-[#FFFDF5] text-[7.5px] font-cinzel font-bold shadow-xs whitespace-nowrap">
-                    HER · 她
+                    HER · {WEASLEY_STATUSES[herStatusIndex].label}
                   </span>
                 </div>
               </div>
@@ -554,7 +576,7 @@ export const LocationRadar: React.FC = () => {
                     />
                   </div>
                   <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 px-1.5 py-0.2 rounded-full bg-[#182638] border border-[#D4AF37] text-[#FFE599] text-[7.5px] font-cinzel font-bold shadow-xs whitespace-nowrap">
-                    ME · 我
+                    ME · {WEASLEY_STATUSES[myStatusIndex].label}
                   </span>
                 </div>
               </div>
@@ -619,13 +641,13 @@ export const LocationRadar: React.FC = () => {
         </div>
 
         {/* Detailed Address Grid */}
-        <div className="space-y-2 text-xs">
-          {/* Her Location Card */}
-          <div className="p-3 rounded-2xl bg-[#FAF5EB] border border-[#D4AF37]/50 shadow-2xs space-y-1">
+        <div className="space-y-2.5 text-xs">
+          {/* Her Location & Weasley Status Card */}
+          <div className="p-3.5 rounded-2xl bg-[#FAF5EB] border border-[#D4AF37]/50 shadow-2xs space-y-1.5">
             <div className="flex items-center justify-between">
               <span className="text-[9.5px] font-cinzel font-bold text-[#8C1D35] flex items-center gap-1">
                 <span className="w-2 h-2 rounded-full bg-[#8C1D35] animate-ping" />
-                HER · 对方实时所在
+                HER · 对方实时所在与韦斯莱钟态
               </span>
               <span className="text-[8.5px] font-mono text-[#8C7658]">
                 {herCoords.lat.toFixed(4)}°N, {herCoords.lng.toFixed(4)}°E
@@ -634,18 +656,24 @@ export const LocationRadar: React.FC = () => {
             <div className="text-[12px] font-bold text-[#2C241E] font-serif">
               {herAddress}
             </div>
-            <div className="text-[9.5px] text-[#8C7658] font-serif italic flex items-center justify-between">
-              <span>移动速度：约 15 km/h · 归途移动中</span>
-              <span className="text-[#8C1D35] font-bold">刚刚活跃</span>
+            
+            {/* Weasley Clock Badge for Her */}
+            <div className="flex items-center justify-between pt-1 border-t border-[#D9C89E]/40 text-[9.5px]">
+              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-[#8C1D35]/10 text-[#8C1D35] font-serif font-bold border border-[#8C1D35]/20">
+                <span>{WEASLEY_STATUSES[herStatusIndex].icon}</span>
+                <span>{WEASLEY_STATUSES[herStatusIndex].label}</span>
+                <span className="text-[8.5px] text-[#8C7658] font-normal">({WEASLEY_STATUSES[herStatusIndex].desc})</span>
+              </div>
+              <span className="text-[#8C1D35] font-serif font-bold text-[8.5px]">黄铜指针锁定</span>
             </div>
           </div>
 
-          {/* My Location Card */}
-          <div className="p-3 rounded-2xl bg-[#FAF5EB] border border-[#D9C89E]/60 space-y-1">
+          {/* My Location & Interactive Weasley Status Selector */}
+          <div className="p-3.5 rounded-2xl bg-[#FAF5EB] border border-[#D9C89E]/60 space-y-1.5">
             <div className="flex items-center justify-between">
               <span className="text-[9.5px] font-cinzel font-bold text-[#2C241E] flex items-center gap-1">
                 <span className="w-2 h-2 rounded-full bg-[#D4AF37]" />
-                ME · 本机实时所在
+                ME · 本机实时所在与拨动齿轮
               </span>
               <span className="text-[8.5px] font-mono text-[#8C7658]">
                 {myCoords.lat.toFixed(4)}°N, {myCoords.lng.toFixed(4)}°E
@@ -654,14 +682,38 @@ export const LocationRadar: React.FC = () => {
             <div className="text-[12px] font-bold text-[#2C241E] font-serif truncate">
               {myAddress}
             </div>
-            <div className="text-[9.5px] text-[#8C7658] font-serif italic flex items-center justify-between">
-              <span>物理状态：静止守候中</span>
-              <button
-                onClick={requestRealLocation}
-                className="text-[#8C1D35] font-serif font-bold hover:underline cursor-pointer"
-              >
-                重新抓取我的GPS
-              </button>
+
+            {/* Weasley Clock Dial Options (Interactive Gears) */}
+            <div className="pt-1.5 border-t border-[#D9C89E]/40 space-y-1">
+              <div className="flex items-center justify-between text-[8.5px] font-cinzel text-[#8C7658]">
+                <span>WEASLEY CLOCK · 拨动你的时针状态</span>
+                <button
+                  onClick={requestRealLocation}
+                  className="text-[#8C1D35] font-serif font-bold hover:underline cursor-pointer"
+                >
+                  刷新GPS
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-3 gap-1.5 pt-0.5">
+                {WEASLEY_STATUSES.map((st, i) => {
+                  const isActive = myStatusIndex === i;
+                  return (
+                    <button
+                      key={st.id}
+                      onClick={() => handleToggleMyStatus(i)}
+                      className={`px-2 py-1 rounded-xl text-[9.5px] font-serif flex items-center justify-center gap-1 transition-all cursor-pointer border ${
+                        isActive
+                          ? 'bg-[#182638] text-[#FFE599] border-[#D4AF37] shadow-xs font-bold'
+                          : 'bg-[#FFFDF9] text-[#7A6750] border-[#D9C89E]/60 hover:border-[#D4AF37]/50'
+                      }`}
+                    >
+                      <span>{st.icon}</span>
+                      <span>{st.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
