@@ -410,15 +410,34 @@ export const LoveLetterGame: React.FC = () => {
           </div>
         </div>
 
-        {/* Narrative Battle Log */}
-        <div className="p-2.5 rounded-xl bg-[#FAF6EE] border border-[#D9C89E]/60 mb-3 text-[11px] font-serif text-[#524336] flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
-            <span>{log}</span>
+        {/* Tactical Battle Log / Action Bar */}
+        <div className="p-3 rounded-2xl bg-gradient-to-r from-[#FAF6EE] to-[#FFFDF9] border border-[#D9C89E]/70 mb-3 text-[11px] font-serif text-[#524336] flex items-center justify-between shadow-2xs">
+          <div className="flex items-center gap-1.5 flex-1 pr-2">
+            <Sparkles className="w-4 h-4 text-[#D4AF37] shrink-0" />
+            <span className="font-bold leading-tight">{log}</span>
           </div>
-          <span className="font-cinzel text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#8C1D35] text-[#FFFDF5]">
-            {activePlayer === 'A' ? 'HE 回合' : 'HER 回合'}
+          <span className="font-cinzel text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#8C1D35] text-[#FFE599] shrink-0 shadow-2xs">
+            {activePlayer === 'A' ? '👦 HE 出牌中' : '👧 HER 出牌中'}
           </span>
+        </div>
+
+        {/* 💡 Direct Strategic Cheat Sheet (直接把博弈逻辑画在眼前，不用死记硬背) */}
+        <div className="p-2.5 rounded-xl bg-[#FAF5EB] border border-[#D9C89E]/60 mb-3 text-[10px] text-[#7A6750] space-y-1">
+          <div className="flex items-center justify-between font-bold text-[#8C1D35]">
+            <span>💡 本轮博弈心法：</span>
+            <span>摸 1 出 1 · 留大牌到最后</span>
+          </div>
+          <div className="grid grid-cols-3 gap-1 text-[9px] text-[#524336] pt-0.5">
+            <span className="bg-[#FFFDF5] p-1 rounded border border-[#D9C89E]/40 text-center">
+              ⚔️ <strong>1~3点</strong>: 攻击刺探
+            </span>
+            <span className="bg-[#FFFDF5] p-1 rounded border border-[#D9C89E]/40 text-center">
+              🛡️ <strong>4~6点</strong>: 换牌自保
+            </span>
+            <span className="bg-[#FFFDF5] p-1 rounded border border-[#D9C89E]/40 text-center text-[#8C1D35]">
+              👑 <strong>8点公主</strong>: 留手里赢
+            </span>
+          </div>
         </div>
 
         {/* Pass & Play Masking Overlay (Prevent seeing opponent hand) */}
@@ -455,7 +474,7 @@ export const LoveLetterGame: React.FC = () => {
                   whileTap={{ scale: 0.95 }}
                   whileHover={{ y: -2 }}
                   onClick={() => handlePlayCard(card)}
-                  className={`p-3.5 rounded-2xl bg-gradient-to-b ${card.artBg} border-2 border-[#D4AF37] hover:border-[#FFE599] shadow-md text-left flex flex-col justify-between h-36 cursor-pointer transition-all relative overflow-hidden group`}
+                  className={`p-3.5 rounded-2xl bg-gradient-to-b ${card.artBg} border-2 border-[#D4AF37] hover:border-[#FFE599] shadow-md text-left flex flex-col justify-between h-40 cursor-pointer transition-all relative overflow-hidden group`}
                 >
                   <div className="flex items-center justify-between">
                     <span className="w-7 h-7 rounded-full bg-[#8C1D35] text-[#FFE599] flex items-center justify-center font-mono font-bold text-sm shadow-xs border border-[#FFE599]/40">
@@ -473,6 +492,11 @@ export const LoveLetterGame: React.FC = () => {
                     <p className="text-[10px] text-[#F3E5AB] font-serif leading-tight line-clamp-2 opacity-90">
                       {card.desc}
                     </p>
+                  </div>
+
+                  {/* 直观点击出牌指示 */}
+                  <div className="w-full py-1 text-center rounded-lg bg-black/30 border border-white/10 text-[9.5px] font-bold text-[#FFE599] group-hover:bg-[#8C1D35] transition-colors">
+                    点击打出此牌 👆
                   </div>
                 </motion.button>
               ))}
