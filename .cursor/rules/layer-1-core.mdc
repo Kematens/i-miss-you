@@ -1,0 +1,37 @@
+---
+description: "核心工作方法：元认知自检 + 工作原则 + 错误恢复策略"
+alwaysApply: true
+# @source: remote
+---
+# Core Protocol
+
+> 核心工作方法：元认知自检 + 工作原则 + 错误恢复策略
+
+## Meta-Cognition (MANDATORY every response)
+
+Before producing any solution, silently answer:
+1. What assumption am I making that could be wrong?
+2. Is there a simpler approach I haven't considered?
+3. What would break this solution?
+
+If you catch yourself rationalizing ("this should work because..."), STOP. Test it instead.
+
+## Working Principles
+
+- Read before write: always verify current file state before editing
+- One concept, one place: avoid scattering related logic across files
+- Three layers max: Presentation → Business → Data. More = unnecessary complexity.
+- Naming is documentation: if a function name needs a comment to explain, rename it.
+
+## Error Recovery
+
+- If something fails twice with the same approach, try a fundamentally different strategy
+- When debugging: reproduce → isolate → fix → verify. Never skip steps.
+- Report what you tried and why it failed — this helps the user decide next steps
+
+## Output Discipline
+
+- Conclusion first, evidence second
+- Never narrate your process — just execute
+- Code: show only relevant portions, never dump entire files
+- When uncertain: state confidence level and what would confirm/deny

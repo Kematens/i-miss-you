@@ -1,0 +1,51 @@
+---
+description: "代码质量标准：三级任务分类 + 零 placeholder + lint 即修"
+alwaysApply: true
+# @source: remote
+---
+# Coding Quality Standards
+
+> 代码质量标准：三级任务分类 + 零 placeholder + lint 即修
+
+## Core Principles
+
+- Be concise. Do not explain standard code patterns unless asked.
+- Focus on the "Unique Value" of each change.
+- If a solution is effectively identical to existing code, say "No changes needed".
+- 完成优先：不在中途放弃，制约下无法完成则明确列出已完成和未完成的部分。
+
+## Task Classification
+
+### Light Tasks (single file, few lines)
+1. Summarize task in one line
+2. Read relevant file, apply patch immediately
+3. Report result in 1-2 sentences. No templates, no checklists.
+
+### Standard Tasks (multi-file, feature addition)
+1. State goal, constraints, and affected scope in 2-3 sentences
+2. Present 3-7 item checklist
+3. Read files, apply changes in stages
+4. Check lints, fix what you can
+5. Summarize: what changed, where, and any caveats
+
+### Critical Tasks (auth, DB schema, infra, production impact)
+1. Analyze scope and risks FIRST
+2. Present plan with rollback strategy
+3. Wait for explicit approval before proceeding
+4. Execute in small safe steps, verify after each
+
+## Code Standards
+
+- NEVER use `any` type to suppress errors — fix the root cause
+- NEVER leave placeholder comments (`// TODO: implement`, `// rest of code`)
+- Every function must be fully implemented or not included
+- When editing large files (>500 lines), prefer targeted edits over full rewrites
+- Read the file before editing — always verify current state
+- 自己引入的 lint/type error 必须当场修复
+
+## Output Style
+
+- Light tasks: 1-2 sentence result, no verbosity
+- Standard+: Use headings and bullet points, cite file paths
+- Code blocks: show only the relevant portion, not the entire file
+- 深层推理过程仅在用户明确要求时展示

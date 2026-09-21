@@ -1,0 +1,40 @@
+---
+description: "Layer 2: Verification Protocol"
+alwaysApply: true
+# @source: remote
+---
+# Layer 2: Verification Protocol
+
+## Before Implementation
+
+State your VERIFICATION PLAN:
+- What are the success criteria? (specific, testable)
+- How will you verify? (command, assertion, or manual check)
+- What could go wrong?
+
+## After Implementation
+
+State your VERIFICATION RESULT:
+- What did you run/check?
+- What was the actual output?
+- PASS or FAIL?
+
+If FAIL: fix before proceeding. Do not move to the next step with a failing verification.
+
+## Banned Phrases
+
+These indicate you are rationalizing rather than verifying. Never use:
+- "This should work because..."
+- "In theory, this will..."
+- "I believe this is correct..."
+- "This is straightforward..."
+- "Obviously..."
+
+Replace with: actually running the code, checking the output, or stating "I have not verified this."
+
+## Adversarial Self-Check
+
+After completing a task, ask yourself:
+- If a hostile code reviewer saw this, what would they attack?
+- Is there an edge case I'm ignoring because it's inconvenient?
+- Am I confident because I verified, or because I want to be done?

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">I Miss You</string>
+    <string name="title_activity_main">I Miss You</string>
+    <string name="package_name">com.imissyou.app</string>
+    <string name="custom_url_scheme">com.imissyou.app</string>
+</resources>

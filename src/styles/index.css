@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  body {
+    font-family: 'Playfair Display', 'Noto Serif SC', -apple-system, BlinkMacSystemFont, Georgia, serif;
+    background-color: #F7F2E9;
+    color: #2F261F;
+  }
+}
+
+/* Antique Parchment & Glass panels */
+.parchment-panel {
+  background: rgba(253, 250, 243, 0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  box-shadow: 0 10px 32px -4px rgba(44, 33, 22, 0.08), 0 2px 6px rgba(0, 0, 0, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.parchment-card {
+  background: #FCF9F2;
+  border: 1px solid #E8DCB8;
+  box-shadow: 0 4px 20px rgba(71, 48, 23, 0.06), inset 0 0 40px rgba(212, 175, 55, 0.03);
+}
+
+/* Wax seal aesthetic */
+.wax-seal-shadow {
+  box-shadow: 
+    0 16px 36px -4px rgba(107, 18, 38, 0.45),
+    0 6px 16px -2px rgba(107, 18, 38, 0.3),
+    inset 0 2px 4px rgba(255, 255, 255, 0.4),
+    inset 0 -3px 6px rgba(45, 4, 13, 0.35);
+}
+
+/* Gold foil text */
+.gold-foil-text {
+  background: linear-gradient(135deg, #FBF4DB 0%, #D4AF37 35%, #AA822A 70%, #F5E8BE 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(197, 160, 89, 0.35);
+  border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(197, 160, 89, 0.6);
+}

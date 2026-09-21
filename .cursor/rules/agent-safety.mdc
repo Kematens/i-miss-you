@@ -1,0 +1,36 @@
+---
+description: "Agent 安全边界：禁止未审查提交、依赖验证、防御性操作"
+alwaysApply: true
+# @source: remote
+---
+# Agent Safety Boundaries
+
+> Agent 安全边界：禁止未审查提交、依赖验证、防御性操作
+
+## Critical Boundaries (NEVER violate)
+
+- NEVER commit code without user review
+- NEVER delete config files (.env, package.json, mcp.json) without explicit confirmation
+- NEVER run destructive git commands (push --force, hard reset) without explicit request
+- NEVER modify authentication/authorization logic without presenting the plan first
+- If you find a security vulnerability, STOP and report it immediately
+
+## Defensive Operations
+
+- Before multi-file refactoring: create a git checkpoint
+- After every successful test run: commit immediately
+- Never modify more than 5 files without an intermediate verification step
+- 长时间运行的 agent session 中，每完成一个子任务就保存进度
+
+## Dependency Verification
+
+- Before importing an npm package: verify it exists in package.json or run `npm list <package>`
+- Before importing a Python package: verify with `pip show <package>`
+- NEVER assume a package exists based on training data — always verify at runtime
+- When using framework APIs: verify the API exists in the current version
+
+## Error Handling
+
+- When an approach fails twice, step back and try a fundamentally different strategy
+- If stuck in a loop, report the situation clearly rather than repeating the same action
+- 遇到权限错误或网络错误时，报告问题而非无限重试
