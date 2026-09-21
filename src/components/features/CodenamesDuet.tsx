@@ -14,18 +14,21 @@ interface WordCard {
   revealedBy?: 'A' | 'B';
 }
 
-const HOGWARTS_ROMANCE_WORDS = [
-  '金色飞贼', '隐形斗篷', '黄油啤酒', '活点地图',
-  '厄里斯魔镜', '冬青木魔杖', '九又四分之三', '初雪散步',
-  '对角巷烛光', '守护神牡鹿', '时间转换器', '晚安拥抱',
-  '蜂蜜公爵', '海格的小屋', '黑湖倒影', '有求必应屋'
+// 情侣真实生活日常与甜蜜心动词库（通俗易懂、好出题、好联想）
+const SWEET_COUPLE_WORDS = [
+  '奶茶', '火锅', '看电影', '牵手',
+  '晚安吻', '拥抱', '散步', '做饭',
+  '毛毯', '下雨天', '听歌', '礼物',
+  '拍照', '吃夜宵', '旅行', '游乐园',
+  '被窝', '甜品', '猫咪', '吹头发',
+  '便利店', '夕阳', '奶芙', '摩天轮'
 ];
 
 export const CodenamesDuet: React.FC = () => {
   // Generate a 4x4 matrix game
   const initGame = () => {
-    // Pick 16 words
-    const shuffledWords = [...HOGWARTS_ROMANCE_WORDS].sort(() => Math.random() - 0.5);
+    // Pick 16 words from common romance pool
+    const shuffledWords = [...SWEET_COUPLE_WORDS].sort(() => Math.random() - 0.5).slice(0, 16);
 
     // Distribution:
     // 5 agents for A, 5 agents for B (with 1 or 2 overlaps)
@@ -264,7 +267,7 @@ export const CodenamesDuet: React.FC = () => {
             >
               <div className="flex items-center justify-between text-[9.5px] font-cinzel mb-1.5 text-[#C5A059]">
                 <span>✦ 只有当前出题人可见的羊皮密码图 ✦</span>
-                <span className="text-[#FFE599]">向对方给出 1个线索词 + 数字</span>
+                <span className="text-[#FFE599]">向对方给出 1个线索词 + 数字（如“美食 2”）</span>
               </div>
               <div className="grid grid-cols-4 gap-1">
                 {cards.map((c) => {
@@ -429,23 +432,23 @@ export const CodenamesDuet: React.FC = () => {
                 <div className="space-y-2 text-[11px] leading-relaxed text-[#524336] font-serif max-h-72 overflow-y-auto pr-1">
                   <div className="p-2 rounded-xl bg-[#FAF5EB] border border-[#D9C89E]/60">
                     <span className="font-bold text-[#8C1D35] block mb-0.5">🎯 游戏目标</span>
-                    你们是霍格沃茨的双人搭档，需要在 <strong>9 个回合内</strong>，互相出题配合，共同找出所有的<strong>【绿色特工词】</strong>！
+                    你们是心有灵犀的双人搭档，需要在 <strong>9 个回合内</strong>，互相出题配合，共同找出所有的<strong>【绿色目标词】</strong>！
                   </div>
 
                   <div className="p-2 rounded-xl bg-[#FAF5EB] border border-[#D9C89E]/60">
                     <span className="font-bold text-[#8C1D35] block mb-0.5">👁️ 步骤一：出题人看密码</span>
-                    轮到你出题时，点击<strong>「查看我方密码」</strong>（不要让对方看到）。你会看到哪些词是<strong>绿色（目标词）</strong>，哪一个是<strong>红色（摄魂怪，碰了直接输）</strong>。
+                    轮到你出题时，点击<strong>「查看我方密码」</strong>（把手机侧过来不让对方看到）。你会看到哪些词是<strong>绿色（目标词）</strong>，哪一个是<strong>红色（地雷词，碰了直接输）</strong>。
                   </div>
 
                   <div className="p-2 rounded-xl bg-[#FAF5EB] border border-[#D9C89E]/60">
                     <span className="font-bold text-[#8C1D35] block mb-0.5">🗣️ 步骤二：口头给线索</span>
                     对对方说出：<strong>【1个线索词 + 1个数字】</strong>。<br />
-                    <em>例如你的绿色词有「金色飞贼」和「黄油啤酒」，你可以对她说：“甜蜜 2” 或 “霍格沃茨 2”。</em>
+                    <em>例如你的绿色词有「奶茶」和「火锅」，你可以对她说：“好吃的 2” 或 “冬天 2”。</em>
                   </div>
 
                   <div className="p-2 rounded-xl bg-[#FAF5EB] border border-[#D9C89E]/60">
                     <span className="font-bold text-[#8C1D35] block mb-0.5">👆 步骤三：对方猜词翻牌</span>
-                    对方根据你的提示，在 16 个方格中点击猜词。猜完后点击<strong>「交换出题」</strong>换对方出题。避开摄魂怪全部找齐即默契通关！
+                    对方根据你的提示，在 16 个方格中点击猜词。猜完后点击<strong>「交换出题」</strong>换对方出题。避开地雷词全部找齐即默契通关！
                   </div>
                 </div>
 
