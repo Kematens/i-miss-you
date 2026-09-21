@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, Swords, Eye, RotateCcw, HelpCircle, Sparkles, Trophy, Shield, Wifi, Hourglass, Send, Users } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { ClickSpark } from '../animations/ClickSpark';
 import { ShinyText } from '../animations/ShinyText';
+import { useCouple } from '../../context/CoupleContext';
 
 export interface CardDef {
   id: number;
@@ -80,13 +81,32 @@ export const LoveLetterGame: React.FC = () => {
   const [showRules, setShowRules] = useState(false);
   const [hideHand, setHideHand] = useState(false);
 
-  // Online Multiplayer Simulation State
+  // Online Multiplayer State via CoupleContext
+  const { myRole, partnerOnline, pairingCode, sendEvent, onEvent } = useCouple();
   const [isOnlineMode, setIsOnlineMode] = useState(true);
-  const [myOnlineRole, setMyOnlineRole] = useState<'A' | 'B'>('A'); // View from HE (A) or HER (B)
-  const [roomCode] = useState('LUMOS-520');
+  const [myOnlineRole, setMyOnlineRole] = useState<'A' | 'B'>(() => (myRole === 'HE' ? 'A' : 'B'));
+  const roomCode = pairingCode;
   const [floatingEmojis, setFloatingEmojis] = useState<FloatingEmoji[]>([]);
   const [drawingCardAnim, setDrawingCardAnim] = useState<CardDef | null>(null);
   const [slammingCardAnim, setSlammingCardAnim] = useState<CardDef | null>(null);
+
+  // Sync role with myRole
+  useEffect(() => {
+    setMyOnlineRole(myRole === 'HE' ? 'A' : 'B');
+  }, [myRole]);
+
+  // Listen for remote reactions
+  useEffect(() => {
+    const unsubEmoji = onEvent<FloatingEmoji>('LOVE_LETTER_EMOJI', (emoji) => {
+      if (emoji?.text) {
+        setFloatingEmojis((prev) => [...prev, emoji]);
+        setTimeout(() => {
+          setFloatingEmojis((prev) => prev.filter((e) => e.id !== emoji.id));
+        }, 2000);
+      }
+    });
+    return unsubEmoji;
+  }, [onEvent]);
 
   // Turn draw
   const drawCardForCurrent = () => {
@@ -181,6 +201,7 @@ export const LoveLetterGame: React.FC = () => {
       x: 30 + Math.random() * 40
     };
     setFloatingEmojis((prev) => [...prev, newEmoji]);
+    sendEvent('LOVE_LETTER_EMOJI', newEmoji);
 
     if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
       try {
@@ -441,8 +462,8 @@ export const LoveLetterGame: React.FC = () => {
                     LOVE LETTER
                   </span>
                   <span className="text-[8px] px-1.5 py-0.2 rounded-full bg-emerald-500/15 text-emerald-700 font-cinzel font-bold border border-emerald-500/30 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    云端同步中
+                    <span className={`w-1.5 h-1.5 rounded-full ${partnerOnline ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+                    {partnerOnline ? '双方已连线' : '云端待命中'}
                   </span>
                 </div>
                 <h2 className="text-xs font-bold text-[#2C241E] font-serif mt-0.5">
