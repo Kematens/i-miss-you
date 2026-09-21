@@ -54,7 +54,7 @@ export const LocationRadar: React.FC = () => {
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
-  const markersRef = useRef<{ me?: L.Marker; her?: L.Marker; line?: L.Polyline }>({});
+  const markersRef = useRef<{ me?: L.Marker; her?: L.Marker; line?: L.Polyline; steps?: L.Marker[] }>({});
 
   // Acquire real GPS position of current device
   const requestRealLocation = () => {
@@ -208,6 +208,42 @@ export const LocationRadar: React.FC = () => {
     const meMarker = L.marker([myCoords.lat, myCoords.lng], { icon: meIcon }).addTo(map);
     const herMarker = L.marker([herCoords.lat, herCoords.lng], { icon: herIcon }).addTo(map);
 
+    // Dynamic Ink Footstep path between ME and HER
+    const stepsCount = 5;
+    const footstepMarkers: L.Marker[] = [];
+    const angleRad = Math.atan2(herCoords.lat - myCoords.lat, herCoords.lng - myCoords.lng);
+    const angleDeg = (angleRad * 180) / Math.PI;
+
+    for (let i = 1; i <= stepsCount; i++) {
+      const frac = i / (stepsCount + 1);
+      const stepLat = myCoords.lat + (herCoords.lat - myCoords.lat) * frac;
+      const stepLng = myCoords.lng + (herCoords.lng - myCoords.lng) * frac;
+      const isLeft = i % 2 === 1;
+
+      const footIcon = L.divIcon({
+        className: 'ink-footstep-icon',
+        html: `
+          <div style="transform: rotate(${angleDeg + 90}deg); opacity: 0.85; display: flex; flex-direction: column; align-items: center;">
+            <svg width="14" height="20" viewBox="0 0 14 20" fill="none">
+              <!-- Left or Right Foot Sole -->
+              <ellipse cx="${isLeft ? 6 : 8}" cy="13" rx="4.5" ry="5.5" fill="#D4AF37" opacity="0.8" />
+              <!-- Heel -->
+              <ellipse cx="${isLeft ? 6 : 8}" cy="5" rx="3.5" ry="3.8" fill="#D4AF37" opacity="0.9" />
+              <!-- Toes arc -->
+              <circle cx="${isLeft ? 4 : 6}" cy="18" r="1.2" fill="#FFE599" />
+              <circle cx="${isLeft ? 6.5 : 8.5}" cy="18.5" r="1.3" fill="#FFE599" />
+              <circle cx="${isLeft ? 9 : 10.5}" cy="17.5" r="1.1" fill="#FFE599" />
+            </svg>
+          </div>
+        `,
+        iconSize: [16, 22],
+        iconAnchor: [8, 11]
+      });
+
+      const stepMarker = L.marker([stepLat, stepLng], { icon: footIcon }).addTo(map);
+      footstepMarkers.push(stepMarker);
+    }
+
     const polyline = L.polyline(
       [
         [myCoords.lat, myCoords.lng],
@@ -215,13 +251,13 @@ export const LocationRadar: React.FC = () => {
       ],
       {
         color: '#D4AF37',
-        weight: 2.5,
-        opacity: 0.85,
-        dashArray: '6, 8'
+        weight: 1.8,
+        opacity: 0.65,
+        dashArray: '4, 8'
       }
     ).addTo(map);
 
-    markersRef.current = { me: meMarker, her: herMarker, line: polyline };
+    markersRef.current = { me: meMarker, her: herMarker, line: polyline, steps: footstepMarkers };
 
     const bounds = L.latLngBounds([
       [myCoords.lat, myCoords.lng],
@@ -231,6 +267,9 @@ export const LocationRadar: React.FC = () => {
 
     return () => {
       if (mapInstanceRef.current) {
+        if (markersRef.current.steps) {
+          markersRef.current.steps.forEach((s) => mapInstanceRef.current?.removeLayer(s));
+        }
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
         markersRef.current = {};
@@ -408,17 +447,35 @@ export const LocationRadar: React.FC = () => {
                 <text x="32" y="143" textAnchor="middle" className="font-cinzel text-[8.5px] fill-[#C5A059] font-bold">W</text>
                 <text x="248" y="143" textAnchor="middle" className="font-cinzel text-[8.5px] fill-[#C5A059] font-bold">E</text>
 
-                {/* Resonance Light Ray from ME (Center) to HER (Orbit) */}
+                {/* Resonance Light Ray & Marauder Footsteps from ME to HER */}
                 <line
                   x1="140"
                   y1="140"
                   x2={herNodeX}
                   y2={herNodeY}
                   stroke="#D4AF37"
-                  strokeWidth="1.8"
-                  strokeDasharray="4 4"
-                  opacity="0.8"
+                  strokeWidth="1.2"
+                  strokeDasharray="3 4"
+                  opacity="0.5"
                 />
+
+                {/* 3 Golden Ink Footstep Nodes along the ray */}
+                {[0.28, 0.52, 0.76].map((frac, idx) => {
+                  const stepX = 140 + (herNodeX - 140) * frac;
+                  const stepY = 140 + (herNodeY - 140) * frac;
+                  const angle = (Math.atan2(herNodeY - 140, herNodeX - 140) * 180) / Math.PI;
+                  const isLeft = idx % 2 === 0;
+                  return (
+                    <g
+                      key={`ray-step-${idx}`}
+                      transform={`translate(${stepX}, ${stepY}) rotate(${angle + 90}) scale(0.65)`}
+                      opacity={0.85}
+                    >
+                      <ellipse cx={isLeft ? -2 : 2} cy="3" rx="2.5" ry="3.5" fill="#FFE599" />
+                      <ellipse cx={isLeft ? -2 : 2} cy="-3" rx="2" ry="2.2" fill="#D4AF37" />
+                    </g>
+                  );
+                })}
               </svg>
 
               {/* 2. Slow Rotating Latin Astrolabe Ring */}
