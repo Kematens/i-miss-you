@@ -338,22 +338,22 @@ export const LoveLetterGame: React.FC = () => {
       <div className="relative rounded-3xl border border-[#D4AF37]/50 bg-[#FCF9F2]/95 shadow-[0_16px_36px_-6px_rgba(45,30,15,0.09)] p-4 sm:p-5 text-[#2C241E] overflow-hidden">
         
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-[#D9C89E]/60 mb-3">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-2xl bg-[#8C1D35] border border-[#D4AF37]/40 text-[#F5E8BE] flex items-center justify-center shadow-xs">
-              <Heart className="w-4 h-4 text-[#FFE599] fill-current" />
+        <div className="flex items-center justify-between pb-3.5 border-b border-[#D9C89E]/60 mb-3.5">
+          <div className="flex items-center gap-2.5">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#6B1226] via-[#8C1D35] to-[#B32645] border-2 border-[#D4AF37] text-[#FFE599] flex items-center justify-center shadow-md">
+              <Heart className="w-5 h-5 text-[#FFE599] fill-current filter drop-shadow-xs" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-[10px] font-cinzel tracking-[0.2em] text-[#8C7658] block leading-none">
-                  LOVE LETTER · 情书密令
+                <span className="text-[10px] font-cinzel tracking-[0.25em] text-[#8C7658] font-bold block leading-none">
+                  LOVE LETTER · 王室情书
                 </span>
-                <span className="text-[8px] px-1.5 py-0.2 rounded bg-[#D4AF37]/15 text-[#8C1D35] font-cinzel border border-[#D4AF37]/30">
-                  TOP 1 MIND GAME
+                <span className="text-[8px] px-2 py-0.5 rounded-full bg-gradient-to-r from-[#D4AF37]/20 to-[#8C1D35]/15 text-[#8C1D35] font-cinzel font-bold border border-[#D4AF37]/40 shadow-2xs">
+                  经典心理博弈
                 </span>
               </div>
-              <h2 className="text-xs font-bold text-[#2C241E] font-serif mt-0.5">
-                摸一张出一张 · 猜心心理博弈
+              <h2 className="text-sm font-bold text-[#2C241E] font-serif mt-0.5">
+                情书心机 · 摸一出一心智决斗
               </h2>
             </div>
           </div>
@@ -361,14 +361,14 @@ export const LoveLetterGame: React.FC = () => {
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => setShowRules(true)}
-              className="px-2 py-1 rounded-xl bg-[#FAF5EB] text-[#8C1D35] hover:bg-[#EADBC4] border border-[#D4AF37]/50 text-[10px] font-bold font-serif flex items-center gap-1 cursor-pointer transition-colors"
+              className="px-2.5 py-1.5 rounded-xl bg-gradient-to-b from-[#FAF5EB] to-[#F0E4D0] text-[#8C1D35] hover:brightness-95 border border-[#D4AF37]/60 text-[10px] font-bold font-serif flex items-center gap-1 cursor-pointer transition-all shadow-2xs"
             >
               <HelpCircle className="w-3.5 h-3.5 text-[#C5A059]" />
-              <span>卡牌表</span>
+              <span>卡牌全览</span>
             </button>
             <button
               onClick={handleNextRound}
-              className="p-1.5 rounded-xl bg-[#FAF5EB] text-[#8C7658] hover:text-[#8C1D35] hover:bg-[#EADBC4] border border-[#D9C89E]/70 transition-colors cursor-pointer"
+              className="p-1.5 rounded-xl bg-gradient-to-b from-[#FAF5EB] to-[#F0E4D0] text-[#8C7658] hover:text-[#8C1D35] border border-[#D9C89E]/70 transition-all cursor-pointer shadow-2xs"
               title="重开一局"
             >
               <RotateCcw className="w-3.5 h-3.5" />
@@ -377,33 +377,33 @@ export const LoveLetterGame: React.FC = () => {
         </div>
 
         {/* Score & Deck Status Bar */}
-        <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-[#FAF5EB] border border-[#D9C89E]/60 mb-2.5 text-xs font-cinzel">
+        <div className="flex items-center justify-between px-3.5 py-2.5 rounded-2xl bg-gradient-to-r from-[#FAF5EB] via-[#FFFDF9] to-[#FAF5EB] border-2 border-[#D4AF37]/45 mb-3 text-xs font-cinzel shadow-xs">
           {/* HE Hearts */}
-          <div className="flex items-center gap-1">
-            <span className="text-[10px] text-[#8C7658]">HE:</span>
-            <div className="flex gap-0.5">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] text-[#8C7658] font-bold">👦 HE:</span>
+            <div className="flex gap-1">
               {[0, 1, 2].map((i) => (
                 <Heart
                   key={i}
-                  className={`w-3.5 h-3.5 ${i < tokensA ? 'text-[#8C1D35] fill-current' : 'text-[#D9C89E]'}`}
+                  className={`w-4 h-4 filter drop-shadow-2xs ${i < tokensA ? 'text-[#8C1D35] fill-current animate-pulse' : 'text-[#D9C89E]'}`}
                 />
               ))}
             </div>
           </div>
 
           {/* Remaining in Deck */}
-          <div className="text-[10.5px] font-bold text-[#C5A059] flex items-center gap-1">
-            <span>DECK: {state.deck.length} 张</span>
+          <div className="text-xs font-bold text-[#8C1D35] bg-[#FAF5EB] px-2.5 py-0.5 rounded-full border border-[#D4AF37]/40 shadow-2xs flex items-center gap-1">
+            <span>🎴 剩余牌库: {state.deck.length}</span>
           </div>
 
           {/* HER Hearts */}
-          <div className="flex items-center gap-1">
-            <span className="text-[10px] text-[#8C7658]">HER:</span>
-            <div className="flex gap-0.5">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] text-[#8C7658] font-bold">👧 HER:</span>
+            <div className="flex gap-1">
               {[0, 1, 2].map((i) => (
                 <Heart
                   key={i}
-                  className={`w-3.5 h-3.5 ${i < tokensB ? 'text-[#8C1D35] fill-current' : 'text-[#D9C89E]'}`}
+                  className={`w-4 h-4 filter drop-shadow-2xs ${i < tokensB ? 'text-[#8C1D35] fill-current animate-pulse' : 'text-[#D9C89E]'}`}
                 />
               ))}
             </div>

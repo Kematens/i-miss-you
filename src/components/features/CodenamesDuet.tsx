@@ -191,22 +191,22 @@ export const CodenamesDuet: React.FC = () => {
       <div className="relative rounded-3xl border border-[#D4AF37]/50 bg-[#FCF9F2]/95 shadow-[0_16px_36px_-6px_rgba(45,30,15,0.09)] p-4 sm:p-5 text-[#2C241E] overflow-hidden">
         
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-[#D9C89E]/60 mb-3">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-2xl bg-[#8C1D35] border border-[#D4AF37]/40 text-[#F5E8BE] flex items-center justify-center shadow-xs">
-              <Sparkles className="w-4 h-4 text-[#FFE599]" />
+        <div className="flex items-center justify-between pb-3 border-b border-[#D9C89E]/60 mb-3.5">
+          <div className="flex items-center gap-2.5">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#6B1226] via-[#8C1D35] to-[#B32645] border-2 border-[#D4AF37] text-[#FFE599] flex items-center justify-center shadow-md">
+              <Sparkles className="w-5 h-5 text-[#FFE599] filter drop-shadow-xs" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-[10px] font-cinzel tracking-[0.2em] text-[#8C7658] block leading-none">
-                  CODENAMES · 如尼密语
+                <span className="text-[10px] font-cinzel tracking-[0.25em] text-[#8C7658] font-bold block leading-none">
+                  CODENAMES DUET
                 </span>
-                <span className="text-[8px] px-1.5 py-0.2 rounded bg-[#D4AF37]/15 text-[#8C1D35] font-cinzel border border-[#D4AF37]/30">
-                  CO-OP DUET
+                <span className="text-[8px] px-2 py-0.5 rounded-full bg-gradient-to-r from-[#D4AF37]/20 to-[#8C1D35]/15 text-[#8C1D35] font-cinzel font-bold border border-[#D4AF37]/40 shadow-2xs">
+                  双人专属密谋
                 </span>
               </div>
-              <h2 className="text-xs font-bold text-[#2C241E] font-serif mt-0.5">
-                双人合作默契解谜 · 避开摄魂怪
+              <h2 className="text-sm font-bold text-[#2C241E] font-serif mt-0.5">
+                代号双子 · 恋人默契暗语推演
               </h2>
             </div>
           </div>
@@ -214,14 +214,14 @@ export const CodenamesDuet: React.FC = () => {
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => setShowRuleModal(true)}
-              className="px-2 py-1 rounded-xl bg-[#FAF5EB] text-[#8C1D35] hover:bg-[#EADBC4] border border-[#D4AF37]/50 text-[10px] font-bold font-serif flex items-center gap-1 cursor-pointer transition-colors"
+              className="px-2.5 py-1.5 rounded-xl bg-gradient-to-b from-[#FAF5EB] to-[#F0E4D0] text-[#8C1D35] hover:brightness-95 border border-[#D4AF37]/60 text-[10px] font-bold font-serif flex items-center gap-1 cursor-pointer transition-all shadow-2xs"
             >
               <HelpCircle className="w-3.5 h-3.5 text-[#C5A059]" />
-              <span>玩法说明</span>
+              <span>规则秘籍</span>
             </button>
             <button
               onClick={handleReset}
-              className="p-1.5 rounded-xl bg-[#FAF5EB] text-[#8C7658] hover:text-[#8C1D35] hover:bg-[#EADBC4] border border-[#D9C89E]/70 transition-colors cursor-pointer"
+              className="p-1.5 rounded-xl bg-gradient-to-b from-[#FAF5EB] to-[#F0E4D0] text-[#8C7658] hover:text-[#8C1D35] border border-[#D9C89E]/70 transition-all cursor-pointer shadow-2xs"
               title="重新洗牌发牌"
             >
               <RotateCcw className="w-3.5 h-3.5" />
@@ -257,43 +257,45 @@ export const CodenamesDuet: React.FC = () => {
         </div>
 
         {/* Turn HUD & Key Card Peek Control */}
-        <div className="flex items-center justify-between px-2.5 py-2 rounded-xl bg-[#FAF5EB] border border-[#D9C89E]/60 mb-2 text-xs font-cinzel">
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10px] text-[#8C7658]">VIEW:</span>
-            <span className="font-bold text-[#8C1D35]">
-              {currentView === 'A' ? 'HE (出题视角)' : 'HER (出题视角)'}
+        <div className="flex items-center justify-between px-3 py-2.5 rounded-2xl bg-gradient-to-r from-[#FAF5EB] via-[#FFFDF9] to-[#FAF5EB] border-2 border-[#D4AF37]/45 mb-2.5 text-xs font-cinzel shadow-xs">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] text-[#8C7658] font-bold">CURRENT:</span>
+            <span className="font-bold text-[#8C1D35] px-2 py-0.5 rounded-lg bg-[#8C1D35]/10 border border-[#8C1D35]/20">
+              {currentView === 'A' ? '👦 HE 出题视角' : '👧 HER 出题视角'}
             </span>
           </div>
 
           {/* Toggle Secret Key Card Peek */}
           <button
             onClick={() => setPeekSecretKey(!peekSecretKey)}
-            className={`px-2 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 transition-all cursor-pointer border ${
+            className={`px-3 py-1.5 rounded-xl text-[10.5px] font-bold font-serif flex items-center gap-1.5 transition-all cursor-pointer border-2 shadow-xs ${
               peekSecretKey
-                ? 'bg-[#8C1D35] text-[#FFFDF5] border-[#D4AF37]'
-                : 'bg-[#FCF9F2] text-[#8C7658] border-[#D9C89E] hover:text-[#2C241E]'
+                ? 'bg-gradient-to-r from-[#8C1D35] to-[#5C0D1E] text-[#FFFDF5] border-[#D4AF37]'
+                : 'bg-gradient-to-b from-[#FFFDF9] to-[#F5EBD9] text-[#8C1D35] border-[#D4AF37]/60 hover:border-[#D4AF37]'
             }`}
           >
-            {peekSecretKey ? <EyeOff className="w-3 h-3 text-[#FFE599]" /> : <Eye className="w-3 h-3" />}
-            <span>{peekSecretKey ? '隐藏密码卡' : '查看我方密码'}</span>
+            {peekSecretKey ? <EyeOff className="w-3.5 h-3.5 text-[#FFE599]" /> : <Eye className="w-3.5 h-3.5 text-[#8C1D35]" />}
+            <span>{peekSecretKey ? '隐藏绝密密码' : '🔑 偷看我方密码'}</span>
           </button>
 
           <div className="text-right font-mono">
-            <span className="text-[10px] text-[#8C7658] mr-1">TURNS:</span>
-            <span className="font-bold text-[#8C1D35]">{turnsLeft}</span>
+            <span className="text-[10px] text-[#8C7658] mr-1 font-cinzel">TURNS:</span>
+            <span className="font-bold text-sm text-[#8C1D35]">{turnsLeft}</span>
           </div>
         </div>
 
         {/* Dynamic Inline Tutorial Tip */}
-        <div className="p-2 rounded-xl bg-[#FAF6EE] border border-[#D9C89E]/50 mb-3 text-[10px] text-[#7A6750] flex items-center justify-between">
+        <div className="p-3 rounded-2xl bg-gradient-to-r from-[#FAF6EE] to-[#FFFDF9] border border-[#D9C89E]/70 mb-3 text-[11px] text-[#524336] flex items-center justify-between shadow-2xs">
           <span>
             {peekSecretKey ? (
-              <span className="text-[#8C1D35] font-bold">
-                私密提示：记住绿色目标词，对她说一个线索（例如“甜蜜 2”），不要让她看屏幕！
+              <span className="text-[#8C1D35] font-bold flex items-center gap-1.5">
+                <span className="text-base">🤫</span>
+                <span>私密出题中：只能看绿色词，向对方说出【1个词 + 目标词数】（例：“浪漫 2”）</span>
               </span>
             ) : (
-              <span>
-                轮到对方猜词时，在下方 16 个词中点击翻牌；猜完点击右下角【交换出题】。
+              <span className="flex items-center gap-1.5">
+                <span className="text-base">🧐</span>
+                <span>根据对方刚才说的线索，在下方点击翻开你猜的词；猜完点右下角【交换出题】。</span>
               </span>
             )}
           </span>
