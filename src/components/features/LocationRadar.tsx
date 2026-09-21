@@ -65,6 +65,13 @@ export const LocationRadar: React.FC = () => {
   const [myStatusIndex, setMyStatusIndex] = useState(1); // 归途漫漫
   const [herStatusIndex] = useState(5); // 极度想你
 
+  // Secret Cipher Pairing System (双向魔法暗号配对密匣)
+  const [showPairModal, setShowPairModal] = useState(false);
+  const [pairingCode, setPairingCode] = useState(() => {
+    return localStorage.getItem('marauder_pairing_code') || 'LUMOS-7788';
+  });
+  const [inputPairCode, setInputPairCode] = useState('');
+
   const handleToggleMyStatus = (idx: number) => {
     setMyStatusIndex(idx);
     if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
@@ -72,6 +79,27 @@ export const LocationRadar: React.FC = () => {
         navigator.vibrate([15, 20]); // Mechanical gear tick
       } catch {}
     }
+  };
+
+  const handleSavePairing = () => {
+    if (!inputPairCode.trim()) return;
+    const clean = inputPairCode.trim().toUpperCase();
+    setPairingCode(clean);
+    localStorage.setItem('marauder_pairing_code', clean);
+    setShowPairModal(false);
+
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      try {
+        navigator.vibrate([20, 30, 60]);
+      } catch {}
+    }
+
+    confetti({
+      particleCount: 35,
+      spread: 60,
+      origin: { y: 0.5 },
+      colors: ['#FFE599', '#D4AF37', '#8C1D35']
+    });
   };
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -330,9 +358,17 @@ export const LocationRadar: React.FC = () => {
                 <span className="text-[10px] font-cinzel tracking-[0.2em] text-[#C5A059] block leading-none">
                   MARAUDER'S ASTROLABE · 活点灵犀
                 </span>
-                <span className="text-[8px] px-1.5 py-0.2 rounded bg-[#D4AF37]/15 text-[#FFE599] font-cinzel border border-[#D4AF37]/30">
-                  REAL-TIME
-                </span>
+                <button
+                  onClick={() => {
+                    setInputPairCode(pairingCode);
+                    setShowPairModal(true);
+                  }}
+                  className="text-[8px] px-1.5 py-0.2 rounded bg-[#D4AF37]/15 hover:bg-[#D4AF37]/30 text-[#FFE599] font-cinzel border border-[#D4AF37]/30 transition-colors cursor-pointer flex items-center gap-1"
+                  title="点击配置双向同步魔法暗号"
+                >
+                  <span>{pairingCode}</span>
+                  <span className="text-[7px]">⚡</span>
+                </button>
               </div>
               <h2 className="text-xs font-bold text-[#F5EBD9] font-serif mt-0.5">
                 相距 {distanceMeters > 1000 ? `${(distanceMeters / 1000).toFixed(2)} 公里` : `${distanceMeters} 米`} · 灵犀同频
@@ -775,6 +811,62 @@ export const LocationRadar: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* ========================================================
+          4. SECRET PAIRING CIPHER MODAL (魔法同步暗号密匣弹窗)
+      ======================================================== */}
+      {showPairModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-3xl bg-[#FAF5EB] border-2 border-[#D4AF37] p-5 shadow-2xl text-[#2C241E] space-y-3">
+            <div className="flex items-center justify-between pb-2 border-b border-[#D9C89E]">
+              <div className="flex items-center gap-2">
+                <span className="text-base">🗝️</span>
+                <h3 className="font-serif font-bold text-sm text-[#8C1D35]">
+                  活点星盘 · 专属配对暗号
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowPairModal(false)}
+                className="text-xs text-[#8C7658] hover:text-[#2C241E] cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-[11px] text-[#7A6750] font-serif leading-relaxed">
+              两台安装本 APP 的手机输入相同的【魔法暗号】，活点星盘与韦斯莱钟态即可瞬间实现云端同频感应。
+            </p>
+
+            <div className="space-y-1.5 pt-1">
+              <label className="text-[9.5px] font-cinzel text-[#8C7658] block">
+                PAIRING CIPHER · 双方私密暗号
+              </label>
+              <input
+                type="text"
+                value={inputPairCode}
+                onChange={(e) => setInputPairCode(e.target.value)}
+                placeholder="例如: LUMOS-8899"
+                className="w-full px-3 py-2 rounded-xl border border-[#D4AF37] bg-[#FFFDF9] text-sm font-mono tracking-wider text-[#8C1D35] font-bold focus:outline-none focus:ring-1 focus:ring-[#8C1D35]"
+              />
+            </div>
+
+            <div className="pt-2 flex items-center gap-2">
+              <button
+                onClick={handleSavePairing}
+                className="flex-1 py-2 rounded-xl bg-gradient-to-r from-[#8C1D35] to-[#6B1226] text-[#FFFDF5] font-serif text-xs font-bold shadow-md hover:brightness-105 cursor-pointer"
+              >
+                绑定并开启双向同频
+              </button>
+              <button
+                onClick={() => setShowPairModal(false)}
+                className="px-3 py-2 rounded-xl bg-[#EADBC4]/60 text-[#7A6750] text-xs font-serif cursor-pointer hover:bg-[#EADBC4]"
+              >
+                取消
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
