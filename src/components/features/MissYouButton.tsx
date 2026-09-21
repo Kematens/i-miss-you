@@ -7,17 +7,67 @@ import { ClickSpark } from '../animations/ClickSpark';
 import { CircularText } from '../animations/CircularText';
 import { TimeTurner } from './TimeTurner';
 import { SlingButton } from '../animations/SlingButton';
+import { useCouple } from '../../context/CoupleContext';
+import { appStorage } from '../../services/storage';
 
 interface MissYouButtonProps {
   onNotify?: (message: string) => void;
 }
 
 export const MissYouButton: React.FC<MissYouButtonProps> = ({ onNotify }) => {
+  const { sendEvent, onEvent, myRole, partnerOnline } = useCouple();
+
   const [isOpen, setIsOpen] = useState(false);
   const [tapCount, setTapCount] = useState(1);
   const [whisper, setWhisper] = useState('');
   const [activeWhispers, setActiveWhispers] = useState<string[]>([]);
   const [justSent, setJustSent] = useState(false);
+  const [incomingAlert, setIncomingAlert] = useState<string | null>(null);
+
+  // Load persisted whispers on mount
+  useEffect(() => {
+    const saved = appStorage.getWhispers().map((w) => w.text);
+    if (saved.length > 0) {
+      setActiveWhispers(saved.slice(0, 3));
+    }
+  }, []);
+
+  // Listen for real-time couple events
+  useEffect(() => {
+    const unsubMissYou = onEvent<{ tapCount: number }>('LUMOS_MISS_YOU', (_payload, sender) => {
+      setIncomingAlert(`✨ 对方（${sender === 'HE' ? '巫师' : '女巫'}）刚刚熔开火漆，向你传递了同频想念！`);
+      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+        try {
+          navigator.vibrate([40, 50, 70, 50, 100]);
+        } catch {}
+      }
+      confetti({
+        particleCount: 40,
+        spread: 80,
+        origin: { y: 0.35 },
+        colors: ['#FFE599', '#D4AF37', '#FFF2CE', '#8C1D35']
+      });
+      setTimeout(() => setIncomingAlert(null), 5000);
+    });
+
+    const unsubWhisper = onEvent<{ text: string }>('OWL_WHISPER', (payload) => {
+      if (payload?.text) {
+        setActiveWhispers((prev) => [payload.text, ...prev.slice(0, 2)]);
+        setIncomingAlert(`💌 猫头鹰送来对方的密札：“${payload.text}”`);
+        if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+          try {
+            navigator.vibrate([30, 40, 30]);
+          } catch {}
+        }
+        setTimeout(() => setIncomingAlert(null), 5000);
+      }
+    });
+
+    return () => {
+      unsubMissYou();
+      unsubWhisper();
+    };
+  }, [onEvent]);
 
   // Hold-to-Break wax melting state
   const [isHolding, setIsHolding] = useState(false);
@@ -98,6 +148,9 @@ export const MissYouButton: React.FC<MissYouButtonProps> = ({ onNotify }) => {
       setShowShockwave(false);
     }, 1000);
 
+    // Broadcast miss-you pulse to partner
+    sendEvent('LUMOS_MISS_YOU', { tapCount: tapCount + 1, timestamp: Date.now() });
+
     if (onNotify) {
       onNotify('以荧光咒热度熔断火漆封印：密札已从信封抽开展阅 ✨');
     }
@@ -133,6 +186,17 @@ export const MissYouButton: React.FC<MissYouButtonProps> = ({ onNotify }) => {
       colors: ['#D4AF37', '#FFF2CE', '#AA822A', '#8C1D35']
     });
 
+    // Persist whisper locally
+    appStorage.addWhisper({
+      id: Date.now(),
+      text: textToSend,
+      senderRole: myRole,
+      timestamp: Date.now()
+    });
+
+    // Broadcast owl whisper to partner
+    sendEvent('OWL_WHISPER', { text: textToSend });
+
     if (onNotify) {
       onNotify(`附添密札私语：“${textToSend}”`);
     }
@@ -151,6 +215,28 @@ export const MissYouButton: React.FC<MissYouButtonProps> = ({ onNotify }) => {
 
   return (
     <div className="w-full max-w-md mx-auto p-4 sm:p-5 font-serif select-none space-y-4">
+      {/* Realtime Partner Message Banner */}
+      <AnimatePresence>
+        {incomingAlert && (
+          <motion.div
+            initial={{ opacity: 0, y: -10, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.96 }}
+            className="p-3 rounded-2xl bg-[#8C1D35]/15 border border-[#D4AF37]/70 text-[#520B1C] shadow-sm flex items-center justify-between text-xs"
+          >
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-[#C5A059] shrink-0 animate-spin" style={{ animationDuration: '4s' }} />
+              <span className="font-medium font-serif leading-snug">{incomingAlert}</span>
+            </div>
+            <button
+              onClick={() => setIncomingAlert(null)}
+              className="text-[#8C1D35] hover:text-[#520B1C] font-bold text-xs px-1"
+            >
+              ✕
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
       
       {/* ========================================================
           1. REAL ANTIQUE ENVELOPE (一体化古典羊皮纸封筒道具)
@@ -175,8 +261,13 @@ export const MissYouButton: React.FC<MissYouButtonProps> = ({ onNotify }) => {
             <div className="text-xs font-serif font-bold text-[#2C241E] mt-0.5">
               致：心间至珍至爱之女孩 · 展信舒颜
             </div>
-            <div className="text-[9.5px] text-[#A8987E] font-serif italic">
-              霍格莫德街角 · 彼此心跳同频处
+            <div className="text-[9.5px] text-[#A8987E] font-serif italic flex items-center gap-1.5">
+              <span>霍格莫德街角 · 彼此心跳同频处</span>
+              {partnerOnline && (
+                <span className="text-[9px] text-[#C5A059] not-italic font-mono font-medium">
+                  · 对方同频在线 ✨
+                </span>
+              )}
             </div>
           </div>
 
