@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Feather, Wand2, Zap, Crown, Sparkles, Heart } from 'lucide-react';
+import { Feather, Wand2, Zap, Crown, Sparkles, Heart, Flame } from 'lucide-react';
 import { CoupleDuel } from './CoupleDuel';
 import { SnitchGame } from './SnitchGame';
 import { RuneChess } from './RuneChess';
 import { CodenamesDuet } from './CodenamesDuet';
 import { LoveLetterGame } from './LoveLetterGame';
 import { MemoryFlipGame } from './MemoryFlipGame';
+import { TheMindGame } from './TheMindGame';
 
-export type TrialSubMode = 'memory' | 'codenames' | 'loveletter' | 'snitch' | 'chess' | 'duel' | 'canvas';
+export type TrialSubMode = 'themind' | 'memory' | 'codenames' | 'loveletter' | 'snitch' | 'chess' | 'duel' | 'canvas';
 
 export const TrialHub: React.FC = () => {
-  const [subMode, setSubMode] = useState<TrialSubMode>('memory');
+  const [subMode, setSubMode] = useState<TrialSubMode>('themind');
 
   const handleSwitch = (mode: TrialSubMode) => {
     setSubMode(mode);
@@ -23,6 +24,7 @@ export const TrialHub: React.FC = () => {
   };
 
   const navItems = [
+    { id: 'themind' as TrialSubMode, label: '心灵同步', sub: 'The Mind', icon: Flame },
     { id: 'memory' as TrialSubMode, label: '记忆翻牌', sub: '对对碰', icon: Sparkles },
     { id: 'chess' as TrialSubMode, label: '如尼连珠', sub: '五子棋', icon: Crown },
     { id: 'snitch' as TrialSubMode, label: '追逐飞贼', sub: '抓金球', icon: Zap },
@@ -79,6 +81,18 @@ export const TrialHub: React.FC = () => {
 
       {/* Main Mode Stage */}
       <AnimatePresence mode="wait">
+        {subMode === 'themind' && (
+          <motion.div
+            key="themind"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.18 }}
+          >
+            <TheMindGame />
+          </motion.div>
+        )}
+
         {subMode === 'memory' && (
           <motion.div
             key="memory"
