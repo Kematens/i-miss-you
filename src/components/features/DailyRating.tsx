@@ -75,12 +75,57 @@ export const DailyRating: React.FC = () => {
     });
   };
 
+  // O.W.L.s & N.E.W.T.s Hogwarts Official 6-Grade Evaluation System
   const getScoreVerdict = (s: number) => {
-    if (s >= 95) return '卓越 · 恪守温存之德 · 授予最高金勋';
-    if (s >= 85) return '优良 · 默契如初 · 授予银叶勋章';
-    if (s >= 70) return '尚可 · 需多加关照 · 勉励前行';
-    return '需促膝长谈调整 · 促膝共饮黄油啤酒';
+    if (s >= 95) {
+      return {
+        grade: 'O · OUTSTANDING',
+        title: '优秀（Outstanding）',
+        quote: '“超迈绝伦 · 恪守温存之德，授予梅林爵士一级勋章”',
+        color: '#8C1D35'
+      };
+    }
+    if (s >= 85) {
+      return {
+        grade: 'E · EXCEEDS EXPECTATIONS',
+        title: '良好（Exceeds Expectations）',
+        quote: '“超出预期 · 默契深切，值得霍格沃茨最高赞赏”',
+        color: '#9E6B20'
+      };
+    }
+    if (s >= 75) {
+      return {
+        grade: 'A · ACCEPTABLE',
+        title: '及格（Acceptable）',
+        quote: '“合乎心意 · 步履平稳，温情常伴日常之间”',
+        color: '#556B2F'
+      };
+    }
+    if (s >= 60) {
+      return {
+        grade: 'P · POOR',
+        title: '欠佳（Poor）',
+        quote: '“稍欠体贴 · 今日略有粗心，需备黄油啤酒促膝长谈”',
+        color: '#8B4513'
+      };
+    }
+    if (s >= 40) {
+      return {
+        grade: 'D · DREADFUL',
+        title: '糟糕（Dreadful）',
+        quote: '“令人失望 · 惹恼了女巫，需诚挚道歉并奉上蜂蜜公爵甜食”',
+        color: '#701C1C'
+      };
+    }
+    return {
+      grade: 'T · TROLL',
+      title: '山怪（Troll）',
+      quote: '“顽钝如巨怪 · 魔法天平倾斜，速速施展修复咒与爱的魔药”',
+      color: '#4A0E17'
+    };
   };
+
+  const currentVerdict = getScoreVerdict(score);
 
   return (
     <div className="w-full max-w-md mx-auto p-4 sm:p-5 font-serif select-none space-y-4">
@@ -140,6 +185,8 @@ export const DailyRating: React.FC = () => {
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FAF5EB] text-[#8C1D35] border border-[#D4AF37]/60 text-xs font-bold my-1 shadow-2xs">
               <span>{score} PTS</span>
               <span>·</span>
+              <span>{currentVerdict.grade}</span>
+              <span>·</span>
               <span>{selectedTag}</span>
             </div>
 
@@ -186,11 +233,19 @@ export const DailyRating: React.FC = () => {
                 step={1}
               />
 
-              {/* Verdict Brass Banner */}
-              <div className="text-center mt-1">
-                <span className="text-[10.5px] text-[#8C1D35] bg-[#FFFDF9] px-3 py-1 rounded-full border border-[#D4AF37]/40 inline-block font-serif font-bold shadow-2xs">
-                  <ShinyText text={getScoreVerdict(score)} speed={3.5} />
-                </span>
+              {/* Verdict Brass Banner - O.W.L.s Harry Potter Grade Banner */}
+              <div className="mt-2.5 p-2.5 rounded-xl bg-[#FFFDF9] border border-[#D4AF37]/50 shadow-2xs space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-[9.5px] font-cinzel font-bold tracking-wider px-2 py-0.5 rounded-full bg-[#8C1D35]/10 text-[#8C1D35] border border-[#8C1D35]/20">
+                    O.W.L. 等级：{currentVerdict.grade}
+                  </span>
+                  <span className="text-[10px] font-serif font-bold text-[#2C241E]">
+                    {currentVerdict.title}
+                  </span>
+                </div>
+                <p className="text-[10.5px] text-[#7A6750] font-serif italic text-center">
+                  <ShinyText text={currentVerdict.quote} speed={3.5} />
+                </p>
               </div>
             </div>
 
@@ -296,6 +351,9 @@ export const DailyRating: React.FC = () => {
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-[#2C241E] text-[11px] font-cinzel">
                           {record.date}
+                        </span>
+                        <span className="text-[9px] px-1.5 py-0.2 rounded bg-[#D4AF37]/20 text-[#8C1D35] font-cinzel font-bold border border-[#D4AF37]/40">
+                          {getScoreVerdict(record.score).grade.split(' · ')[0]}
                         </span>
                         <span className="text-[9.5px] px-2 py-0.2 rounded-md bg-[#8C1D35]/10 text-[#8C1D35] border border-[#8C1D35]/25 font-bold font-serif">
                           {record.moodTag}
