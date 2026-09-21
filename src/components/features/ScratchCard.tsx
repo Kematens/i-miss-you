@@ -2,14 +2,41 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Clock, Feather, Wand2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { BlurText } from '../animations/BlurText';
+import { useCouple } from '../../context/CoupleContext';
 
 export const ScratchCard: React.FC = () => {
+  const { sendEvent, onEvent } = useCouple();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isScratched, setIsScratched] = useState(false);
   const [scratchedPercent, setScratchedPercent] = useState(0);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
 
   const secretMessage = "“在漫长岁月中，你是我唯一的魔杖光芒 —— Always.”";
+
+  // Listen for partner revealing the card
+  useEffect(() => {
+    const unsub = onEvent('SCRATCH_REVEALED', () => {
+      setIsScratched(true);
+      setTimeLeft(60);
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+        try {
+          navigator.vibrate([20, 30, 40]);
+        } catch {}
+      }
+      confetti({
+        particleCount: 25,
+        spread: 60,
+        origin: { y: 0.65 },
+        colors: ['#FFE599', '#D4AF37', '#8C1D35']
+      });
+    });
+    return unsub;
+  }, [onEvent]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -58,6 +85,7 @@ export const ScratchCard: React.FC = () => {
         if (next >= 40 && !isScratched) {
           setIsScratched(true);
           setTimeLeft(60);
+          sendEvent('SCRATCH_REVEALED', { timestamp: Date.now() });
           if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
             try {
               navigator.vibrate([20, 30, 40]);

@@ -1,8 +1,10 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Camera, Lock, Sparkles, RotateCw } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { StickerPeel } from '../animations/StickerPeel';
+import { useCouple } from '../../context/CoupleContext';
+import { appStorage } from '../../services/storage';
 
 interface FloatingSticker {
   id: number;
@@ -11,28 +13,130 @@ interface FloatingSticker {
   y: number;
 }
 
+// Compress photo to max 600px dimension and WebP/JPEG format under 80KB
+function compressImage(file: File, maxDimension = 600, quality = 0.72): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+        if (width > height) {
+          if (width > maxDimension) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+          }
+        } else {
+          if (height > maxDimension) {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(e.target?.result as string);
+          return;
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+        try {
+          const webp = canvas.toDataURL('image/webp', quality);
+          if (webp.startsWith('data:image/webp')) {
+            resolve(webp);
+            return;
+          }
+        } catch {}
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject;
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 export const TodayLook: React.FC = () => {
-  const [myPhoto, setMyPhoto] = useState<string | null>(null);
-  const [partnerPhoto] = useState<string>(
-    'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=600&q=80'
-  );
+  const { sendEvent, onEvent, myRole, partnerRole, partnerOnline } = useCouple();
+
+  const [myPhoto, setMyPhoto] = useState<string | null>(() => {
+    return appStorage.getMyPhoto()?.dataUrl || null;
+  });
+
+  const [partnerPhoto, setPartnerPhoto] = useState<string>(() => {
+    return (
+      appStorage.getPartnerPhoto()?.dataUrl ||
+      'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=600&q=80'
+    );
+  });
+
   const [stickers, setStickers] = useState<FloatingSticker[]>([]);
+  const [photoAlert, setPhotoAlert] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Real-time synchronization
+  useEffect(() => {
+    const unsubPhoto = onEvent<{ dataUrl: string }>('TODAY_PHOTO', (payload) => {
+      if (payload?.dataUrl) {
+        setPartnerPhoto(payload.dataUrl);
+        appStorage.setPartnerPhoto({
+          dataUrl: payload.dataUrl,
+          updatedAt: Date.now(),
+          senderRole: partnerRole
+        });
+        setPhotoAlert('📸 对方刚刚摄取并封存了今日画像！');
+        if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+          try {
+            navigator.vibrate([30, 40, 50]);
+          } catch {}
+        }
+        confetti({
+          particleCount: 30,
+          spread: 60,
+          origin: { y: 0.4 },
+          colors: ['#FFE599', '#D4AF37', '#8C1D35']
+        });
+        setTimeout(() => setPhotoAlert(null), 5000);
+      }
+    });
+
+    const unsubSticker = onEvent<FloatingSticker>('ADD_STICKER', (payload) => {
+      if (payload?.emoji) {
+        setStickers((prev) => [...prev, payload]);
+      }
+    });
+
+    return () => {
+      unsubPhoto();
+      unsubSticker();
+    };
+  }, [onEvent, partnerRole]);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setMyPhoto(event.target?.result as string);
+      try {
+        const compressed = await compressImage(file);
+        setMyPhoto(compressed);
+        appStorage.setMyPhoto({
+          dataUrl: compressed,
+          updatedAt: Date.now(),
+          senderRole: myRole
+        });
+        sendEvent('TODAY_PHOTO', { dataUrl: compressed, timestamp: Date.now() });
+
         confetti({
           particleCount: 30,
           spread: 60,
           origin: { y: 0.4 },
           colors: ['#D4AF37', '#FFF2CE', '#AA822A', '#8C1D35']
         });
-      };
-      reader.readAsDataURL(file);
+      } catch (err) {
+        console.error('Photo compression failed', err);
+      }
     }
   };
 
@@ -44,6 +148,7 @@ export const TodayLook: React.FC = () => {
       y: 25 + Math.random() * 50
     };
     setStickers((prev) => [...prev, newSticker]);
+    sendEvent('ADD_STICKER', newSticker);
 
     if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
       try {
@@ -71,7 +176,7 @@ export const TodayLook: React.FC = () => {
                   MAGIC PORTRAITS · 今日画像
                 </span>
                 <span className="text-[8px] px-1.5 py-0.2 rounded bg-[#D4AF37]/15 text-[#8C1D35] font-cinzel border border-[#D4AF37]/30">
-                  CHRONICLE
+                  {partnerOnline ? 'LIVE SYNC' : 'SAVED'}
                 </span>
               </div>
               <h2 className="text-xs font-bold text-[#2C241E] font-serif mt-0.5">
@@ -84,11 +189,26 @@ export const TodayLook: React.FC = () => {
           </span>
         </div>
 
+        {/* Sync Toast Alert */}
+        <AnimatePresence>
+          {photoAlert && (
+            <motion.div
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              className="mb-3 p-2.5 rounded-xl bg-[#8C1D35]/10 border border-[#8C1D35]/30 text-xs text-[#8C1D35] flex items-center gap-2"
+            >
+              <Sparkles className="w-3.5 h-3.5 shrink-0" />
+              <span className="text-[11px] font-serif">{photoAlert}</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Dual Layout with Washi Tape Sticky Notes */}
         <div className="grid grid-cols-2 gap-3.5 mb-3.5">
           {/* My Photo */}
           <div className="flex flex-col items-center">
-            <StickerPeel tag="MY PORTRAIT" className="w-full">
+            <StickerPeel tag={`MY LOOK (${myRole})`} className="w-full">
               <div className="p-2.5 bg-[#FAF6EE] border border-[#E8DCB8] flex flex-col items-center shadow-sm">
                 <div className="relative w-full aspect-[4/5] rounded-xl overflow-hidden bg-[#EFE7D5] flex items-center justify-center border border-[#D9C89E]/60">
                   {myPhoto ? (
@@ -138,7 +258,7 @@ export const TodayLook: React.FC = () => {
 
           {/* Partner Photo */}
           <div className="flex flex-col items-center">
-            <StickerPeel tag="HIS PORTRAIT" className="w-full">
+            <StickerPeel tag={`PARTNER (${partnerRole})`} className="w-full">
               <div className="p-2.5 bg-[#FAF6EE] border border-[#E8DCB8] flex flex-col items-center shadow-sm">
                 <div className="relative w-full aspect-[4/5] rounded-xl overflow-hidden bg-[#EFE7D5] flex items-center justify-center border border-[#D9C89E]/60">
                   <img
