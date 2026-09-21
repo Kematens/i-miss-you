@@ -56,6 +56,7 @@
 
 ## 三、 当前 Git 提交记录摘要
 
+- `9884eec`: `feat(loveletter): add online multiplayer room view, turn waiting states, draw flight animation, and ReactBits ClickSpark slam effects`
 - `c8f40e9`: `feat(game): port The Mind (心灵同步) as flagship zero-barrier co-op card game`
 - `168e19a`: `feat(cards): implement tactile fan of cards, velvet table felt, and fling-to-table interaction in Love Letter`
 - `ca8f073`: `fix(copy): clarify hand card terminology in Love Letter`
