@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Award, Feather, Heart, Sparkles, Check, Flame } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -6,6 +6,8 @@ import { ElasticSlider } from '../animations/ElasticSlider';
 import { DecayCard } from '../animations/DecayCard';
 import { ClickSpark } from '../animations/ClickSpark';
 import { ShinyText } from '../animations/ShinyText';
+import { useCouple } from '../../context/CoupleContext';
+import { appStorage, UserRole } from '../../services/storage';
 
 interface RatingRecord {
   id: string;
@@ -13,29 +15,82 @@ interface RatingRecord {
   score: number;
   moodTag: string;
   comment: string;
+  senderRole?: UserRole;
 }
 
 export const DailyRating: React.FC = () => {
+  const { sendEvent, onEvent, myRole, partnerRole, partnerOnline } = useCouple();
+
   const [score, setScore] = useState(96);
   const [selectedTag, setSelectedTag] = useState('温存之德');
   const [comment, setComment] = useState('');
   const [submittedToday, setSubmittedToday] = useState(false);
-  const [history, setHistory] = useState<RatingRecord[]>([
-    {
-      id: '1',
-      date: '昨日案卷',
-      score: 98,
-      moodTag: '温存之德',
-      comment: '夜深时主动煮了热饮并剥好温热水果，举止温存，态度诚挚。'
-    },
-    {
-      id: '2',
-      date: '前日案卷',
-      score: 91,
-      moodTag: '值得表彰',
-      comment: '准时赴约，并在散步迎风时细心披上外套，特此载入案卷。'
+  const [ratingAlert, setRatingAlert] = useState<string | null>(null);
+
+  const [history, setHistory] = useState<RatingRecord[]>(() => {
+    const saved = appStorage.getRatings();
+    if (saved.length > 0) {
+      return saved.map((r) => ({
+        id: r.id,
+        date: r.date,
+        score: r.score,
+        moodTag: r.tags[0] || '值得表彰',
+        comment: r.notes,
+        senderRole: r.senderRole
+      }));
     }
-  ]);
+    return [
+      {
+        id: '1',
+        date: '昨日案卷',
+        score: 98,
+        moodTag: '温存之德',
+        comment: '夜深时主动煮了热饮并剥好温热水果，举止温存，态度诚挚。',
+        senderRole: 'SHE'
+      },
+      {
+        id: '2',
+        date: '前日案卷',
+        score: 91,
+        moodTag: '值得表彰',
+        comment: '准时赴约，并在散步迎风时细心披上外套，特此载入案卷。',
+        senderRole: 'SHE'
+      }
+    ];
+  });
+
+  // Listen for partner submitting a rating
+  useEffect(() => {
+    const unsub = onEvent<RatingRecord>('SUBMIT_RATING', (record) => {
+      if (record?.score) {
+        setHistory((prev) => [record, ...prev]);
+        appStorage.addRating({
+          id: record.id,
+          date: record.date,
+          score: record.score,
+          verdict: 'PARTNER_RATED',
+          notes: record.comment,
+          tags: [record.moodTag],
+          senderRole: record.senderRole || partnerRole,
+          timestamp: Date.now()
+        });
+        setRatingAlert(`📜 对方刚刚为你封缄了今日打分与评语（${record.score}分 · ${record.moodTag}）！`);
+        if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+          try {
+            navigator.vibrate([30, 40, 80]);
+          } catch {}
+        }
+        confetti({
+          particleCount: 35,
+          spread: 70,
+          origin: { y: 0.5 },
+          colors: ['#FFE599', '#D4AF37', '#8C1D35']
+        });
+        setTimeout(() => setRatingAlert(null), 6000);
+      }
+    });
+    return unsub;
+  }, [onEvent, partnerRole]);
 
   const MEDAL_TAGS = [
     { label: '温存之德', icon: '⚜️', desc: '体贴入微' },
@@ -55,11 +110,27 @@ export const DailyRating: React.FC = () => {
       date: '今日案卷',
       score,
       moodTag: selectedTag,
-      comment
+      comment,
+      senderRole: myRole
     };
 
     setHistory([newRecord, ...history]);
     setSubmittedToday(true);
+
+    // Persist locally
+    appStorage.addRating({
+      id: newRecord.id,
+      date: newRecord.date,
+      score: newRecord.score,
+      verdict: 'RATED',
+      notes: newRecord.comment,
+      tags: [newRecord.moodTag],
+      senderRole: myRole,
+      timestamp: Date.now()
+    });
+
+    // Broadcast to partner
+    sendEvent('SUBMIT_RATING', newRecord);
 
     if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
       try {
@@ -156,9 +227,32 @@ export const DailyRating: React.FC = () => {
             </div>
           </div>
           <span className="text-[10px] text-[#C5A059] font-cinzel tracking-wider font-bold">
-            CHRONICLE
+            {partnerOnline ? 'LIVE SYNC' : 'CHRONICLE'}
           </span>
         </div>
+
+        {/* Real-time Rating Alert */}
+        <AnimatePresence>
+          {ratingAlert && (
+            <motion.div
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              className="mb-3.5 p-3 rounded-2xl bg-[#8C1D35]/15 border border-[#D4AF37]/70 text-[#520B1C] shadow-sm flex items-center justify-between text-xs"
+            >
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-[#C5A059] shrink-0 animate-spin" style={{ animationDuration: '4s' }} />
+                <span className="font-medium font-serif leading-snug">{ratingAlert}</span>
+              </div>
+              <button
+                onClick={() => setRatingAlert(null)}
+                className="text-[#8C1D35] hover:text-[#520B1C] font-bold text-xs px-1"
+              >
+                ✕
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {submittedToday ? (
           /* ====================================================
@@ -358,6 +452,11 @@ export const DailyRating: React.FC = () => {
                         <span className="text-[9.5px] px-2 py-0.2 rounded-md bg-[#8C1D35]/10 text-[#8C1D35] border border-[#8C1D35]/25 font-bold font-serif">
                           {record.moodTag}
                         </span>
+                        {record.senderRole && (
+                          <span className="text-[8.5px] px-1.5 py-0.2 rounded bg-[#C5A059]/15 text-[#8C7658] font-cinzel">
+                            {record.senderRole === 'HE' ? 'BY WIZARD' : 'BY WITCH'}
+                          </span>
+                        )}
                       </div>
                       
                       <div className="flex items-center gap-1 font-mono font-bold text-xs text-[#8C1D35]">
