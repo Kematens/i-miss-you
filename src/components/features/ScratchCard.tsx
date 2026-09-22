@@ -122,13 +122,14 @@ export const ScratchCard: React.FC = () => {
 
     ctx.globalCompositeOperation = 'destination-out';
     ctx.beginPath();
-    ctx.arc(x, y, 22, 0, Math.PI * 2);
+    ctx.arc(x, y, 18, 0, Math.PI * 2);
     ctx.fill();
 
-    if (scratchedPercent < 45) {
+    if (scratchedPercent < 75) {
       setScratchedPercent((prev) => {
-        const next = prev + 3;
-        if (next >= 40 && !isScratched) {
+        // Increment slowly per move, requiring real continuous rubbing
+        const next = prev + 0.8;
+        if (next >= 65 && !isScratched) {
           markScratchedToday();
           sendEvent('SCRATCH_REVEALED', { timestamp: Date.now() });
           if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {

@@ -569,24 +569,56 @@ export const LocationRadar: React.FC = () => {
                   );
                 })}
 
-                {/* Dynamic Lumos Pulse Shockwaves flowing from ME to HER */}
+                {/* Dynamic Lumos Pulse Shockwaves flowing from ME to HER (Continuous Fluid Beam Animation) */}
                 {isPulsing && (
                   <g>
-                    {[0.2, 0.45, 0.7, 0.95].map((pFrac, pIdx) => {
-                      const px = 140 + (herNodeX - 140) * pFrac;
-                      const py = 140 + (herNodeY - 140) * pFrac;
-                      return (
-                        <circle
-                          key={`pulse-node-${pIdx}`}
-                          cx={px}
-                          cy={py}
-                          r={3 + pIdx * 1.5}
-                          fill="#FFFDF5"
-                          opacity={0.9}
-                          filter="drop-shadow(0 0 6px #FFE599)"
+                    {/* Pulsing Guide Line */}
+                    <line
+                      x1="140"
+                      y1="140"
+                      x2={herNodeX}
+                      y2={herNodeY}
+                      stroke="#FFE599"
+                      strokeWidth="2.5"
+                      opacity="0.8"
+                      strokeDasharray="6 4"
+                      className="animate-pulse"
+                    />
+
+                    {/* Animated Light Orbs Traveling along the beam */}
+                    {[0, 0.25, 0.5, 0.75].map((_, orbIdx) => (
+                      <circle
+                        key={`pulse-travel-${orbIdx}`}
+                        r="4.5"
+                        fill="#FFFDF5"
+                        stroke="#FFE599"
+                        strokeWidth="1.5"
+                        opacity="0.95"
+                      >
+                        <animateMotion
+                          path={`M 140,140 L ${herNodeX},${herNodeY}`}
+                          begin={`${orbIdx * 0.35}s`}
+                          dur="1.4s"
+                          repeatCount="indefinite"
                         />
-                      );
-                    })}
+                        <animate
+                          attributeName="opacity"
+                          values="0.2;1;1;0"
+                          keyTimes="0;0.2;0.8;1"
+                          begin={`${orbIdx * 0.35}s`}
+                          dur="1.4s"
+                          repeatCount="indefinite"
+                        />
+                        <animate
+                          attributeName="r"
+                          values="3;5.5;4.5;3"
+                          keyTimes="0;0.3;0.7;1"
+                          begin={`${orbIdx * 0.35}s`}
+                          dur="1.4s"
+                          repeatCount="indefinite"
+                        />
+                      </circle>
+                    ))}
                   </g>
                 )}
               </svg>
@@ -837,7 +869,7 @@ export const LocationRadar: React.FC = () => {
                 origin: { y: 0.7 },
                 colors: ['#FFE599', '#D4AF37', '#FFF2CE', '#8C1D35']
               });
-              setTimeout(() => setIsPulsing(false), 2000);
+              setTimeout(() => setIsPulsing(false), 3000);
             }}
             className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#8C1D35] to-[#6B1226] text-[#FFFDF5] text-xs font-serif font-bold flex items-center justify-center gap-1.5 shadow-sm hover:brightness-105 transition-all cursor-pointer border border-[#D4AF37]/50"
           >
