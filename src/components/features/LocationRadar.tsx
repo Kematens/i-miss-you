@@ -369,7 +369,41 @@ export const LocationRadar: React.FC = () => {
   }, [viewMode, myCoords, herCoords]);
 
   useEffect(() => {
+    // Initial fetch
     requestRealLocation();
+
+    // High-frequency continuous watch for background & moving tracking
+    let watchId: number | null = null;
+    if (typeof navigator !== 'undefined' && navigator.geolocation) {
+      try {
+        watchId = navigator.geolocation.watchPosition(
+          (pos) => {
+            const { latitude, longitude } = pos.coords;
+            setMyCoords({ lat: latitude, lng: longitude });
+            const dist = calculateDistanceMeters(latitude, longitude, herCoords.lat, herCoords.lng);
+            const bear = calculateBearing(latitude, longitude, herCoords.lat, herCoords.lng);
+            setDistanceMeters(dist);
+            setTrueBearing(bear);
+            appStorage.setMyLocation({ lat: latitude, lng: longitude, updatedAt: Date.now() });
+            sendEvent('LOCATION_UPDATE', { lat: latitude, lng: longitude });
+          },
+          () => {},
+          { enableHighAccuracy: true, maximumAge: 3000, timeout: 15000 }
+        );
+      } catch {}
+    }
+
+    // Periodic heartbeat pulse to ensure persistent syncing even when static (every 45s)
+    const heartbeatTimer = setInterval(() => {
+      requestRealLocation();
+    }, 45000);
+
+    return () => {
+      if (watchId !== null && navigator.geolocation) {
+        navigator.geolocation.clearWatch(watchId);
+      }
+      clearInterval(heartbeatTimer);
+    };
   }, []);
 
   // Mathematical positioning of HER avatar on the celestial orbit
