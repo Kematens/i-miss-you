@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
 import { Compass, MapPin, Wand2, Battery, RefreshCw, Layers, Zap, Sparkles } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import L from 'leaflet';
@@ -681,12 +680,14 @@ export const LocationRadar: React.FC = () => {
                 </svg>
               </div>
 
-              {/* 3. The Sculpted Wand Needle (Centered, Rotating to True Bearing) */}
-              <motion.div
-                animate={{ rotate: trueBearing }}
-                transition={{ type: 'spring', stiffness: 130, damping: 15 }}
-                className="absolute z-20 w-2 h-[172px] pointer-events-none flex flex-col items-center justify-between"
-                style={{ transformOrigin: 'center center' }}
+              {/* 3. The Sculpted Wand Needle (Centered, Rotating to True Bearing with GPU acceleration) */}
+              <div
+                className="absolute z-20 w-2 h-[172px] pointer-events-none flex flex-col items-center justify-between mobile-gpu-layer"
+                style={{
+                  transformOrigin: 'center center',
+                  transform: `rotate(${trueBearing}deg) translateZ(0)`,
+                  transition: 'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)'
+                }}
               >
                 {/* Lumos Wand Tip pointing directly at HER node */}
                 <div className="w-4 h-4 rounded-full bg-[#FFFDF5] shadow-[0_0_18px_#FFE599,0_0_8px_#FFF] flex items-center justify-center">
@@ -696,20 +697,16 @@ export const LocationRadar: React.FC = () => {
                 <div className="w-1.5 h-full bg-gradient-to-b from-[#FFFDF5] via-[#D4AF37] to-[#7A5612] rounded-full shadow-xs" />
                 {/* Counterweight Jewel Tail */}
                 <div className="w-3 h-3 rounded-full bg-[#8C1D35] border border-[#FFE599] shadow-xs" />
-              </motion.div>
+              </div>
 
               {/* 4. HER AVATAR NODE (Positioned Precisely on the Celestial Orbit) */}
-              <motion.div
-                animate={{
-                  scale: isPulsing ? [1, 1.25, 1.05, 1] : 1,
-                  rotate: isPulsing ? [0, -8, 8, 0] : 0
-                }}
-                transition={{ duration: 0.8, ease: 'easeOut' }}
-                className="absolute z-30 flex flex-col items-center"
+              <div
+                className={`absolute z-30 flex flex-col items-center mobile-gpu-layer ${isPulsing ? 'animate-bounce' : ''}`}
                 style={{
                   left: `${herNodeX}px`,
                   top: `${herNodeY}px`,
-                  transform: 'translate(-50%, -50%)'
+                  transform: 'translate(-50%, -50%) translateZ(0)',
+                  transition: 'left 0.4s ease, top 0.4s ease'
                 }}
               >
                 <div className="relative group cursor-pointer">
@@ -728,15 +725,12 @@ export const LocationRadar: React.FC = () => {
                     {partnerRole} · {WEASLEY_STATUSES[herStatusIndex].label} {partnerOnline ? '✨' : ''}
                   </span>
                 </div>
-              </motion.div>
+              </div>
 
               {/* 5. ME AVATAR NODE (Anchor Center Pivot) */}
-              <motion.div
-                animate={{
-                  scale: isPulsing ? [1, 1.15, 1] : 1
-                }}
-                transition={{ duration: 0.6 }}
-                className="absolute z-30 flex flex-col items-center"
+              <div
+                className={`absolute z-30 flex flex-col items-center mobile-gpu-layer ${isPulsing ? 'scale-110' : ''}`}
+                style={{ transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
               >
                 <div className="relative group cursor-pointer">
                   <div className={`w-10 h-10 rounded-full border-2 p-0.5 bg-[#101A29] overflow-hidden transition-all ${isPulsing ? 'border-[#FFFDF5] shadow-[0_0_24px_#D4AF37]' : 'border-[#D4AF37] shadow-[0_0_16px_rgba(212,175,55,0.7)]'}`}>
@@ -750,7 +744,7 @@ export const LocationRadar: React.FC = () => {
                     ME ({myRole}) · {WEASLEY_STATUSES[myStatusIndex].label}
                   </span>
                 </div>
-              </motion.div>
+              </div>
             </div>
 
             {/* Bottom Calibrate & Bearing Pill */}

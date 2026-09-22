@@ -657,7 +657,7 @@ export const MissYouButton: React.FC<MissYouButtonProps> = ({ onNotify }) => {
                       )}
 
                       {/* 4. Central Wax Seal Button */}
-                      <motion.button
+                      <button
                         onMouseDown={handleStartHold}
                         onMouseUp={handleEndHold}
                         onMouseLeave={handleEndHold}
@@ -665,18 +665,12 @@ export const MissYouButton: React.FC<MissYouButtonProps> = ({ onNotify }) => {
                         onTouchEnd={handleEndHold}
                         onTouchCancel={handleEndHold}
                         onContextMenu={(e) => e.preventDefault()}
-                        whileTap={{ scale: 0.96 }}
-                        animate={{
-                          scale: isHolding ? 1.05 : 1,
-                          boxShadow: isHolding
-                            ? `0 0 28px rgba(212, 175, 55, 0.8), inset 0 0 16px rgba(255, 242, 206, 0.7)`
-                            : '0 16px 36px -4px rgba(107, 18, 38, 0.45)'
-                        }}
-                        transition={{ type: 'spring', stiffness: 350, damping: 26 }}
-                        className="relative w-[138px] h-[138px] rounded-full aspect-square flex flex-col items-center justify-center focus:outline-none cursor-pointer wax-seal-shadow group select-none"
+                        className={`relative w-[138px] h-[138px] rounded-full aspect-square flex flex-col items-center justify-center focus:outline-none cursor-pointer wax-seal-shadow group select-none mobile-gpu-layer ${
+                          isHolding ? 'scale-105 shadow-[0_0_28px_rgba(212,175,55,0.8),inset_0_0_16px_rgba(255,242,206,0.7)]' : 'active:scale-95 shadow-[0_16px_36px_-4px_rgba(107,18,38,0.45)]'
+                        }`}
                         style={{
                           background: 'radial-gradient(circle at 36% 36%, #A51D38 0%, #7D122B 55%, #4C0816 100%)',
-                          transform: 'translateZ(0)',
+                          transition: 'transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease',
                           touchAction: 'none',
                           WebkitUserSelect: 'none',
                           userSelect: 'none'
@@ -700,15 +694,12 @@ export const MissYouButton: React.FC<MissYouButtonProps> = ({ onNotify }) => {
                             LUMOS
                           </span>
                         </div>
-                      </motion.button>
+                      </button>
 
                       {/* Lumos Maxima Light Shockwave on Completion */}
                       {showShockwave && (
-                        <motion.div
-                          initial={{ scale: 0.6, opacity: 1 }}
-                          animate={{ scale: 2.8, opacity: 0 }}
-                          transition={{ duration: 0.8, ease: 'easeOut' }}
-                          className="absolute inset-0 rounded-full border-4 border-[#FFF8DE] shadow-[0_0_30px_#D4AF37] pointer-events-none z-50"
+                        <div
+                          className="absolute inset-0 rounded-full border-4 border-[#FFF8DE] shadow-[0_0_30px_#D4AF37] pointer-events-none z-50 animate-ping"
                         />
                       )}
                     </div>

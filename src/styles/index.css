@@ -65,3 +65,53 @@
   filter: contrast(110%) brightness(95%) saturate(85%);
 }
 
+/* ========================================================
+   MOBILE HIGH-PERFORMANCE GPU ENGINE (60FPS-120FPS HARDWARE ACCELERATED)
+   - Zero JS layout thrashing
+   - Apple-grade Spring Cubic-Bezier physical dampening
+   ======================================================== */
+.mobile-gpu-layer {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  will-change: transform, opacity;
+}
+
+/* Fluid apple-grade physical micro-spring on active touch */
+.mobile-touch-spring {
+  transition: transform 0.16s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.mobile-touch-spring:active {
+  transform: scale3d(0.95, 0.95, 1);
+}
+
+/* Ultra smooth floating and pulsing for arcane elements */
+@keyframes mobile-float-soft {
+  0%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -6px, 0);
+  }
+}
+
+.mobile-animate-float {
+  animation: mobile-float-soft 3.6s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+
+/* Fast hardware rotation with zero main-thread JS blocking */
+@keyframes mobile-spin-gpu {
+  from {
+    transform: rotate(0deg) translateZ(0);
+  }
+  to {
+    transform: rotate(360deg) translateZ(0);
+  }
+}
+
+.mobile-spin-smooth {
+  animation: mobile-spin-gpu 60s linear infinite;
+  will-change: transform;
+}
+
+

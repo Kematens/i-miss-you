@@ -764,16 +764,8 @@ export const LoveLetterGame: React.FC = () => {
                   const defaultX = idx === 0 ? -38 : 38;
 
                   return (
-                    <motion.div
+                    <div
                       key={`${card.id}-${idx}`}
-                      animate={{
-                        rotate: isSelected ? 0 : defaultRotate,
-                        y: isSelected ? -24 : 0,
-                        x: isSelected ? (idx === 0 ? -24 : 24) : defaultX,
-                        scale: isSelected ? 1.08 : 1,
-                        zIndex: isSelected ? 30 : idx === 1 ? 20 : 10
-                      }}
-                      transition={{ type: 'spring', stiffness: 450, damping: 25 }}
                       onClick={() => {
                         setSelectedCardId(card.id);
                         if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
@@ -784,7 +776,12 @@ export const LoveLetterGame: React.FC = () => {
                       }}
                       className={`absolute w-44 h-50 rounded-2xl p-2.5 bg-gradient-to-b ${card.artBg} border-3 ${
                         isSelected ? 'border-[#FFE599] shadow-[0_12px_28px_rgba(212,175,55,0.4)]' : 'border-[#D4AF37] shadow-xl'
-                      } text-left flex flex-col justify-between cursor-pointer select-none transition-colors overflow-hidden`}
+                      } text-left flex flex-col justify-between cursor-pointer select-none overflow-hidden mobile-gpu-layer`}
+                      style={{
+                        transform: `translate(${isSelected ? (idx === 0 ? -24 : 24) : defaultX}px, ${isSelected ? -24 : 0}px) rotate(${isSelected ? 0 : defaultRotate}deg) scale(${isSelected ? 1.08 : 1}) translateZ(0)`,
+                        zIndex: isSelected ? 30 : idx === 1 ? 20 : 10,
+                        transition: 'transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                      }}
                     >
                       {/* Top Ribbon */}
                       <div className="flex items-center justify-between">
@@ -836,7 +833,7 @@ export const LoveLetterGame: React.FC = () => {
                           </div>
                         )}
                       </div>
-                    </motion.div>
+                    </div>
                   );
                 })}
               </div>

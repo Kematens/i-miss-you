@@ -14,26 +14,24 @@ interface DockItemProps {
 
 const DockItem: React.FC<DockItemProps> = ({ icon: Icon, label, sublabel, isActive, onClick }) => {
   return (
-    <motion.button
-      whileTap={{ scale: 0.94 }}
+    <button
       onClick={onClick}
-      className={`relative w-[60px] sm:w-[68px] h-[56px] rounded-2xl flex flex-col items-center justify-center select-none px-1 transition-transform duration-150 ${
+      className={`relative w-[60px] sm:w-[68px] h-[56px] rounded-2xl flex flex-col items-center justify-center select-none px-1 mobile-touch-spring mobile-gpu-layer cursor-pointer ${
         isActive ? 'text-[#F5E8BE] font-bold' : 'text-[#A8987E] active:text-[#FAF5EB]'
       }`}
-      style={{ transform: 'translateZ(0)' }}
+      style={{ touchAction: 'manipulation' }}
     >
       {isActive && (
         <motion.div
           layoutId="dock-active-bg"
-          className="absolute inset-1 rounded-xl bg-[#8C1D35] border border-[#D4AF37]/50 shadow-[0_3px_12px_rgba(140,29,53,0.45)] -z-10"
-          transition={{ type: 'spring', stiffness: 450, damping: 32 }}
-          style={{ transform: 'translateZ(0)' }}
+          className="absolute inset-1 rounded-xl bg-[#8C1D35] border border-[#D4AF37]/50 shadow-[0_3px_12px_rgba(140,29,53,0.45)] -z-10 mobile-gpu-layer"
+          transition={{ type: 'spring', stiffness: 480, damping: 32 }}
         />
       )}
       <Icon className={`w-4 h-4 transition-transform duration-150 ${isActive ? 'scale-110 text-[#F5E8BE]' : ''}`} />
       <span className="text-[9.5px] mt-1 font-bold tracking-wider font-cinzel leading-none">{label}</span>
       <span className="text-[8.5px] mt-0.5 font-serif leading-none opacity-80">{sublabel}</span>
-    </motion.button>
+    </button>
   );
 };
 
