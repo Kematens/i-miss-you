@@ -5,9 +5,15 @@ on:
     branches: [ main, master ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    env:
+      ANDROID_HOME: /usr/local/lib/android/sdk
 
     steps:
       - name: Checkout Source Code
@@ -31,11 +37,11 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Sync Capacitor
         run: npx cap sync android
+
+      - name: Make Gradlew Executable
+        run: chmod +x ./android/gradlew
 
       - name: Build APK with Gradle
         working-directory: ./android
@@ -46,3 +52,15 @@ jobs:
         with:
           name: I-Miss-You-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Release APK
+        uses: softprops/action-gh-release@v2
+        if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+        with:
+          tag_name: v1.0.0
+          name: "I Miss You v1.0.0 · 魔法专属手札"
+          body: |
+            ### 🏰 I Miss You · 专属魔法手札 Android 安装包
+            - 包含双人跨网同频、活点地图真实 GPS、拍立得画像压缩互传、每日评分与《The Mind》实体桌游
+            - 手机端点击下方 **`app-debug.apk`** 即可直接下载并安装！
+          files: android/app/build/outputs/apk/debug/app-debug.apk
