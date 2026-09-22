@@ -122,15 +122,18 @@ export const ScratchCard: React.FC = () => {
 
     ctx.globalCompositeOperation = 'destination-out';
     ctx.beginPath();
-    ctx.arc(x, y, 18, 0, Math.PI * 2);
+    ctx.arc(x, y, 16, 0, Math.PI * 2);
     ctx.fill();
 
-    if (scratchedPercent < 75) {
+    // Requires genuine extensive scratching (at least 75% coverage with slow progression)
+    if (scratchedPercent < 85) {
       setScratchedPercent((prev) => {
-        // Increment slowly per move, requiring real continuous rubbing
-        const next = prev + 0.8;
-        if (next >= 65 && !isScratched) {
+        // Very slow increment: requires at least 150~200 scratch moves across the card
+        const next = prev + 0.45;
+        if (next >= 78 && !isScratched) {
           markScratchedToday();
+          // Clear remaining canvas completely with high satisfaction once threshold passed
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
           sendEvent('SCRATCH_REVEALED', { timestamp: Date.now() });
           if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
             try {
@@ -220,9 +223,7 @@ export const ScratchCard: React.FC = () => {
                 e.preventDefault();
                 handleScratch(e);
               }}
-              className={`absolute inset-0 w-full h-full cursor-pointer touch-none transition-opacity duration-700 ${
-                isScratched ? 'opacity-0 pointer-events-none' : 'opacity-100'
-              }`}
+              className="absolute inset-0 w-full h-full cursor-pointer touch-none"
               style={{ touchAction: 'none' }}
             />
           )}
