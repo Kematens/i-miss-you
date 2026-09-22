@@ -281,7 +281,7 @@ export const SnitchGame: React.FC = () => {
         {/* Pitch Arena Container */}
         <div
           ref={containerRef}
-          className="relative rounded-2xl overflow-hidden bg-gradient-to-b from-[#111A27] via-[#0D1522] to-[#080E18] border-2 border-[#D4AF37]/45 shadow-[inset_0_2px_12px_rgba(0,0,0,0.5)]"
+          className="relative rounded-2xl overflow-hidden bg-gradient-to-b from-[#111A27] via-[#0D1522] to-[#080E18] border-2 border-[#D4AF37]/45 shadow-[inset_0_2px_12px_rgba(0,0,0,0.5)] select-none"
           style={{ height: '240px', touchAction: 'none' }}
         >
           {/* Subtle Quidditch Pitch Ring markings */}

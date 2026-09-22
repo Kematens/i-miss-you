@@ -68,8 +68,10 @@ export const ElasticSlider: React.FC<ElasticSliderProps> = ({
         onMouseUp={() => setIsDragging(false)}
         onTouchStart={() => setIsDragging(true)}
         onTouchEnd={() => setIsDragging(false)}
+        onTouchCancel={() => setIsDragging(false)}
         onChange={(e) => handleSliderChange(Number(e.target.value))}
-        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 select-none"
+        style={{ touchAction: 'none' }}
       />
 
       {/* Ruby & Gold Crown Thumb (Elastic Mochi Physics) */}

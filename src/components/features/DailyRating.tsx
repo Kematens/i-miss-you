@@ -386,21 +386,20 @@ export const DailyRating: React.FC = () => {
             </div>
 
             {/* 4. Confer & Seal Button */}
-            <ClickSpark sparkColors={['#FFE599', '#D4AF37', '#FFF2CE', '#8C1D35']} sparkCount={10}>
-              <motion.button
-                whileTap={{ scale: 0.98 }}
-                type="submit"
-                disabled={!comment.trim()}
-                className={`w-full py-2.5 rounded-2xl font-cinzel text-xs tracking-[0.15em] transition-all flex items-center justify-center gap-1.5 shadow-sm border ${
-                  comment.trim()
-                    ? 'bg-gradient-to-r from-[#8C1D35] to-[#6B1226] text-[#FFFDF5] cursor-pointer shadow-[#7D122B]/20 border-[#D4AF37]/50 hover:brightness-105'
-                    : 'bg-[#EADBC4]/50 text-[#A8987E] cursor-not-allowed border-transparent'
-                }`}
-              >
-                <Heart className="w-3.5 h-3.5 fill-current text-[#FFE599]" />
-                <span>SEAL & CONFER · 加盖印信入卷</span>
-              </motion.button>
-            </ClickSpark>
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              type="submit"
+              disabled={!comment.trim()}
+              className={`w-full py-2.5 rounded-2xl font-cinzel text-xs tracking-[0.15em] transition-all flex items-center justify-center gap-1.5 shadow-sm border select-none ${
+                comment.trim()
+                  ? 'bg-gradient-to-r from-[#8C1D35] to-[#6B1226] text-[#FFFDF5] cursor-pointer shadow-[#7D122B]/20 border-[#D4AF37]/50 active:brightness-95'
+                  : 'bg-[#EADBC4]/50 text-[#A8987E] cursor-not-allowed border-transparent'
+              }`}
+              style={{ touchAction: 'manipulation' }}
+            >
+              <Heart className="w-3.5 h-3.5 fill-current text-[#FFE599]" />
+              <span>SEAL & CONFER · 加盖印信入卷</span>
+            </motion.button>
           </form>
         )}
 

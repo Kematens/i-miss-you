@@ -802,11 +802,11 @@ export const LoveLetterGame: React.FC = () => {
                       </div>
 
                       {/* Center Artwork Emblem */}
-                      <div className="my-auto text-center flex flex-col items-center justify-center">
-                        <span className="text-3xl filter drop-shadow-md mb-0.5">
+                      <div className="my-auto text-center flex flex-col items-center justify-center pointer-events-none select-none">
+                        <span className="text-3xl mb-0.5">
                           {card.icon}
                         </span>
-                        <h4 className="text-sm font-bold text-[#FFFDF5] font-serif drop-shadow-xs">
+                        <h4 className="text-sm font-bold text-[#FFFDF5] font-serif">
                           {card.name}
                         </h4>
                       </div>

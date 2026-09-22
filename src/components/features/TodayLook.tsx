@@ -262,9 +262,10 @@ export const TodayLook: React.FC = () => {
                     <img
                       src={partnerPhoto}
                       alt="对方画像"
-                      className={`w-full h-full object-cover transition-all duration-700 ${
-                        isUnlocked ? 'filter-none scale-100' : 'filter blur-md scale-105 opacity-60'
+                      className={`w-full h-full object-cover transition-opacity duration-500 ${
+                        isUnlocked ? 'opacity-100 scale-100' : 'opacity-25 scale-95'
                       }`}
+                      style={{ transform: 'translateZ(0)' }}
                     />
                   ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center p-4 bg-gradient-to-b from-[#FAF5EB] to-[#EAE0CD] text-[#8C7658] text-center select-none">

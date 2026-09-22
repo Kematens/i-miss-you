@@ -211,10 +211,18 @@ export const ScratchCard: React.FC = () => {
             <canvas
               ref={canvasRef}
               onMouseMove={(e) => e.buttons === 1 && handleScratch(e)}
-              onTouchMove={handleScratch}
+              onTouchMove={(e) => {
+                e.preventDefault();
+                handleScratch(e);
+              }}
+              onTouchStart={(e) => {
+                e.preventDefault();
+                handleScratch(e);
+              }}
               className={`absolute inset-0 w-full h-full cursor-pointer touch-none transition-opacity duration-700 ${
                 isScratched ? 'opacity-0 pointer-events-none' : 'opacity-100'
               }`}
+              style={{ touchAction: 'none' }}
             />
           )}
         </div>

@@ -585,15 +585,15 @@ export const TheMindGame: React.FC = () => {
             </span>
           </div>
 
-          <div className="flex items-center justify-center gap-2 py-1 overflow-x-auto">
+          <div className="flex items-center justify-center gap-2 py-1 overflow-x-auto select-none" style={{ touchAction: 'pan-x' }}>
             {(isRemoteMode ? myHand : handHE).map((cardVal) => (
               <motion.button
                 key={`my-${cardVal}`}
                 whileTap={{ scale: 0.92 }}
-                whileHover={{ y: -2 }}
                 disabled={gameState !== 'playing'}
                 onClick={() => handlePlayCardInternal(isRemoteMode ? (isMeHE ? 'HE' : 'HER') : 'HE', cardVal, false)}
-                className="w-14 h-20 rounded-xl bg-gradient-to-b from-[#8C1D35] via-[#6B1226] to-[#450A0A] border-2 border-[#FF8080] text-[#FFFDF5] shadow-lg flex flex-col items-center justify-between p-1.5 cursor-pointer relative group"
+                className="w-14 h-20 rounded-xl bg-gradient-to-b from-[#8C1D35] via-[#6B1226] to-[#450A0A] border-2 border-[#FF8080] text-[#FFFDF5] shadow-lg flex flex-col items-center justify-between p-1.5 cursor-pointer relative group transition-transform duration-100 active:scale-95"
+                style={{ transform: 'translateZ(0)', touchAction: 'manipulation' }}
               >
                 <span className="text-[9px] font-cinzel font-bold text-[#FCA5A5]">{isRemoteMode ? myRole : 'HE'}</span>
                 <span className="text-xl font-bold font-mono text-[#FFE599] drop-shadow-xs">

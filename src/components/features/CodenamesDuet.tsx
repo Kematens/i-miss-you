@@ -348,15 +348,16 @@ export const CodenamesDuet: React.FC = () => {
                 whileTap={{ scale: 0.94 }}
                 onClick={() => handleCardClick(card.id)}
                 disabled={card.isRevealed || Boolean(gameOver)}
-                className={`aspect-[4/3] rounded-xl p-1.5 flex flex-col items-center justify-center text-center transition-all relative border-2 ${
+                className={`aspect-[4/3] rounded-xl p-1.5 flex flex-col items-center justify-center text-center transition-transform duration-100 relative border-2 select-none ${
                   card.isRevealed
                     ? roleForOther === 'agent'
                       ? 'bg-gradient-to-tr from-[#14532D] to-[#15803D] text-[#D8F3DC] border-[#86EFAC] shadow-md ring-2 ring-[#86EFAC]/40'
                       : roleForOther === 'assassin'
                       ? 'bg-gradient-to-tr from-[#8C1D35] to-[#450A0A] text-[#FFFDF5] border-[#FCA5A5] shadow-lg ring-2 ring-[#EF4444]/50'
                       : 'bg-[#D9C89E]/70 text-[#7A6750] border-[#C5B7A0] opacity-75'
-                    : 'bg-gradient-to-b from-[#FFFDF9] to-[#F5EBD9] text-[#2C241E] border-[#D4AF37]/60 hover:border-[#D4AF37] hover:shadow-md cursor-pointer'
+                    : 'bg-gradient-to-b from-[#FFFDF9] to-[#F5EBD9] text-[#2C241E] border-[#D4AF37]/60 active:border-[#D4AF37] cursor-pointer'
                 }`}
+                style={{ touchAction: 'manipulation' }}
               >
                 {/* Revealed status stamp icon */}
                 {card.isRevealed ? (

@@ -2,8 +2,6 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, Sparkles, Feather, Lock, Wand2, Mail, Bird } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { Magnet } from '../animations/Magnet';
-import { ClickSpark } from '../animations/ClickSpark';
 import { CircularText } from '../animations/CircularText';
 import { TimeTurner } from './TimeTurner';
 import { SlingButton } from '../animations/SlingButton';
@@ -122,9 +120,12 @@ export const MissYouButton: React.FC<MissYouButtonProps> = ({ onNotify }) => {
   const [showShockwave, setShowShockwave] = useState(false);
   const progressIntervalRef = useRef<number | null>(null);
 
-  const HOLD_DURATION_MS = 1300; // 1.3s smooth spell charging duration
+  const HOLD_DURATION_MS = 1000; // 1.0s crisp & responsive spell charging duration
 
-  const handleStartHold = () => {
+  const handleStartHold = (e?: React.SyntheticEvent) => {
+    if (e && e.cancelable) {
+      e.preventDefault();
+    }
     if (isOpen) return;
     setIsHolding(true);
     setHoldProgress(0);
@@ -133,7 +134,7 @@ export const MissYouButton: React.FC<MissYouButtonProps> = ({ onNotify }) => {
 
     if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
       try {
-        navigator.vibrate([25, 40, 25]);
+        navigator.vibrate(25);
       } catch {
         // Fallback
       }
@@ -144,10 +145,9 @@ export const MissYouButton: React.FC<MissYouButtonProps> = ({ onNotify }) => {
       const pct = Math.min(100, Math.round((elapsed / HOLD_DURATION_MS) * 100));
       setHoldProgress(pct);
 
-      if (pct % 20 === 0 && typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      if (pct % 30 === 0 && pct > 0 && pct < 100 && typeof navigator !== 'undefined' && 'vibrate' in navigator) {
         try {
-          const intensity = Math.min(60, 15 + Math.round(pct * 0.45));
-          navigator.vibrate([intensity, 20]);
+          navigator.vibrate(18);
         } catch {
           // ignore
         }
@@ -156,10 +156,13 @@ export const MissYouButton: React.FC<MissYouButtonProps> = ({ onNotify }) => {
       if (pct >= 100) {
         handleCompleteBreak();
       }
-    }, 25);
+    }, 16);
   };
 
-  const handleEndHold = () => {
+  const handleEndHold = (e?: React.SyntheticEvent) => {
+    if (e && e.cancelable) {
+      e.preventDefault();
+    }
     if (holdProgress < 100) {
       setIsHolding(false);
       setHoldProgress(0);
@@ -557,33 +560,22 @@ export const MissYouButton: React.FC<MissYouButtonProps> = ({ onNotify }) => {
                   </div>
 
                   {/* The Central Wax Seal with Hold-to-Break Hexagram Ritual */}
-                  <ClickSpark sparkColors={['#D4AF37', '#FFF2CE', '#AA822A']} sparkCount={8}>
-                    <div className="relative flex items-center justify-center p-5 z-20">
+                  <div className="relative flex items-center justify-center p-5 z-20">
                       
                       {/* 1. Ancient Concentric Runic Magic Circle */}
-                      <motion.div
-                        animate={{
-                          rotate: 360,
-                          scale: isHolding ? 1.08 : 1,
-                          opacity: isHolding ? 0.95 : 0.45
-                        }}
-                        transition={{
-                          rotate: { repeat: Infinity, duration: 24, ease: 'linear' },
-                          scale: { duration: 0.35, ease: 'easeOut' },
-                          opacity: { duration: 0.3, ease: 'easeOut' }
-                        }}
-                        className="absolute inset-[-18px] pointer-events-none flex items-center justify-center"
+                      <div
+                        className={`absolute inset-[-18px] pointer-events-none flex items-center justify-center transition-all duration-300 ${
+                          isHolding ? 'scale-105 opacity-95' : 'scale-100 opacity-60'
+                        }`}
+                        style={{ transform: 'translateZ(0)' }}
                       >
-                        <svg viewBox="0 0 200 200" className="w-full h-full filter drop-shadow-[0_0_8px_rgba(212,175,55,0.4)]">
+                        <svg viewBox="0 0 200 200" className="w-full h-full animate-spin" style={{ animationDuration: '24s' }}>
                           <defs>
                             <radialGradient id="magicRuneGlow" cx="50%" cy="50%" r="50%">
                               <stop offset="60%" stopColor="#D4AF37" stopOpacity={isHolding ? '0.85' : '0.4'} />
                               <stop offset="90%" stopColor="#FFF8DE" stopOpacity={isHolding ? '1' : '0.6'} />
                               <stop offset="100%" stopColor="#FFE599" stopOpacity="0" />
                             </radialGradient>
-                            <filter id="starGlow" x="-20%" y="-20%" width="140%" height="140%">
-                              <feGaussianBlur stdDeviation={isHolding ? '1.5' : '0.8'} result="glow" />
-                            </filter>
                           </defs>
 
                           <circle cx="100" cy="100" r="94" fill="none" stroke="url(#magicRuneGlow)" strokeWidth="1.2" strokeDasharray="3 3" />
@@ -591,7 +583,7 @@ export const MissYouButton: React.FC<MissYouButtonProps> = ({ onNotify }) => {
                           <circle cx="100" cy="100" r="52" fill="none" stroke="#D4AF37" strokeWidth="0.8" strokeDasharray="2 4" opacity={isHolding ? 0.85 : 0.5} />
 
                           {/* Distinct Sacred Hexagram */}
-                          <g filter="url(#starGlow)">
+                          <g>
                             <polygon
                               points="100,14 174,142 26,142"
                               fill={isHolding ? 'rgba(212, 175, 55, 0.08)' : 'none'}
@@ -626,7 +618,7 @@ export const MissYouButton: React.FC<MissYouButtonProps> = ({ onNotify }) => {
                           <line x1="100" y1="4" x2="100" y2="196" stroke="#D4AF37" strokeWidth="0.8" strokeDasharray="4 6" opacity={isHolding ? 0.75 : 0.4} />
                           <line x1="4" y1="100" x2="196" y2="100" stroke="#D4AF37" strokeWidth="0.8" strokeDasharray="4 6" opacity={isHolding ? 0.75 : 0.4} />
                         </svg>
-                      </motion.div>
+                      </div>
 
                       {/* 2. Rotating Latin Inscription Dial */}
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none scale-105">
@@ -642,13 +634,8 @@ export const MissYouButton: React.FC<MissYouButtonProps> = ({ onNotify }) => {
                           className="absolute w-[184px] h-[184px] pointer-events-none z-30 rotate-[-90deg]"
                           viewBox="0 0 160 160"
                         >
-                          <defs>
-                            <filter id="spellGlow" x="-30%" y="-30%" width="160%" height="160%">
-                              <feGaussianBlur stdDeviation="3.5" result="blur" />
-                            </filter>
-                          </defs>
                           <circle
-                            stroke="rgba(212, 175, 55, 0.2)"
+                            stroke="rgba(212, 175, 55, 0.25)"
                             fill="transparent"
                             strokeWidth={strokeWidth}
                             r={normalizedRadius}
@@ -660,57 +647,60 @@ export const MissYouButton: React.FC<MissYouButtonProps> = ({ onNotify }) => {
                             fill="transparent"
                             strokeWidth={strokeWidth}
                             strokeDasharray={`${circumference} ${circumference}`}
-                            style={{ strokeDashoffset, transition: 'stroke-dashoffset 40ms linear' }}
+                            style={{ strokeDashoffset }}
                             strokeLinecap="round"
                             r={normalizedRadius}
                             cx={sealRadius}
                             cy={sealRadius}
-                            filter="url(#spellGlow)"
                           />
                         </svg>
                       )}
 
                       {/* 4. Central Wax Seal Button */}
-                      <Magnet padding={50} magnetStrength={2.8}>
-                        <motion.button
-                          onMouseDown={handleStartHold}
-                          onMouseUp={handleEndHold}
-                          onMouseLeave={handleEndHold}
-                          onTouchStart={handleStartHold}
-                          onTouchEnd={handleEndHold}
-                          whileHover={{ scale: 1.03 }}
-                          animate={{
-                            scale: isHolding ? 1.04 : 1,
-                            boxShadow: isHolding
-                              ? `0 0 32px rgba(212, 175, 55, 0.75), inset 0 0 18px rgba(255, 242, 206, 0.7)`
-                              : '0 16px 36px -4px rgba(107, 18, 38, 0.45)'
-                          }}
-                          transition={{ type: 'spring', stiffness: 280, damping: 24 }}
-                          className="relative w-[138px] h-[138px] rounded-full aspect-square flex flex-col items-center justify-center focus:outline-none cursor-pointer wax-seal-shadow group transition-all"
-                          style={{
-                            background: 'radial-gradient(circle at 36% 36%, #A51D38 0%, #7D122B 55%, #4C0816 100%)'
-                          }}
-                        >
-                          <div className="absolute inset-1 rounded-full border border-[#D4AF37]/50 pointer-events-none" />
-                          <div className="absolute inset-2.5 rounded-full border border-[#D4AF37]/25 pointer-events-none" />
+                      <motion.button
+                        onMouseDown={handleStartHold}
+                        onMouseUp={handleEndHold}
+                        onMouseLeave={handleEndHold}
+                        onTouchStart={handleStartHold}
+                        onTouchEnd={handleEndHold}
+                        onTouchCancel={handleEndHold}
+                        onContextMenu={(e) => e.preventDefault()}
+                        whileTap={{ scale: 0.96 }}
+                        animate={{
+                          scale: isHolding ? 1.05 : 1,
+                          boxShadow: isHolding
+                            ? `0 0 28px rgba(212, 175, 55, 0.8), inset 0 0 16px rgba(255, 242, 206, 0.7)`
+                            : '0 16px 36px -4px rgba(107, 18, 38, 0.45)'
+                        }}
+                        transition={{ type: 'spring', stiffness: 350, damping: 26 }}
+                        className="relative w-[138px] h-[138px] rounded-full aspect-square flex flex-col items-center justify-center focus:outline-none cursor-pointer wax-seal-shadow group select-none"
+                        style={{
+                          background: 'radial-gradient(circle at 36% 36%, #A51D38 0%, #7D122B 55%, #4C0816 100%)',
+                          transform: 'translateZ(0)',
+                          touchAction: 'none',
+                          WebkitUserSelect: 'none',
+                          userSelect: 'none'
+                        }}
+                      >
+                        <div className="absolute inset-1 rounded-full border border-[#D4AF37]/50 pointer-events-none" />
+                        <div className="absolute inset-2.5 rounded-full border border-[#D4AF37]/25 pointer-events-none" />
 
-                          <div className="relative z-10 flex flex-col items-center justify-center pointer-events-none">
-                            <Heart
-                              className={`w-11 h-11 fill-[#F5E8BE] text-[#C5A059] filter drop-shadow-[0_2px_4px_rgba(40,4,10,0.7)] transition-all duration-300 ${
-                                isHolding
-                                  ? 'scale-120 text-[#FFFFFF] drop-shadow-[0_0_12px_#FFF8DE]'
-                                  : 'group-hover:scale-110'
-                              }`}
-                            />
-                            <span className="font-cinzel text-[11px] font-bold tracking-[0.2em] mt-1 text-[#F5E8BE] drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
-                              ALWAYS
-                            </span>
-                            <span className="font-serif text-[8.5px] tracking-wider text-[#E8C68A]/80 -mt-0.5">
-                              LUMOS
-                            </span>
-                          </div>
-                        </motion.button>
-                      </Magnet>
+                        <div className="relative z-10 flex flex-col items-center justify-center pointer-events-none">
+                          <Heart
+                            className={`w-11 h-11 fill-[#F5E8BE] text-[#C5A059] transition-all duration-200 ${
+                              isHolding
+                                ? 'scale-115 text-[#FFFFFF]'
+                                : 'group-hover:scale-110'
+                            }`}
+                          />
+                          <span className="font-cinzel text-[11px] font-bold tracking-[0.2em] mt-1 text-[#F5E8BE]">
+                            ALWAYS
+                          </span>
+                          <span className="font-serif text-[8.5px] tracking-wider text-[#E8C68A]/80 -mt-0.5">
+                            LUMOS
+                          </span>
+                        </div>
+                      </motion.button>
 
                       {/* Lumos Maxima Light Shockwave on Completion */}
                       {showShockwave && (
@@ -722,7 +712,6 @@ export const MissYouButton: React.FC<MissYouButtonProps> = ({ onNotify }) => {
                         />
                       )}
                     </div>
-                  </ClickSpark>
                 </div>
 
                 {/* Subtitle Hint */}

@@ -180,9 +180,10 @@ export const RuneChess: React.FC = () => {
                     key={`${r}-${c}`}
                     onClick={() => handleCellClick(r, c)}
                     disabled={Boolean(cell || winner)}
-                    className={`aspect-square rounded-xl flex items-center justify-center transition-all relative ${
+                    className={`aspect-square rounded-xl flex items-center justify-center transition-transform duration-75 relative select-none ${
                       (r + c) % 2 === 0 ? 'bg-[#FCF9F2]' : 'bg-[#F4EBD9]'
-                    } hover:bg-[#FFE599]/40 active:scale-95 cursor-pointer shadow-2xs`}
+                    } active:scale-90 cursor-pointer shadow-2xs`}
+                    style={{ touchAction: 'manipulation' }}
                   >
                     {cell === 'obsidian' && (
                       <motion.div

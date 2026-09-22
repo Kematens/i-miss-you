@@ -37,7 +37,7 @@ export const TrialHub: React.FC = () => {
     <div className="w-full max-w-md mx-auto space-y-3 font-serif select-none">
       {/* Victorian Arena Switcher with Scrollable Support */}
       <div className="px-3 sm:px-4">
-        <div className="p-1 rounded-2xl bg-[#FCF9F2]/90 border border-[#D4AF37]/45 shadow-sm flex items-center gap-1 overflow-x-auto scrollbar-none">
+        <div className="p-1 rounded-2xl bg-[#FCF9F2] border border-[#D4AF37]/45 shadow-sm flex items-center gap-1 overflow-x-auto scrollbar-none" style={{ touchAction: 'pan-x' }}>
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = subMode === item.id;
@@ -46,15 +46,17 @@ export const TrialHub: React.FC = () => {
               <button
                 key={item.id}
                 onClick={() => handleSwitch(item.id)}
-                className={`flex-1 min-w-[62px] py-1.5 px-1 rounded-xl text-center font-serif transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer relative shrink-0 ${
-                  isActive ? 'text-[#FFFDF5]' : 'text-[#8C7658] hover:text-[#2C241E]'
+                className={`flex-1 min-w-[62px] py-1.5 px-1 rounded-xl text-center font-serif transition-transform duration-75 active:scale-95 flex flex-col items-center justify-center gap-0.5 cursor-pointer relative shrink-0 select-none ${
+                  isActive ? 'text-[#FFFDF5]' : 'text-[#8C7658] active:text-[#2C241E]'
                 }`}
+                style={{ touchAction: 'manipulation' }}
               >
                 {isActive && (
                   <motion.div
                     layoutId="trial-mode-pill"
                     className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#8C1D35] to-[#6B1226] border border-[#D4AF37]/50 shadow-sm"
-                    transition={{ type: 'spring', stiffness: 420, damping: 30 }}
+                    transition={{ type: 'spring', stiffness: 450, damping: 32 }}
+                    style={{ transform: 'translateZ(0)' }}
                   />
                 )}
                 <Icon className={`w-3.5 h-3.5 relative z-10 ${isActive ? 'text-[#FFE599]' : ''}`} />
@@ -68,7 +70,7 @@ export const TrialHub: React.FC = () => {
         </div>
 
         {/* Online Room Sync Badge Preview */}
-        <div className="mt-1.5 flex items-center justify-between px-2.5 py-1 rounded-lg bg-[#FAF5EB]/80 border border-[#D9C89E]/40 text-[9.5px] text-[#8C7658]">
+        <div className="mt-1.5 flex items-center justify-between px-2.5 py-1 rounded-lg bg-[#FAF5EB] border border-[#D9C89E]/40 text-[9.5px] text-[#8C7658]">
           <div className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             <span>同机对弈模式（面对面同屏）</span>

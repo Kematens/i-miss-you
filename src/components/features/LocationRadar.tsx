@@ -592,10 +592,9 @@ export const LocationRadar: React.FC = () => {
               </svg>
 
               {/* 2. Slow Rotating Latin Astrolabe Ring */}
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ repeat: Infinity, duration: 80, ease: 'linear' }}
-                className="absolute inset-0 pointer-events-none flex items-center justify-center"
+              <div
+                className="absolute inset-0 pointer-events-none flex items-center justify-center animate-spin"
+                style={{ animationDuration: '80s', transform: 'translateZ(0)' }}
               >
                 <svg viewBox="0 0 280 280" className="w-full h-full">
                   <defs>
@@ -610,7 +609,7 @@ export const LocationRadar: React.FC = () => {
                     </textPath>
                   </text>
                 </svg>
-              </motion.div>
+              </div>
 
               {/* 3. The Sculpted Wand Needle (Centered, Rotating to True Bearing) */}
               <motion.div
@@ -804,11 +803,12 @@ export const LocationRadar: React.FC = () => {
                     <button
                       key={st.id}
                       onClick={() => handleToggleMyStatus(i)}
-                      className={`px-2 py-1 rounded-xl text-[9.5px] font-serif flex items-center justify-center gap-1 transition-all cursor-pointer border ${
+                      className={`px-2 py-1.5 rounded-xl text-[9.5px] font-serif flex items-center justify-center gap-1 transition-transform duration-100 active:scale-95 cursor-pointer border select-none ${
                         isActive
                           ? 'bg-[#182638] text-[#FFE599] border-[#D4AF37] shadow-xs font-bold'
-                          : 'bg-[#FFFDF9] text-[#7A6750] border-[#D9C89E]/60 hover:border-[#D4AF37]/50'
+                          : 'bg-[#FFFDF9] text-[#7A6750] border-[#D9C89E]/60 active:bg-[#F2E8D5]'
                       }`}
+                      style={{ touchAction: 'manipulation' }}
                     >
                       <span>{st.icon}</span>
                       <span>{st.label}</span>
