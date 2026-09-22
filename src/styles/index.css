@@ -16,11 +16,10 @@
 
 /* Antique Parchment & Glass panels */
 .parchment-panel {
-  background: rgba(253, 250, 243, 0.85);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(212, 175, 55, 0.25);
+  background: rgba(253, 250, 243, 0.96);
+  border: 1px solid rgba(212, 175, 55, 0.3);
   box-shadow: 0 10px 32px -4px rgba(44, 33, 22, 0.08), 0 2px 6px rgba(0, 0, 0, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  transform: translateZ(0);
 }
 
 .parchment-card {

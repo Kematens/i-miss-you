@@ -225,7 +225,7 @@ const MainApp: React.FC = () => {
 
       {/* Settings Modal */}
       {showPushModal && (
-        <div className="fixed inset-0 z-50 bg-[#111A27]/60 backdrop-blur-xs flex items-center justify-center p-4 font-serif">
+        <div className="fixed inset-0 z-50 bg-[#111A27]/75 flex items-center justify-center p-4 font-serif">
           <div className="w-full max-w-sm rounded-3xl p-6 bg-[#FCF9F2] shadow-2xl border border-[#D4AF37]/50">
             <h3 className="text-sm font-bold font-cinzel tracking-wider text-[#2C241E] mb-1">
               HERALD CONFIG · 微信通知配置

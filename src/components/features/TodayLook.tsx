@@ -281,8 +281,8 @@ export const TodayLook: React.FC = () => {
                   )}
 
                   {!isUnlocked && (
-                    <div className="absolute inset-0 bg-[#1A140F]/45 backdrop-blur-xs flex flex-col items-center justify-center p-3 text-center text-[#FAF5EB]">
-                      <div className="w-8 h-8 rounded-full bg-[#FAF5EB]/20 backdrop-blur-md flex items-center justify-center mb-1.5 border border-[#D4AF37]/40 shadow-xs">
+                    <div className="absolute inset-0 bg-[#1A140F]/60 flex flex-col items-center justify-center p-3 text-center text-[#FAF5EB]">
+                      <div className="w-8 h-8 rounded-full bg-[#FAF5EB]/20 flex items-center justify-center mb-1.5 border border-[#D4AF37]/40 shadow-xs">
                         <Lock className="w-4 h-4 text-[#F5E8BE]" />
                       </div>
                       <span className="text-[10px] leading-relaxed font-serif text-[#F5E8BE]">

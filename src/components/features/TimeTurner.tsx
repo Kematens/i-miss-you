@@ -75,7 +75,7 @@ export const TimeTurner: React.FC = () => {
   };
 
   return (
-    <div className="rounded-3xl border border-[#D4AF37]/40 bg-[#FCF9F2]/95 shadow-[0_12px_32px_-6px_rgba(45,30,15,0.08)] backdrop-blur-md p-5 select-none font-serif">
+    <div className="rounded-3xl border border-[#D4AF37]/40 bg-[#FCF9F2] shadow-[0_12px_32px_-6px_rgba(45,30,15,0.08)] p-5 select-none font-serif">
       {/* Header */}
       <div className="flex items-center justify-between pb-3 border-b border-[#D9C89E]/60 mb-4">
         <div className="flex items-center gap-2.5">

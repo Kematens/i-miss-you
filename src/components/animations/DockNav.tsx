@@ -1,5 +1,5 @@
-import React, { useRef } from 'react';
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import React from 'react';
+import { motion } from 'framer-motion';
 import { Heart, Compass, Camera, Scroll, Sparkles, LucideIcon } from 'lucide-react';
 
 export type NavTab = 'seal' | 'compass' | 'today' | 'rating' | 'fun';
@@ -10,38 +10,27 @@ interface DockItemProps {
   sublabel: string;
   isActive: boolean;
   onClick: () => void;
-  mouseX: ReturnType<typeof useMotionValue<number>>;
 }
 
-const DockItem: React.FC<DockItemProps> = ({ icon: Icon, label, sublabel, isActive, onClick, mouseX }) => {
-  const ref = useRef<HTMLButtonElement>(null);
-
-  const distance = useTransform(mouseX, (val: number) => {
-    const bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 };
-    return val - bounds.x - bounds.width / 2;
-  });
-
-  // Balanced scaling for 5-item mobile dock
-  const widthSync = useTransform(distance, [-70, 0, 70], [56, 74, 56]);
-  const width = useSpring(widthSync, { mass: 0.1, stiffness: 220, damping: 18 });
-
+const DockItem: React.FC<DockItemProps> = ({ icon: Icon, label, sublabel, isActive, onClick }) => {
   return (
     <motion.button
-      ref={ref}
-      style={{ width }}
+      whileTap={{ scale: 0.94 }}
       onClick={onClick}
-      className={`relative h-[56px] rounded-2xl flex flex-col items-center justify-center transition-colors duration-200 select-none px-1 ${
-        isActive ? 'text-[#F5E8BE] font-bold' : 'text-[#A8987E] hover:text-[#FAF5EB]'
+      className={`relative w-[60px] sm:w-[68px] h-[56px] rounded-2xl flex flex-col items-center justify-center select-none px-1 transition-transform duration-150 ${
+        isActive ? 'text-[#F5E8BE] font-bold' : 'text-[#A8987E] active:text-[#FAF5EB]'
       }`}
+      style={{ transform: 'translateZ(0)' }}
     >
       {isActive && (
         <motion.div
           layoutId="dock-active-bg"
           className="absolute inset-1 rounded-xl bg-[#8C1D35] border border-[#D4AF37]/50 shadow-[0_3px_12px_rgba(140,29,53,0.45)] -z-10"
-          transition={{ type: 'spring', stiffness: 380, damping: 28 }}
+          transition={{ type: 'spring', stiffness: 450, damping: 32 }}
+          style={{ transform: 'translateZ(0)' }}
         />
       )}
-      <Icon className={`w-4 h-4 transition-transform duration-200 ${isActive ? 'scale-110 text-[#F5E8BE]' : ''}`} />
+      <Icon className={`w-4 h-4 transition-transform duration-150 ${isActive ? 'scale-110 text-[#F5E8BE]' : ''}`} />
       <span className="text-[9.5px] mt-1 font-bold tracking-wider font-cinzel leading-none">{label}</span>
       <span className="text-[8.5px] mt-0.5 font-serif leading-none opacity-80">{sublabel}</span>
     </motion.button>
@@ -54,8 +43,6 @@ interface DockNavProps {
 }
 
 export const DockNav: React.FC<DockNavProps> = ({ activeTab, onChangeTab }) => {
-  const mouseX = useMotionValue(Infinity);
-
   const tabs = [
     { id: 'seal' as NavTab, label: 'SEAL', sublabel: '信笺', icon: Heart },
     { id: 'compass' as NavTab, label: 'STAR', sublabel: '星轨', icon: Compass },
@@ -65,11 +52,10 @@ export const DockNav: React.FC<DockNavProps> = ({ activeTab, onChangeTab }) => {
   ];
 
   return (
-    <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 max-w-[96vw]">
+    <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 max-w-[96vw]" style={{ transform: 'translate3d(-50%, 0, 0)' }}>
       <div
-        onMouseMove={(e) => mouseX.set(e.pageX)}
-        onMouseLeave={() => mouseX.set(Infinity)}
-        className="rounded-3xl px-1.5 py-1.5 flex items-center gap-0.5 sm:gap-1 shadow-[0_12px_32px_rgba(15,23,42,0.35)] border border-[#D4AF37]/40 bg-[#182435]/95 backdrop-blur-md"
+        className="rounded-3xl px-1.5 py-1.5 flex items-center gap-0.5 sm:gap-1 shadow-[0_12px_32px_rgba(15,23,42,0.4)] border border-[#D4AF37]/40 bg-[#162132]"
+        style={{ transform: 'translateZ(0)' }}
       >
         {tabs.map((tab) => (
           <DockItem
@@ -79,7 +65,6 @@ export const DockNav: React.FC<DockNavProps> = ({ activeTab, onChangeTab }) => {
             sublabel={tab.sublabel}
             isActive={activeTab === tab.id}
             onClick={() => onChangeTab(tab.id)}
-            mouseX={mouseX}
           />
         ))}
       </div>

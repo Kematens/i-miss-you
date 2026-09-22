@@ -53,7 +53,7 @@ export const PairingModal: React.FC = () => {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 bg-[#111A27]/65 backdrop-blur-xs flex items-center justify-center p-4 font-serif">
+      <div className="fixed inset-0 z-50 bg-[#111A27]/75 flex items-center justify-center p-4 font-serif">
         <motion.div
           initial={{ opacity: 0, scale: 0.94, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}

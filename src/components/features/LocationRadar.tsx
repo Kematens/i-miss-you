@@ -449,13 +449,13 @@ export const LocationRadar: React.FC = () => {
             <button
               onClick={requestRealLocation}
               disabled={isLocating}
-              className="absolute top-2.5 right-2.5 z-20 px-2.5 py-1 rounded-lg bg-[#09101A]/90 hover:bg-[#121C2B] border border-[#D4AF37]/50 text-[#FFE599] text-[9.5px] font-cinzel flex items-center gap-1 backdrop-blur-md shadow-md cursor-pointer active:scale-95"
+              className="absolute top-2.5 right-2.5 z-20 px-2.5 py-1 rounded-lg bg-[#09101A] hover:bg-[#121C2B] border border-[#D4AF37]/50 text-[#FFE599] text-[9.5px] font-cinzel flex items-center gap-1 shadow-md cursor-pointer active:scale-95"
             >
               <RefreshCw className={`w-3 h-3 text-[#D4AF37] ${isLocating ? 'animate-spin' : ''}`} />
               <span>{isLocating ? 'GPS定位中...' : '刷新真机位置'}</span>
             </button>
 
-            <div className="absolute bottom-2.5 inset-x-2.5 z-20 p-2 rounded-xl bg-[#09101A]/85 border border-[#D4AF37]/40 backdrop-blur-md flex items-center justify-between text-[9.5px]">
+            <div className="absolute bottom-2.5 inset-x-2.5 z-20 p-2 rounded-xl bg-[#09101A] border border-[#D4AF37]/40 flex items-center justify-between text-[9.5px]">
               <div className="flex items-center gap-1.5 truncate">
                 <MapPin className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
                 <span className="text-[#F5EBD9] font-serif truncate">
@@ -686,7 +686,7 @@ export const LocationRadar: React.FC = () => {
 
             {/* Bottom Calibrate & Bearing Pill */}
             <div className="absolute bottom-2 inset-x-0 flex items-center justify-between px-3.5 z-30">
-              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#131F33]/90 border border-[#D4AF37]/50 text-[#FFE599] text-[9.5px] font-cinzel tracking-wider backdrop-blur-md">
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#131F33] border border-[#D4AF37]/50 text-[#FFE599] text-[9.5px] font-cinzel tracking-wider">
                 <Sparkles className="w-3 h-3 text-[#FFE599]" />
                 <span>方位角 {bearingNormalized}° · 东南</span>
               </div>
@@ -718,7 +718,7 @@ export const LocationRadar: React.FC = () => {
       {/* ========================================================
           3. REAL-TIME ADDRESS & DETAILED LOCATION CARDS
       ======================================================== */}
-      <div className="rounded-3xl border border-[#D4AF37]/40 bg-[#FCF9F2]/95 shadow-[0_12px_32px_-6px_rgba(45,30,15,0.08)] backdrop-blur-md p-4 select-none font-serif text-[#2C241E]">
+      <div className="rounded-3xl border border-[#D4AF37]/40 bg-[#FCF9F2] shadow-[0_12px_32px_-6px_rgba(45,30,15,0.08)] p-4 select-none font-serif text-[#2C241E]">
         
         {/* Header */}
         <div className="flex items-center justify-between pb-2.5 border-b border-[#D9C89E]/60 mb-3">

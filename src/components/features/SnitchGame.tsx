@@ -317,7 +317,7 @@ export const SnitchGame: React.FC = () => {
 
           {/* Start Screen Overlay */}
           {!isPlaying && (
-            <div className="absolute inset-0 bg-[#0A101A]/75 backdrop-blur-[2px] flex flex-col items-center justify-center p-4 text-center z-30">
+            <div className="absolute inset-0 bg-[#0A101A]/85 flex flex-col items-center justify-center p-4 text-center z-30">
               <motion.div
                 initial={{ scale: 0.9 }}
                 animate={{ scale: 1 }}
