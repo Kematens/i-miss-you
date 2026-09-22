@@ -255,11 +255,13 @@ export const LocationRadar: React.FC = () => {
       attributionControl: false
     });
 
-    // OpenStreetMap warm antique style tile layer (zero API key, zero watermark, high speed)
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      subdomains: ['a', 'b', 'c'],
-      className: 'vintage-map-tiles'
+    // High-resolution, crisp GaoDe (AutoNavi) Vector Dark/Night map tiles (Free, fast in CN, clear road labels)
+    // style: 7 = standard road map, style: 8 = night/dark high-contrast mode (no watermark, clean vector look)
+    L.tileLayer('https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
+      maxZoom: 18,
+      minZoom: 3,
+      subdomains: ['1', '2', '3', '4'],
+      className: 'gaode-dark-tiles'
     }).addTo(map);
 
     mapInstanceRef.current = map;
@@ -442,7 +444,7 @@ export const LocationRadar: React.FC = () => {
         {/* --------------------------------------------------------
             2. THE HERO STAGE: ROYAL HOGWARTS ASTROLABE (浑天皇家星盘)
         -------------------------------------------------------- */}
-        <div className="relative w-full h-[295px] rounded-2xl bg-gradient-to-b from-[#0D1626] to-[#070D18] border border-[#D4AF37]/30 overflow-hidden mt-3.5 shadow-inner flex items-center justify-center">
+        <div className="relative w-full h-[330px] rounded-2xl bg-gradient-to-b from-[#0D1626] to-[#070D18] border border-[#D4AF37]/30 overflow-hidden mt-3.5 shadow-inner flex items-center justify-center">
           
           {/* A. MAP LAYER (Always rendered, hidden via absolute visibility so Leaflet never destroys DOM or leaks markers) */}
           <div className={`absolute inset-0 z-10 transition-opacity duration-300 ${viewMode === 'map' ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>

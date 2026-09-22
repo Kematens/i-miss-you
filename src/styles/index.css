@@ -60,8 +60,8 @@
   background: rgba(197, 160, 89, 0.6);
 }
 
-/* Vintage parchment style filter for OpenStreetMap tiles to match Hogwarts aesthetic without watermarks */
-.vintage-map-tiles {
-  filter: invert(100%) hue-rotate(180deg) brightness(85%) contrast(90%) sepia(35%);
+/* Premium Luxury Dark Gold theme for High-Res GaoDe Map Tiles */
+.gaode-dark-tiles {
+  filter: contrast(110%) brightness(95%) saturate(85%);
 }
 
