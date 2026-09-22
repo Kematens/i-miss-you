@@ -255,9 +255,11 @@ export const LocationRadar: React.FC = () => {
       attributionControl: false
     });
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    // OpenStreetMap warm antique style tile layer (zero API key, zero watermark, high speed)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
-      subdomains: 'abcd'
+      subdomains: ['a', 'b', 'c'],
+      className: 'vintage-map-tiles'
     }).addTo(map);
 
     mapInstanceRef.current = map;
